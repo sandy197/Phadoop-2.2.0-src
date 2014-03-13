@@ -79,7 +79,7 @@ import org.apache.hadoop.yarn.server.utils.U2Proto;
 public class YarnChild {
 
   private static final Log LOG = LogFactory.getLog(YarnChild.class);
-  //srkandul
+  //srkandul : for the sake of git
   public GenericMatrix matrixRead;
   //TODO:populate in job conf !
   private boolean stopChild = false;
