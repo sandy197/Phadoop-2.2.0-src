@@ -177,7 +177,7 @@ public class ContainerLaunch implements Callable<Integer> {
         	if(strTokenized != null){
         		for(int i = 0; i < strTokenized.length; i++){
         			if(strTokenized[i].contains("YarnChild")){
-        				int jvmIntId = Integer.parseInt(strTokenized[i+3]);
+        				int jvmIntId = Integer.parseInt(strTokenized[i+4]);
         				this.port = U2Proto.BASE_PORT + jvmIntId;
         				//TODO : add more fields similar to port in the ContainerExecutor. U2Proto.Request
         				exec.setConnectPort(this.port);
