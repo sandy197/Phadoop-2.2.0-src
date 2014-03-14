@@ -279,6 +279,7 @@ public YarnChild(){
 	 * @author sandeep
 	 */
   public static void main(String[] args){
+	  boolean isFirst = true;
 	  ServerSocket ssocket;
 	  if(args.length < 4){
 		  LOG.error("Insufficient args provided:");
@@ -296,9 +297,15 @@ public YarnChild(){
 	  }
 	  try{
 		  while(!yc.isStopChild()){
-			  //listen for communication from ContainerLaunch
+			  if(isFirst){
+				  yc.yarnChildMain(args[0], Integer.parseInt(args[1]), args[2], Integer.parseInt(args[3]));
+				  isFirst = false;
+				  continue;
+			  }
 			  if (DEBUG) LOG.info(listeningPort + ":Yarnchild started listening");
+			//listen for communication from ContainerLaunch only after the initial task execution
 			  Socket csocket = ssocket.accept();
+			  if(DEBUG) LOG.info("Connection accepted by the child");
 			  ObjectInputStream ois = new ObjectInputStream(csocket.getInputStream());
 			  ObjectOutputStream oos = new ObjectOutputStream(csocket.getOutputStream());
 			  //TODO : create U2ProtoRequest/U2ProtoResponse in YARN project to avoid cyclic dependency.

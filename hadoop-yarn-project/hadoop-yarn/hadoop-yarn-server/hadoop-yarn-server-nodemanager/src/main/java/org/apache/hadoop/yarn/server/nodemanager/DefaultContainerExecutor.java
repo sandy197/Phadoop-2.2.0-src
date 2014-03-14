@@ -196,7 +196,7 @@ public class DefaultContainerExecutor extends ContainerExecutor {
           new File(containerWorkDir.toUri().getPath()),
           container.getLaunchContext().getEnvironment());      // sanitized env
       if (isContainerActive(containerId)) {
-    	  //TODO : handle case for application manager.
+    	  //handle case for application manager.
     	//srkandul : get the port from the jvmIdInt
     	  if(this.isAMContainer()){
     		  try{
@@ -222,6 +222,7 @@ public class DefaultContainerExecutor extends ContainerExecutor {
 					} catch (IOException e) {
 						// TODO: handle exception
 						LOG.info(e.getStackTrace());
+						LOG.info("*********Unable to connect to the child, launching a new process**********");
 						if(!fromExec)shExec.execute();
 						}
     	  }
