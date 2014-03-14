@@ -59,8 +59,17 @@ public abstract class ContainerExecutor implements Configurable {
   private int connectPort;
   private U2Proto.Request yarnChildTaskRequest;
   private boolean isAMContainer = false;
+  private char taskType;
   
-  public boolean isAMContainer() {
+  public char getTaskType() {
+	return taskType;
+}
+
+public void setTaskType(char taskType) {
+	this.taskType = taskType;
+}
+
+public boolean isAMContainer() {
 	return isAMContainer;
 }
 

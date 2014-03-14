@@ -178,6 +178,14 @@ public class ContainerLaunch implements Callable<Integer> {
         	if(strTokenized != null){
         		for(int i = 0; i < strTokenized.length; i++){
         			if(strTokenized[i].contains("YarnChild")){
+        				//TODO:get taskattemptID to see if its a map or a reduce task
+        				// Set it in the executor & use it to make decision while cleaning the container
+        				String taskAttemptId = strTokenized[i+3];
+        				String[] parts = taskAttemptId.split("_");
+        				//if m then map, if r then reduce
+        				char taskType = parts[3].charAt(0);
+        				exec.setTaskType(taskType);
+        				
         				int jvmIntId = Integer.parseInt(strTokenized[i+4]);
         				this.port = U2Proto.BASE_PORT + jvmIntId;
         				//TODO : add more fields similar to port in the ContainerExecutor. U2Proto.Request
@@ -463,6 +471,10 @@ public class ContainerLaunch implements Callable<Integer> {
       }
     }
     return processId;
+  }
+  
+  public ContainerExecutor getExec() {
+		return exec;
   }
 
   public static String getRelativeContainerLogDir(String appIdStr,

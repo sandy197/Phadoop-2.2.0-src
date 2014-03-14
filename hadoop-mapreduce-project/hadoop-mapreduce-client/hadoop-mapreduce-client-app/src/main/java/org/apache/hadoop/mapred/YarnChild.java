@@ -299,6 +299,7 @@ public YarnChild(){
 		  while(!yc.isStopChild()){
 			  if(isFirst){
 				  yc.yarnChildMain(args[0], Integer.parseInt(args[1]), args[2], Integer.parseInt(args[3]));
+				  LOG.info("**returned from the yarnchildmain invocation");
 				  isFirst = false;
 				  continue;
 			  }
@@ -368,6 +369,14 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
 //    int jvmIdInt = Integer.parseInt(args[3]);
     JVMId jvmId = new JVMId(firstTaskid.getJobID(),
         firstTaskid.getTaskType() == TaskType.MAP, jvmIdInt);
+    
+  //TODO:check if we really need this. 
+    // A map task from the 2nd iteration can stop the child form the previous reduce run.
+    // We cannot launch a separate process for the MAP task as we can not differentiate it. 
+    if(firstTaskid.getTaskType() == TaskType.MAP){
+    	LOG.info("Map task is set to be stopped");
+    	this.setStopChild(true);
+    }
 
     // initialize metrics
     DefaultMetricsSystem.initialize(
@@ -420,6 +429,7 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
         myTask = umbilical.getTask(context);
       }
       if (myTask.shouldDie()) {
+    	  LOG.info("**Die signal for mytask");
         return;
       }
 
