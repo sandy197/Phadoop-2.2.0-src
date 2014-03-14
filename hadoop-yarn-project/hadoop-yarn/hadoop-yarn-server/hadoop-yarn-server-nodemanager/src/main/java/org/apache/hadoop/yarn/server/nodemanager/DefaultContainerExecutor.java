@@ -25,7 +25,9 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -49,6 +51,7 @@ import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.Cont
 import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.ContainerDiagnosticsUpdateEvent;
 import org.apache.hadoop.yarn.server.nodemanager.containermanager.launcher.ContainerLaunch;
 import org.apache.hadoop.yarn.server.nodemanager.containermanager.localizer.ContainerLocalizer;
+import org.apache.hadoop.yarn.server.utils.U2Proto;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -192,7 +195,29 @@ public class DefaultContainerExecutor extends ContainerExecutor {
           new File(containerWorkDir.toUri().getPath()),
           container.getLaunchContext().getEnvironment());      // sanitized env
       if (isContainerActive(containerId)) {
-        shExec.execute();
+    	//srkandul : get the port from the jvmIdInt
+    	  Socket socket = new Socket(InetAddress.getLocalHost().getHostName(),this.getConnectPort());
+    	  if(U2Proto.isTaskProcessListening(socket)){
+    		  U2Proto.Request processRequest = new U2Proto.Request(U2Proto.Command.U2_RUN_TASK);
+    		  //get the request values from the command
+    		  processRequest.setHostName(this.getYarnChildTaskRequest().getHostName());
+    		  processRequest.setJvmIdInt(this.getYarnChildTaskRequest().getJvmIdInt());
+    		  processRequest.setPortNum(this.getYarnChildTaskRequest().getPortNum());
+    		  processRequest.setTaskAttemptId(this.getYarnChildTaskRequest().getTaskAttemptId());
+    		  
+    		  try {
+				U2Proto.getResponse(processRequest, socket);
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				LOG.info(e.getStackTrace());
+			} catch (IOException e) {
+				// TODO: handle exception
+				LOG.info(e.getStackTrace());
+			}
+    	  }
+    	  else{
+    		  shExec.execute();  
+    	  }
       }
       else {
         LOG.info("Container " + containerIdStr +

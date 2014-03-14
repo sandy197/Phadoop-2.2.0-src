@@ -79,6 +79,8 @@ import org.apache.hadoop.yarn.server.utils.U2Proto;
 public class YarnChild {
 
   private static final Log LOG = LogFactory.getLog(YarnChild.class);
+  
+  private static final boolean DEBUG = true;
   //srkandul : for the sake of git
   public GenericMatrix matrixRead;
   //TODO:populate in job conf !
@@ -283,6 +285,7 @@ public YarnChild(){
 	  }
 	  YarnChild yc = new YarnChild();
 	  int listeningPort = U2Proto.BASE_PORT + Integer.parseInt(args[3]);
+	  LOG.info("Yarn process launched, listening on port:" + listeningPort);
 	  //Create listening socket using the listening port
 	  try{
 		  ssocket = new ServerSocket(listeningPort);
@@ -294,6 +297,7 @@ public YarnChild(){
 	  try{
 		  while(!yc.isStopChild()){
 			  //listen for communication from ContainerLaunch
+			  if (DEBUG) LOG.info(listeningPort + ":Yarnchild started listening");
 			  Socket csocket = ssocket.accept();
 			  ObjectInputStream ois = new ObjectInputStream(csocket.getInputStream());
 			  ObjectOutputStream oos = new ObjectOutputStream(csocket.getOutputStream());
@@ -319,6 +323,7 @@ public YarnChild(){
 			  }
 			  csocket.close();
 		  }
+		  if (DEBUG) LOG.info("YarnChild stopped !! No listener now on :" + listeningPort );
 	  }
 	  catch(IOException e){
 		e.printStackTrace();
