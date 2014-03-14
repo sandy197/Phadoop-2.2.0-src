@@ -56,10 +56,19 @@ public abstract class ContainerExecutor implements Configurable {
  * parameters to the YarnChild process launched.i.e, this is
  * the port used by YarnChild process to listen for commands.
  */
-  private int connectPort; 
+  private int connectPort;
   private U2Proto.Request yarnChildTaskRequest;
+  private boolean isAMContainer = false;
   
-  public U2Proto.Request getYarnChildTaskRequest() {
+  public boolean isAMContainer() {
+	return isAMContainer;
+}
+
+public void setAMContainer(boolean isAMContainer) {
+	this.isAMContainer = isAMContainer;
+}
+
+public U2Proto.Request getYarnChildTaskRequest() {
 	return yarnChildTaskRequest;
 }
 

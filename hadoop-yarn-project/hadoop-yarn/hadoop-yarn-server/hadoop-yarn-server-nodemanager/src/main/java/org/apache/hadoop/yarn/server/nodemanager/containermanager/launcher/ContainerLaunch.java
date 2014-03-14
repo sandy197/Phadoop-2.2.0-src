@@ -173,6 +173,7 @@ public class ContainerLaunch implements Callable<Integer> {
 	//srkandul:added a condition to check if the command has YarnChild
         // No need for command manipulation. We are using the jvmIntId for port
         if(str.contains("YarnChild")){
+        	LOG.info("This container is for YarnChild");
         	String[] strTokenized = str.split(" ");
         	if(strTokenized != null){
         		for(int i = 0; i < strTokenized.length; i++){
@@ -185,6 +186,10 @@ public class ContainerLaunch implements Callable<Integer> {
         			}
             	}
         	}
+        }
+        else if(str.contains("MRAppMaster")){
+        	LOG.info("This container is for AM");
+        	exec.setAMContainer(true);
         }
       }
       launchContext.setCommands(newCmds);

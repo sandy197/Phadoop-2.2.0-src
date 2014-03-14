@@ -178,6 +178,7 @@ public class DefaultContainerExecutor extends ContainerExecutor {
 
     // create log dir under app
     // fork script
+    boolean fromExec = false;
     ShellCommandExecutor shExec = null;
     try {
       lfs.setPermission(launchDst,
@@ -195,28 +196,37 @@ public class DefaultContainerExecutor extends ContainerExecutor {
           new File(containerWorkDir.toUri().getPath()),
           container.getLaunchContext().getEnvironment());      // sanitized env
       if (isContainerActive(containerId)) {
+    	  //TODO : handle case for application manager.
     	//srkandul : get the port from the jvmIdInt
-    	  Socket socket = new Socket(InetAddress.getLocalHost().getHostName(),this.getConnectPort());
-    	  if(U2Proto.isTaskProcessListening(socket)){
-    		  U2Proto.Request processRequest = new U2Proto.Request(U2Proto.Command.U2_RUN_TASK);
-    		  //get the request values from the command
-    		  processRequest.setHostName(this.getYarnChildTaskRequest().getHostName());
-    		  processRequest.setJvmIdInt(this.getYarnChildTaskRequest().getJvmIdInt());
-    		  processRequest.setPortNum(this.getYarnChildTaskRequest().getPortNum());
-    		  processRequest.setTaskAttemptId(this.getYarnChildTaskRequest().getTaskAttemptId());
-    		  
-    		  try {
-				U2Proto.getResponse(processRequest, socket);
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				LOG.info(e.getStackTrace());
-			} catch (IOException e) {
-				// TODO: handle exception
-				LOG.info(e.getStackTrace());
-			}
+    	  if(this.isAMContainer()){
+    		  try{
+		    	  Socket socket = new Socket(InetAddress.getLocalHost().getHostName(),this.getConnectPort());
+		    	  if(U2Proto.isTaskProcessListening(socket)){
+		    		  U2Proto.Request processRequest = new U2Proto.Request(U2Proto.Command.U2_RUN_TASK);
+		    		  //get the request values from the command
+		    		  processRequest.setHostName(this.getYarnChildTaskRequest().getHostName());
+		    		  processRequest.setJvmIdInt(this.getYarnChildTaskRequest().getJvmIdInt());
+		    		  processRequest.setPortNum(this.getYarnChildTaskRequest().getPortNum());
+		    		  processRequest.setTaskAttemptId(this.getYarnChildTaskRequest().getTaskAttemptId());
+		    		  
+						U2Proto.getResponse(processRequest, socket);
+					
+		    	  }
+		    	  else{
+		    		  fromExec = true;
+		    		  shExec.execute();  
+		    	  }
+	    	  } catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					LOG.info(e.getStackTrace());
+					} catch (IOException e) {
+						// TODO: handle exception
+						LOG.info(e.getStackTrace());
+						if(!fromExec)shExec.execute();
+						}
     	  }
     	  else{
-    		  shExec.execute();  
+    		  shExec.execute();
     	  }
       }
       else {
