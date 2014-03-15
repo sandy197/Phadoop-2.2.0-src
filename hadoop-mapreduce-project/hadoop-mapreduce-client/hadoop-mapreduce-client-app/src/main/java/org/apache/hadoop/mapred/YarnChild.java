@@ -280,12 +280,17 @@ public YarnChild(){
 	 */
   public static void main(String[] args){
 	  boolean isFirst = true;
+	  int listeningPort;
 	  ServerSocket ssocket;
 	  if(args.length < 4){
 		  LOG.error("Insufficient args provided:");
 	  }
 	  YarnChild yc = new YarnChild();
-	  int listeningPort = U2Proto.BASE_PORT + Integer.parseInt(args[3]);
+	  TaskAttemptID taskAttempt = TaskAttemptID.forName(args[2]);
+	  if(taskAttempt.getTaskType() == TaskType.MAP)
+		  listeningPort = U2Proto.MAP_BASE_PORT + taskAttempt.getTaskID();
+	  else
+		  listeningPort = U2Proto.BASE_PORT + taskAttempt.getTaskID();
 	  LOG.info("Yarn process launched, listening on port:" + listeningPort);
 	  //Create listening socket using the listening port
 	  try{

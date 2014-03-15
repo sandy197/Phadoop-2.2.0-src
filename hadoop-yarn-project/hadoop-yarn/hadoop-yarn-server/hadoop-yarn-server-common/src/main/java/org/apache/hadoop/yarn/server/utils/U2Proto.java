@@ -9,6 +9,7 @@ import java.net.Socket;
 
 public class U2Proto {
 	public static int BASE_PORT = 16000;
+	public static int MAP_BASE_PORT = 17000;
 	
 	public static enum Command{
 		U2_RUN_TASK,
