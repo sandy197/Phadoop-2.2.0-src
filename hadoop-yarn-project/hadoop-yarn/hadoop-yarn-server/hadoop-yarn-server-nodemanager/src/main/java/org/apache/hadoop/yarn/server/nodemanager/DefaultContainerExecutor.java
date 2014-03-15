@@ -198,7 +198,7 @@ public class DefaultContainerExecutor extends ContainerExecutor {
       if (isContainerActive(containerId)) {
     	  //handle case for application manager.
     	//srkandul : get the port from the jvmIdInt
-    	  if(this.isAMContainer()){
+    	  if(!this.isAMContainer()){
     		  try{
 		    	  if(U2Proto.isTaskProcessListening(this.getConnectPort())){
 		    		  LOG.info("And the process is alive... hence will send task runnning params");
