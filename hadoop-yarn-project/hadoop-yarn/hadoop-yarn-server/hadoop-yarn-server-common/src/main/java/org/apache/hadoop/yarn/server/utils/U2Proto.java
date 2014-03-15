@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.net.Socket;
 
 
@@ -32,26 +33,15 @@ public class U2Proto {
 		return response;
 	}
 
-	public static boolean isTaskProcessListening(Socket socket) {
-		Request req = new Request(Command.U2_IS_ACTIVE);
-		Response resp;
-		boolean isAlive = false;
-		//send request over the socket
+	public static boolean isTaskProcessListening(int port) {
 		try {
-			System.out.println("Sending request to check if the process is alive");
-			resp = getResponse(req, socket);
-			if(resp.getStatus() == Status.U2_SUCCESS){
-				isAlive = true;
-			}			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return isAlive;
-	}
+            Socket socket = new Socket(InetAddress.getLocalHost().getHostName(), port);
+            socket.close();
+            return false;
+        } catch (Exception ex) {
+            return true;
+        }
+    }
 	
 	public static class Request implements Serializable{
 		private Command cmd;

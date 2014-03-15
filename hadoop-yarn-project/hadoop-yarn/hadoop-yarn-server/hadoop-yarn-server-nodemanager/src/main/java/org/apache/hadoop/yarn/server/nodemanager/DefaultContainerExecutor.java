@@ -200,9 +200,10 @@ public class DefaultContainerExecutor extends ContainerExecutor {
     	//srkandul : get the port from the jvmIdInt
     	  if(this.isAMContainer()){
     		  try{
-		    	  Socket socket = new Socket(InetAddress.getLocalHost().getHostName(),this.getConnectPort());
-		    	  LOG.info("Connected to process listening on : "+ this.getConnectPort());
-		    	  if(U2Proto.isTaskProcessListening(socket)){
+		    	  if(U2Proto.isTaskProcessListening(this.getConnectPort())){
+		    		  LOG.info("And the process is alive... hence will send task runnning params");
+		    		  Socket socket = new Socket(InetAddress.getLocalHost().getHostName(),this.getConnectPort());
+			    	  LOG.info("Connected to process listening on : "+ this.getConnectPort());
 		    		  U2Proto.Request processRequest = new U2Proto.Request(U2Proto.Command.U2_RUN_TASK);
 		    		  //get the request values from the command
 		    		  processRequest.setHostName(this.getYarnChildTaskRequest().getHostName());
@@ -223,8 +224,8 @@ public class DefaultContainerExecutor extends ContainerExecutor {
 					} catch (IOException e) {
 						// TODO: handle exception
 						LOG.info(e.getStackTrace());
-						LOG.info("*********Unable to connect to the child, launching a new process**********");
-						if(!fromExec)shExec.execute();
+//						LOG.info("*********Unable to connect to the child, launching a new process**********");
+//						if(!fromExec)shExec.execute();
 						}
     	  }
     	  else{
