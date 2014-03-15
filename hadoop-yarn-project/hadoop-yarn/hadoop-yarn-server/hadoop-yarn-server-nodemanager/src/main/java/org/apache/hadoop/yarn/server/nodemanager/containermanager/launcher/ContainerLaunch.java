@@ -98,9 +98,15 @@ public class ContainerLaunch implements Callable<Integer> {
   private volatile AtomicBoolean shouldLaunchContainer = new AtomicBoolean(false);
   private volatile AtomicBoolean completed = new AtomicBoolean(false);
 
-	  //srkandul
-  private int port;
-  private long sleepDelayBeforeSigKill = 250;
+  private char taskType;
+  public char getTaskType() {
+		return taskType;
+	}
+
+	public void setTaskType(char taskType) {
+		this.taskType = taskType;
+	}
+private long sleepDelayBeforeSigKill = 250;
   private long maxKillWaitTime = 2000;
 
   private Path pidFilePath = null;
@@ -184,13 +190,21 @@ public class ContainerLaunch implements Callable<Integer> {
         				String[] parts = taskAttemptId.split("_");
         				//if m then map, if r then reduce
         				char taskType = parts[3].charAt(0);
-        				exec.setTaskType(taskType);
+        				
+        				//exec.setTaskType(taskType);
+        				
+        				U2Proto.Request req = new U2Proto.Request(U2Proto.Command.U2_RUN_TASK);
+        				req.setHostName(strTokenized[i+1]);
+        				req.setPortNum(Integer.parseInt(strTokenized[i+2]));
+        				req.setTaskAttemptId(taskAttemptId);
+        				req.setJvmIdInt(Integer.parseInt(strTokenized[i+4]));
+        				exec.setYarnChildTaskRequest(req);
         				
         				//TODO:have to change this
-        				int jvmIntId = Integer.parseInt(strTokenized[i+4]);
-        				this.port = U2Proto.BASE_PORT + jvmIntId;
-        				//TODO : add more fields similar to port in the ContainerExecutor. U2Proto.Request
-        				exec.setConnectPort(this.port);
+//        				int jvmIntId = Integer.parseInt(strTokenized[i+4]);
+//        				this.port = U2Proto.BASE_PORT + jvmIntId;
+//        				//TODO : add more fields similar to port in the ContainerExecutor. U2Proto.Request
+//        				exec.setConnectPort(this.port);
         				break;
         			}
             	}
@@ -409,7 +423,7 @@ public class ContainerLaunch implements Callable<Integer> {
             + " as user " + user
             + " for container " + containerIdStr);
         //Do not kill the process if its a reduce type
-        if(exec.getTaskType() != 'r'){
+        if(this.getTaskType() != 'r'){
         	LOG.info("**killing the process as its not a reduce type");
         	if (sleepDelayBeforeSigKill > 0) {
                 boolean result = exec.signalContainer(user,
