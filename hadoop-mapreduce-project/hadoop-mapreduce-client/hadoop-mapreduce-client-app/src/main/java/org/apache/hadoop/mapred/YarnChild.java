@@ -288,9 +288,9 @@ public YarnChild(){
 	  YarnChild yc = new YarnChild();
 	  TaskAttemptID taskAttempt = TaskAttemptID.forName(args[2]);
 	  if(taskAttempt.getTaskType() == TaskType.MAP)
-		  listeningPort = U2Proto.MAP_BASE_PORT + taskAttempt.getTaskID();
+		  listeningPort = U2Proto.MAP_BASE_PORT + taskAttempt.getTaskID().getId();
 	  else
-		  listeningPort = U2Proto.BASE_PORT + taskAttempt.getTaskID();
+		  listeningPort = U2Proto.BASE_PORT + taskAttempt.getTaskID().getId();
 	  LOG.info("Yarn process launched, listening on port:" + listeningPort);
 	  //Create listening socket using the listening port
 	  try{
