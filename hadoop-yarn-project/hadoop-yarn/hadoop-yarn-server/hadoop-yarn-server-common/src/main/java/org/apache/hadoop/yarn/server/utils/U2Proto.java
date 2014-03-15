@@ -37,6 +37,7 @@ public class U2Proto {
 		boolean isAlive = false;
 		//send request over the socket
 		try {
+			System.out.println("Sending request to check if the process is alive");
 			resp = getResponse(req, socket);
 			if(resp.getStatus() == Status.U2_SUCCESS){
 				isAlive = true;

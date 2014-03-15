@@ -201,6 +201,7 @@ public class DefaultContainerExecutor extends ContainerExecutor {
     	  if(this.isAMContainer()){
     		  try{
 		    	  Socket socket = new Socket(InetAddress.getLocalHost().getHostName(),this.getConnectPort());
+		    	  LOG.info("Connected to process listening on : "+ this.getConnectPort());
 		    	  if(U2Proto.isTaskProcessListening(socket)){
 		    		  U2Proto.Request processRequest = new U2Proto.Request(U2Proto.Command.U2_RUN_TASK);
 		    		  //get the request values from the command
