@@ -127,7 +127,7 @@ public class ContainersLauncher extends AbstractService
         break;
       case CLEANUP_CONTAINER:
         ContainerLaunch launcher = running.remove(containerId);
-        char taskType = launcher.getExec().getTaskType();
+        char taskType = launcher.getTaskType();
         if(taskType == 'm'){
         	LOG.info("**Cleanup phase, this is a map task");
         }

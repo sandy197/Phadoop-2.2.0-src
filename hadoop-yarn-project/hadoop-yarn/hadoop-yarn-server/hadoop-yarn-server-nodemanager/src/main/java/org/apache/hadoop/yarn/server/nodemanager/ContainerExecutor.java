@@ -57,20 +57,25 @@ public abstract class ContainerExecutor implements Configurable {
  * the port used by YarnChild process to listen for commands.
  */
   private int connectPort;
+  private boolean isStateValid;
   private U2Proto.Request yarnChildTaskRequest;
   private boolean isAMContainer = false;
-  private char taskType;
   
-  public char getTaskType() {
-	return taskType;
-}
+  public boolean isStateValid() {
+		return isStateValid;
+	}
 
-public void setTaskType(char taskType) {
-	this.taskType = taskType;
-}
+	public void setStateValid(boolean isStateValid) {
+		this.isStateValid = isStateValid;
+	}
+  
+ 
 
 public boolean isAMContainer() {
-	return isAMContainer;
+	//reset back to default value once used
+	boolean returnVal = isAMContainer; 
+	isAMContainer = false;
+	return returnVal;
 }
 
 public void setAMContainer(boolean isAMContainer) {
