@@ -178,7 +178,7 @@ public class ContainerLaunch implements Callable<Integer> {
         	if(strTokenized != null){
         		for(int i = 0; i < strTokenized.length; i++){
         			if(strTokenized[i].contains("YarnChild")){
-        				//TODO:get taskattemptID to see if its a map or a reduce task
+        				// get taskattemptID to see if its a map or a reduce task
         				// Set it in the executor & use it to make decision while cleaning the container
         				String taskAttemptId = strTokenized[i+3];
         				String[] parts = taskAttemptId.split("_");
@@ -186,6 +186,7 @@ public class ContainerLaunch implements Callable<Integer> {
         				char taskType = parts[3].charAt(0);
         				exec.setTaskType(taskType);
         				
+        				//TODO:have to change this
         				int jvmIntId = Integer.parseInt(strTokenized[i+4]);
         				this.port = U2Proto.BASE_PORT + jvmIntId;
         				//TODO : add more fields similar to port in the ContainerExecutor. U2Proto.Request
@@ -407,15 +408,19 @@ public class ContainerLaunch implements Callable<Integer> {
         LOG.debug("Sending signal to pid " + processId
             + " as user " + user
             + " for container " + containerIdStr);
-        if (sleepDelayBeforeSigKill > 0) {
-          boolean result = exec.signalContainer(user,
-              processId, Signal.TERM);
-          LOG.debug("Sent signal to pid " + processId
-              + " as user " + user
-              + " for container " + containerIdStr
-              + ", result=" + (result? "success" : "failed"));
-          new DelayedProcessKiller(container, user,
-              processId, sleepDelayBeforeSigKill, Signal.KILL, exec).start();
+        //Do not kill the process if its a reduce type
+        if(exec.getTaskType() != 'r'){
+        	LOG.info("**killing the process as its not a reduce type");
+        	if (sleepDelayBeforeSigKill > 0) {
+                boolean result = exec.signalContainer(user,
+                    processId, Signal.TERM);
+                LOG.debug("Sent signal to pid " + processId
+                    + " as user " + user
+                    + " for container " + containerIdStr
+                    + ", result=" + (result? "success" : "failed"));
+                new DelayedProcessKiller(container, user,
+                    processId, sleepDelayBeforeSigKill, Signal.KILL, exec).start();
+              }
         }
       }
     } catch (Exception e) {

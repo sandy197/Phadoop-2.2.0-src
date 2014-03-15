@@ -311,7 +311,7 @@ public YarnChild(){
 			  if (DEBUG) LOG.info(listeningPort + ":Yarnchild started listening");
 			//listen for communication from ContainerLaunch only after the initial task execution
 			  Socket csocket = ssocket.accept();
-			  if(DEBUG) LOG.info("Connection accepted by the child");
+			  if(DEBUG) LOG.info("**Connection accepted by the child");
 			  ObjectInputStream ois = new ObjectInputStream(csocket.getInputStream());
 			  ObjectOutputStream oos = new ObjectOutputStream(csocket.getOutputStream());
 			  //TODO : create U2ProtoRequest/U2ProtoResponse in YARN project to avoid cyclic dependency.
