@@ -127,6 +127,13 @@ public class ContainersLauncher extends AbstractService
         break;
       case CLEANUP_CONTAINER:
         ContainerLaunch launcher = running.remove(containerId);
+        char taskType = launcher.getExec().getTaskType();
+        if(taskType == 'm'){
+        	LOG.info("**Cleanup phase, this is a map task");
+        }
+        else if(taskType == 'r'){
+        	LOG.info("**Cleanup phase, this is a reduce task");
+        }
         if (launcher == null) {
           // Container not launched. So nothing needs to be done.
           return;
@@ -135,6 +142,7 @@ public class ContainersLauncher extends AbstractService
         // Cleanup a container whether it is running/killed/completed, so that
         // no sub-processes are alive.
         try {
+        LOG.info("**Trying to cleanup container");
           launcher.cleanupContainer();
         } catch (IOException e) {
           LOG.warn("Got exception while cleaning container " + containerId
