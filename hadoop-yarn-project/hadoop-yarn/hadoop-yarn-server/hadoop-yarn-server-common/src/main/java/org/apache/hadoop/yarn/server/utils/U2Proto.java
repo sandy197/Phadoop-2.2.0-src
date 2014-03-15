@@ -4,6 +4,7 @@ package org.apache.hadoop.yarn.server.utils;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.Socket;
 
 
@@ -52,7 +53,7 @@ public class U2Proto {
 		return isAlive;
 	}
 	
-	public static class Request{
+	public static class Request implements Serializable{
 		private Command cmd;
 		private String hostName;
 		private int portNum;
@@ -105,7 +106,7 @@ public class U2Proto {
 		
 	}
 	
-	public static class Response{
+	public static class Response implements Serializable{
 		private Status status;
 		private String message;
 		
