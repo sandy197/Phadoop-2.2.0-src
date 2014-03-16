@@ -310,10 +310,11 @@ public YarnChild(){
 			  if (DEBUG) LOG.info(listeningPort + ":Yarnchild started listening");
 			//listen for communication from ContainerLaunch only after the initial task execution
 			  Socket csocket = ssocket.accept();
+			  ObjectInputStream ois = new ObjectInputStream(csocket.getInputStream());
+			  ObjectOutputStream oos = new ObjectOutputStream(csocket.getOutputStream());
 			  if(DEBUG) LOG.info("**Connection accepted by the child");
 			  try{
-				  ObjectInputStream ois = new ObjectInputStream(csocket.getInputStream());
-				  ObjectOutputStream oos = new ObjectOutputStream(csocket.getOutputStream());
+				  
 				  //TODO : create U2ProtoRequest/U2ProtoResponse in YARN project to avoid cyclic dependency.
 				  U2Proto.Request request = (U2Proto.Request)ois.readObject();
 				  //TODO: put all the below code as registered handler
@@ -326,18 +327,26 @@ public YarnChild(){
 					  int jvmIdInt = request.getJvmIdInt();
 					  yc.yarnChildMain(hostAM, portAM, taskAttemptId, jvmIdInt);
 					  //TODO:see if containerLaunch needs an ACK response
+					  oos.writeObject(new U2Proto.Response(U2Proto.Status.U2_SUCCESS));
+					  
 				  }
 				  else if(request.getCmd() == U2Proto.Command.U2_STOP_LISTENER){
 					  yc.setStopChild(true);
+					  oos.writeObject(new U2Proto.Response(U2Proto.Status.U2_SUCCESS));
 				  }
 				  else if(request.getCmd() == U2Proto.Command.U2_IS_ACTIVE){
 					  //TODO : send a response saying that I am alive and accepting requests
 					  oos.writeObject(new U2Proto.Response(U2Proto.Status.U2_SUCCESS));
+					 
 				  }
 			  } catch(EOFException eofEx){
 				  eofEx.printStackTrace();
+				  oos.writeObject(new U2Proto.Response(U2Proto.Status.U2_FAILURE));
 			  }
 			  finally{
+				  ois.close();
+				  oos.flush();
+				  oos.close();
 				  csocket.close();
 			  }
 		  }

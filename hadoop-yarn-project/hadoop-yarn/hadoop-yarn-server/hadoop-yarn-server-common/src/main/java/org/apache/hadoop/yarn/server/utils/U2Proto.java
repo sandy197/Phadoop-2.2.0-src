@@ -20,7 +20,8 @@ public class U2Proto {
 	}
 	
 	public static enum Status{
-		U2_SUCCESS
+		U2_SUCCESS,
+		U2_FAILURE
 	}
 	
 	public static Response getResponse(Request req, Socket socket){
