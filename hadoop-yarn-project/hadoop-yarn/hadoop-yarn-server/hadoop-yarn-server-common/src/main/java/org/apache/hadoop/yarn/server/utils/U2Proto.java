@@ -23,13 +23,20 @@ public class U2Proto {
 		U2_SUCCESS
 	}
 	
-	public static Response getResponse(Request req, Socket socket) throws IOException, ClassNotFoundException{
-		ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-		ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-		oos.writeObject(req);
-		Response response = (Response)ois.readObject();
-		oos.close();
-		ois.close();
+	public static Response getResponse(Request req, Socket socket){
+		Response response =  null;
+		try{
+			ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+			ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+			oos.writeObject(req);
+			response = (Response)ois.readObject();
+			oos.close();
+			ois.close();
+		} catch(IOException iex){
+			iex.printStackTrace();			
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 		return response;
 	}
 

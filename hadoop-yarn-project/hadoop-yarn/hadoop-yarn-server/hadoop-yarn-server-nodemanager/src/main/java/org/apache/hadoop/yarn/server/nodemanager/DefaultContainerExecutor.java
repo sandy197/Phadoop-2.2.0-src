@@ -179,7 +179,6 @@ public class DefaultContainerExecutor extends ContainerExecutor {
 
     // create log dir under app
     // fork script
-    boolean fromExec = false;
     ShellCommandExecutor shExec = null;
     try {
       lfs.setPermission(launchDst,
@@ -219,24 +218,22 @@ public class DefaultContainerExecutor extends ContainerExecutor {
 		    		  processRequest.setPortNum(this.getYarnChildTaskRequest().getPortNum());
 		    		  processRequest.setTaskAttemptId(this.getYarnChildTaskRequest().getTaskAttemptId());
 		    		  
-						U2Proto.getResponse(processRequest, socket);
-						socket.close();
+		    		  U2Proto.Response response = U2Proto.getResponse(processRequest, socket);
+		    		  LOG.info("**Response received:" + response.getStatus());
+						//socket.close();
 					
 		    	  }
 		    	  else{
-		    		  fromExec = true;
+//		    		  fromExec = true;
 		    		  shExec.execute();  
 		    	  }
-	    	  } catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					LOG.info(e.getStackTrace());
-					} catch (IOException e) {
-						// TODO: handle exception
-						e.printStackTrace();
-						LOG.info(e.getStackTrace());
-//						LOG.info("*********Unable to connect to the child, launching a new process**********");
-//						if(!fromExec)shExec.execute();
-						}
+	    	  } catch (IOException e) {
+				// TODO: handle exception
+				e.printStackTrace();
+				LOG.info(e.getStackTrace());
+	//						LOG.info("*********Unable to connect to the child, launching a new process**********");
+	//						if(!fromExec)shExec.execute();
+	    	  }
     		  finally{
     			  if(socket != null)
     				  socket.close();
