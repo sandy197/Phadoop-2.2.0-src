@@ -201,10 +201,16 @@ private long sleepDelayBeforeSigKill = 250;
         				exec.setYarnChildTaskRequest(req);
         				
         				//TODO:have to change this
-//        				int jvmIntId = Integer.parseInt(strTokenized[i+4]);
-//        				this.port = U2Proto.BASE_PORT + jvmIntId;
-//        				//TODO : add more fields similar to port in the ContainerExecutor. U2Proto.Request
-//        				exec.setConnectPort(this.port);
+        				int taskId = Integer.parseInt(parts[4]);
+        				//this.port = U2Proto.BASE_PORT + taskId;
+        				int taskListeningPort = 0;
+        				if(taskType == 'm')
+        					taskListeningPort = U2Proto.MAP_BASE_PORT + taskId;
+        				else if(taskType == 'r'){
+        					taskListeningPort = U2Proto.BASE_PORT + taskId;
+        				}
+        				//TODO : add more fields similar to port in the ContainerExecutor. U2Proto.Request
+        				exec.setConnectPort(taskListeningPort);
         				break;
         			}
             	}
