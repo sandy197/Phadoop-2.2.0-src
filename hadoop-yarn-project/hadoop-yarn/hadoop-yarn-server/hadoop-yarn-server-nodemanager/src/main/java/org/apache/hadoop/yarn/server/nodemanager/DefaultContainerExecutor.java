@@ -116,6 +116,7 @@ public class DefaultContainerExecutor extends ContainerExecutor {
       String userName, String appId, Path containerWorkDir,
       List<String> localDirs, List<String> logDirs) throws IOException {
 
+	Socket socket = null;
     FsPermission dirPerm = new FsPermission(APPDIR_PERM);
     ContainerId containerId = container.getContainerId();
 
@@ -202,7 +203,7 @@ public class DefaultContainerExecutor extends ContainerExecutor {
     		  try{
 		    	  if(U2Proto.isTaskProcessListening(this.getConnectPort())){
 		    		  LOG.info("And the process is alive... hence will send task runnning params");
-		    		  Socket socket = new Socket(InetAddress.getLocalHost().getHostName(),this.getConnectPort());
+		    		  socket = new Socket(InetAddress.getLocalHost().getHostName(),this.getConnectPort());
 			    	  LOG.info("Connected to process listening on : "+ this.getConnectPort());
 		    		  U2Proto.Request processRequest = new U2Proto.Request(U2Proto.Command.U2_RUN_TASK);
 		    		  //get the request values from the command
@@ -212,6 +213,7 @@ public class DefaultContainerExecutor extends ContainerExecutor {
 		    		  processRequest.setTaskAttemptId(this.getYarnChildTaskRequest().getTaskAttemptId());
 		    		  
 						U2Proto.getResponse(processRequest, socket);
+						socket.close();
 					
 		    	  }
 		    	  else{
@@ -227,6 +229,10 @@ public class DefaultContainerExecutor extends ContainerExecutor {
 //						LOG.info("*********Unable to connect to the child, launching a new process**********");
 //						if(!fromExec)shExec.execute();
 						}
+    		  finally{
+    			  if(socket != null)
+    				  socket.close();
+    		  }
     	  }
     	  else{
     		  shExec.execute();
