@@ -426,8 +426,10 @@ public class DefaultContainerExecutor extends ContainerExecutor {
     for (Path baseDir : baseDirs) {
       Path del = subDir == null ? baseDir : new Path(baseDir, subDir);
       LOG.info("Deleting path : " + del);
-      if (!lfs.delete(del, true)) {
-        LOG.warn("delete returned false for path: [" + del + "]");
+      if(!del.toString().contains("container_tokens")){
+    	  if (!lfs.delete(del, true)) {
+    	        LOG.warn("delete returned false for path: [" + del + "]");
+    	  }  
       }
     }
   }
