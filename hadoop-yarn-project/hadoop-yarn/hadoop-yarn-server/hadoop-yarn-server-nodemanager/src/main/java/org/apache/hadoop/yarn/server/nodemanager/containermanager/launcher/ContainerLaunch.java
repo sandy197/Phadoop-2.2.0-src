@@ -191,6 +191,7 @@ private long sleepDelayBeforeSigKill = 250;
         				//if m then map, if r then reduce
         				char taskType = parts[3].charAt(0);
         				
+        				this.setTaskType(taskType);
         				//exec.setTaskType(taskType);
         				
         				U2Proto.Request req = new U2Proto.Request(U2Proto.Command.U2_RUN_TASK);
