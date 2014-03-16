@@ -192,6 +192,13 @@ public class DefaultContainerExecutor extends ContainerExecutor {
         containerIdStr, this.getConf());
 
       LOG.info("launchContainer: " + Arrays.toString(command));
+      if(U2Proto.isTaskProcessListening(this.getConnectPort())){
+    	  LOG.info("Before shExec**, port unavalable");
+      }
+      else
+      {
+    	  LOG.info("Before shExec**, port available");
+      }
       shExec = new ShellCommandExecutor(
           command,
           new File(containerWorkDir.toUri().getPath()),
