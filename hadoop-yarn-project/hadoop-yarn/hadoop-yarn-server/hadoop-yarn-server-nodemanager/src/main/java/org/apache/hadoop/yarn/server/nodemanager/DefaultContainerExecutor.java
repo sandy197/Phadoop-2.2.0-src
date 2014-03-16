@@ -232,6 +232,7 @@ public class DefaultContainerExecutor extends ContainerExecutor {
 					LOG.info(e.getStackTrace());
 					} catch (IOException e) {
 						// TODO: handle exception
+						e.printStackTrace();
 						LOG.info(e.getStackTrace());
 //						LOG.info("*********Unable to connect to the child, launching a new process**********");
 //						if(!fromExec)shExec.execute();
