@@ -418,9 +418,11 @@ public class DefaultContainerExecutor extends ContainerExecutor {
       throws IOException, InterruptedException {
     if (baseDirs == null || baseDirs.length == 0) {
       LOG.info("Deleting absolute path : " + subDir);
-      if (!lfs.delete(subDir, true)) {
-        //Maybe retry
-        LOG.warn("delete returned false for path: [" + subDir + "]");
+      if(!subDir.toString().contains("appcache")){
+	      if (!lfs.delete(subDir, true)) {
+	        //Maybe retry
+	        LOG.warn("delete returned false for path: [" + subDir + "]");
+	      }
       }
       return;
     }
