@@ -36,13 +36,20 @@ public class U2Proto {
 	public static boolean isTaskProcessListening(int port) {
 		boolean retVal = false;
 		Socket socket = null;
+		Request req = new Request(Command.U2_IS_ACTIVE);
+		Response resp;
+		
+		
 		try {
              socket = new Socket(InetAddress.getByName(null), port);
-             System.out.println(port + "**Port unavailable, hence process is listening");
-            retVal = true;
+             resp = getResponse(req, socket);
+             if(resp.getStatus() == Status.U2_SUCCESS){
+            	 retVal = true;
+            	 System.out.println(port + "**Process is listening, port unavailable");
+             }
         } catch (Exception ex) {
         	ex.printStackTrace();
-        	System.out.println(port + "**Port available, hence no process running");
+        	System.out.println(port + "**No listener Process running, port available");
             retVal =  false;
         }
 		finally{

@@ -20,6 +20,7 @@ package org.apache.hadoop.mapred;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -31,7 +32,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,7 +46,6 @@ import org.apache.hadoop.ipc.RPC;
 
 //srkandul
 import org.apache.hadoop.ipc.GenericMatrix;
-
 import org.apache.hadoop.mapreduce.MRConfig;
 import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.mapreduce.TaskType;
@@ -312,29 +311,35 @@ public YarnChild(){
 			//listen for communication from ContainerLaunch only after the initial task execution
 			  Socket csocket = ssocket.accept();
 			  if(DEBUG) LOG.info("**Connection accepted by the child");
-			  ObjectInputStream ois = new ObjectInputStream(csocket.getInputStream());
-			  ObjectOutputStream oos = new ObjectOutputStream(csocket.getOutputStream());
-			  //TODO : create U2ProtoRequest/U2ProtoResponse in YARN project to avoid cyclic dependency.
-			  U2Proto.Request request = (U2Proto.Request)ois.readObject();
-			  //TODO: put all the below code as registered handler
-			  // handle the request
-			  if(request.getCmd() == U2Proto.Command.U2_RUN_TASK){
-				  
-				  String hostAM = request.getHostName();
-				  int portAM = request.getPortNum();
-				  String taskAttemptId = request.getTaskAttemptId();
-				  int jvmIdInt = request.getJvmIdInt();
-				  yc.yarnChildMain(hostAM, portAM, taskAttemptId, jvmIdInt);
-				  //TODO:see if containerLaunch needs an ACK response
+			  try{
+				  ObjectInputStream ois = new ObjectInputStream(csocket.getInputStream());
+				  ObjectOutputStream oos = new ObjectOutputStream(csocket.getOutputStream());
+				  //TODO : create U2ProtoRequest/U2ProtoResponse in YARN project to avoid cyclic dependency.
+				  U2Proto.Request request = (U2Proto.Request)ois.readObject();
+				  //TODO: put all the below code as registered handler
+				  // handle the request
+				  if(request.getCmd() == U2Proto.Command.U2_RUN_TASK){
+					  
+					  String hostAM = request.getHostName();
+					  int portAM = request.getPortNum();
+					  String taskAttemptId = request.getTaskAttemptId();
+					  int jvmIdInt = request.getJvmIdInt();
+					  yc.yarnChildMain(hostAM, portAM, taskAttemptId, jvmIdInt);
+					  //TODO:see if containerLaunch needs an ACK response
+				  }
+				  else if(request.getCmd() == U2Proto.Command.U2_STOP_LISTENER){
+					  yc.setStopChild(true);
+				  }
+				  else if(request.getCmd() == U2Proto.Command.U2_IS_ACTIVE){
+					  //TODO : send a response saying that I am alive and accepting requests
+					  oos.writeObject(new U2Proto.Response(U2Proto.Status.U2_SUCCESS));
+				  }
+			  } catch(EOFException eofEx){
+				  eofEx.printStackTrace();
 			  }
-			  else if(request.getCmd() == U2Proto.Command.U2_STOP_LISTENER){
-				  yc.setStopChild(true);
+			  finally{
+				  csocket.close();
 			  }
-			  else if(request.getCmd() == U2Proto.Command.U2_IS_ACTIVE){
-				  //TODO : send a response saying that I am alive and accepting requests
-				  oos.writeObject(new U2Proto.Response(U2Proto.Status.U2_SUCCESS));
-			  }
-			  csocket.close();
 		  }
 		  if (DEBUG) LOG.info("YarnChild stopped !! No listener now on :" + listeningPort );
 	  }
