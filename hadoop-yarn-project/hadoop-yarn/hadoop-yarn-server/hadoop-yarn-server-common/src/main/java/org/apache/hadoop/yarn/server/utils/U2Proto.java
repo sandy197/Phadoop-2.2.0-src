@@ -34,17 +34,31 @@ public class U2Proto {
 	}
 
 	public static boolean isTaskProcessListening(int port) {
+		boolean retVal = false;
+		Socket socket = null;
 		try {
-            Socket socket = new Socket(InetAddress.getLocalHost().getHostName(), port);
-            socket.close();
+             socket = new Socket(InetAddress.getLocalHost().getHostName(), port);
             System.out.println(port + "**Port available, hence no process running");
-            return false;
+            retVal = false;
         } catch (Exception ex) {
         	System.out.println(port + "**Port unavailable, hence process is listening");
-            return true;
+            retVal =  true;
         }
+		finally{
+			closeSilently(socket);
+		}
+		return retVal;
     }
 	
+	private static void closeSilently(Socket socket) {
+		try{
+			if(socket != null) socket.close();
+		} catch(IOException ex){
+			//nothing
+		}
+		
+	}
+
 	public static class Request implements Serializable{
 		private Command cmd;
 		private String hostName;
