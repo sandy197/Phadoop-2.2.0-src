@@ -37,12 +37,13 @@ public class U2Proto {
 		boolean retVal = false;
 		Socket socket = null;
 		try {
-             socket = new Socket(InetAddress.getLocalHost().getHostName(), port);
-            System.out.println(port + "**Port available, hence no process running");
-            retVal = false;
+             socket = new Socket(InetAddress.getByName(null), port);
+             System.out.println(port + "**Port unavailable, hence process is listening");
+            retVal = true;
         } catch (Exception ex) {
-        	System.out.println(port + "**Port unavailable, hence process is listening");
-            retVal =  true;
+        	ex.printStackTrace();
+        	System.out.println(port + "**Port available, hence no process running");
+            retVal =  false;
         }
 		finally{
 			closeSilently(socket);
