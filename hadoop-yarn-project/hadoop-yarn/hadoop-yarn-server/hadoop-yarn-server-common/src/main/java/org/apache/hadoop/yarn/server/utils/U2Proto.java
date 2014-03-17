@@ -7,19 +7,20 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Map;
 
 
 public class U2Proto {
 	public static int BASE_PORT = 16000;
 	public static int MAP_BASE_PORT = 17000;
 	
-	public static enum Command{
+	public static enum Command implements Serializable{
 		U2_RUN_TASK,
 		U2_IS_ACTIVE,
 		U2_STOP_LISTENER
 	}
 	
-	public static enum Status{
+	public static enum Status implements Serializable{
 		U2_SUCCESS,
 		U2_FAILURE
 	}
@@ -81,7 +82,16 @@ public class U2Proto {
 		private int portNum;
 		private String TaskAttemptId;
 		private int jvmIdInt;
+		private Map<String, String> environment;
 		
+		public Map<String, String> getEnvironment() {
+			return environment;
+		}
+
+		public void setEnvironment(Map<String, String> environment) {
+			this.environment = environment;
+		}
+
 		public Request(Command cmd){
 			this.cmd = cmd;
 		}

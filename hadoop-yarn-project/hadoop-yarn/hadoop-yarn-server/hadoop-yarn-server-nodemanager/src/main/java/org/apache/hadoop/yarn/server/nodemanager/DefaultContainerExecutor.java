@@ -217,6 +217,7 @@ public class DefaultContainerExecutor extends ContainerExecutor {
 		    		  processRequest.setJvmIdInt(this.getYarnChildTaskRequest().getJvmIdInt());
 		    		  processRequest.setPortNum(this.getYarnChildTaskRequest().getPortNum());
 		    		  processRequest.setTaskAttemptId(this.getYarnChildTaskRequest().getTaskAttemptId());
+		    		  processRequest.setEnvironment(this.getYarnChildTaskRequest().getEnvironment());
 		    		  
 		    		  U2Proto.Response response = U2Proto.getResponse(processRequest, socket);
 		    		  if(response!=null) LOG.info("**Response received:" + response.getStatus());

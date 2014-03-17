@@ -304,6 +304,9 @@ private long sleepDelayBeforeSigKill = 250;
         sanitizeEnv(environment, containerWorkDir, appDirs, containerLogDirs,
           localResources);
         
+        //srkandul:Write the environment to the request
+        exec.getYarnChildTaskRequest().setEnvironment(environment);
+        
         // Write out the environment
         writeLaunchEnv(containerScriptOutStream, environment, localResources,
             launchContext.getCommands());

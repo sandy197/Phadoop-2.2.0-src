@@ -23,6 +23,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -60,8 +61,8 @@ public abstract class ContainerExecutor implements Configurable {
   private boolean isStateValid;
   private U2Proto.Request yarnChildTaskRequest;
   private boolean isAMContainer = false;
-  
-  public boolean isStateValid() {
+
+public boolean isStateValid() {
 		return isStateValid;
 	}
 

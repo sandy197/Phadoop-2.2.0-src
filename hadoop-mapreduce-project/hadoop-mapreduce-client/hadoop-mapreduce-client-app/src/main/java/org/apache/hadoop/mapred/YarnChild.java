@@ -28,6 +28,7 @@ import java.net.URI;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
@@ -49,6 +50,7 @@ import org.apache.hadoop.ipc.GenericMatrix;
 import org.apache.hadoop.mapreduce.MRConfig;
 import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.mapreduce.TaskType;
+import org.apache.hadoop.mapreduce.ThreadPinning;
 import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.security.TokenCache;
 import org.apache.hadoop.mapreduce.security.token.JobTokenIdentifier;
@@ -71,6 +73,7 @@ import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.apache.log4j.LogManager;
 //import org.apache.hadoop.yarn.ipc.U2Proto;
 import org.apache.hadoop.yarn.server.utils.U2Proto;
+import org.ncsu.sys.*;
 
 /**
  * The main() for MapReduce task processes.
@@ -325,6 +328,7 @@ public YarnChild(){
 					  int portAM = request.getPortNum();
 					  String taskAttemptId = request.getTaskAttemptId();
 					  int jvmIdInt = request.getJvmIdInt();
+					  yc.setupEnv(request.getEnvironment());
 					  yc.yarnChildMain(hostAM, portAM, taskAttemptId, jvmIdInt);
 					  //TODO:see if containerLaunch needs an ACK response
 					  oos.writeObject(new U2Proto.Response(U2Proto.Status.U2_SUCCESS));
@@ -370,6 +374,17 @@ public YarnChild(){
 		}
 	  }
   }
+  
+  
+public void setupEnv(Map<String, String> env){
+	ThreadPinning tp = new ThreadPinning();
+	for(String name : env.keySet()){
+		if(tp.set_env(name, env.get(name)) != 0){
+			LOG.error("**Problem setting environment variable" + name + ":" + env.get(name));
+		}
+	}
+	
+}
 
 public void yarnChildMain(String host, int port, String taskAttemptId, int jvmIdInt) throws Throwable {
 //  public static void main1(String[] args) throws Throwable {
