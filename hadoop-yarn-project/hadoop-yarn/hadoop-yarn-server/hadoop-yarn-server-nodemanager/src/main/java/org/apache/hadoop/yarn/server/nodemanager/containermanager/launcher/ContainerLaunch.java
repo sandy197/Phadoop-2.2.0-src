@@ -136,6 +136,7 @@ private long sleepDelayBeforeSigKill = 250;
   @Override
   @SuppressWarnings("unchecked") // dispatcher not typed
   public Integer call() {
+	  boolean isYarnChildLaunch = false;
     final ContainerLaunchContext launchContext = container.getLaunchContext();
     Map<Path,List<String>> localResources = null;
     ContainerId containerID = container.getContainerId();
@@ -200,6 +201,7 @@ private long sleepDelayBeforeSigKill = 250;
         				req.setTaskAttemptId(taskAttemptId);
         				req.setJvmIdInt(Integer.parseInt(strTokenized[i+4]));
         				exec.setYarnChildTaskRequest(req);
+        				isYarnChildLaunch = true;
         				
         				//TODO:have to change this
         				int taskId = Integer.parseInt(parts[4]);
@@ -305,7 +307,8 @@ private long sleepDelayBeforeSigKill = 250;
           localResources);
         
         //srkandul:Write the environment to the request
-        exec.getYarnChildTaskRequest().setEnvironment(environment);
+        if(isYarnChildLaunch)
+        	exec.getYarnChildTaskRequest().setEnvironment(environment);
         
         // Write out the environment
         writeLaunchEnv(containerScriptOutStream, environment, localResources,
