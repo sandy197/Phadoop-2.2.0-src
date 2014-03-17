@@ -50,7 +50,6 @@ import org.apache.hadoop.ipc.GenericMatrix;
 import org.apache.hadoop.mapreduce.MRConfig;
 import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.mapreduce.TaskType;
-import org.apache.hadoop.mapreduce.ThreadPinning;
 import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.security.TokenCache;
 import org.apache.hadoop.mapreduce.security.token.JobTokenIdentifier;
@@ -378,10 +377,13 @@ public YarnChild(){
   
 public void setupEnv(Map<String, String> env){
 	ThreadPinning tp = new ThreadPinning();
+	System.out.println("**Settingup new env");
 	for(String name : env.keySet()){
 		if(tp.set_env(name, env.get(name)) != 0){
 			LOG.error("**Problem setting environment variable" + name + ":" + env.get(name));
 		}
+		else
+			System.out.println("Set:" + name + "->" + env.get(name));
 	}
 	
 }
