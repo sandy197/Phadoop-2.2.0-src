@@ -14,7 +14,7 @@ public class TestMatrixMultiply {
 
 	private static final String DATA_DIR_PATH = "/tmp/MatrixMultiply";
 	private static final String INPUT_PATH_A = DATA_DIR_PATH + "/A";
-	private static final String INPUT_OATH_B = DATA_DIR_PATH + "/B";
+	//private static final String INPUT_OATH_B = DATA_DIR_PATH + "/B";
 	private static final String OUTPUT_DIR_PATH = DATA_DIR_PATH + "/out";
 	private static final String TEMP_DIR_PATH = DATA_DIR_PATH;
 	
@@ -316,7 +316,7 @@ public class TestMatrixMultiply {
 		int IB, int KB, int JB)
 			throws Exception
 	{
-		MatrixMultiply.runJob(conf, INPUT_PATH_A, INPUT_OATH_B, OUTPUT_DIR_PATH, TEMP_DIR_PATH,
+		MatrixMultiply.runJob(conf, INPUT_PATH_A, OUTPUT_DIR_PATH, TEMP_DIR_PATH,
 			strategy, R1, R2, I, K, J, IB, KB, JB);
 		//checkAnswer(A, B, I, K, J);
 	}

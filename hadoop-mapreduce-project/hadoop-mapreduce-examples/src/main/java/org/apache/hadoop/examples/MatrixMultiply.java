@@ -34,7 +34,7 @@ public class MatrixMultiply {
 	/**	Global variables for the mapper and reducer tasks. */
 	private static boolean useTaskPool;	
 	private static String inputPathA;
-	private static String inputPathB;
+	//private static String inputPathB;
 	private static String outputDirPath;
 	private static String tempDirPath;
 	private static int strategy;
@@ -686,7 +686,7 @@ public class MatrixMultiply {
 	private static void init (JobContext context) {
 		Configuration conf = context.getConfiguration();
 		inputPathA = conf.get("MatrixMultiply.inputPathA");
-		inputPathB = conf.get("MatrixMultiply.inputPathB");
+		//inputPathB = conf.get("MatrixMultiply.inputPathB");
 		outputDirPath = conf.get("MatrixMultiply.outputDirPath");
 		tempDirPath = conf.get("MatrixMultiply.tempDirPath");
 		strategy = conf.getInt("MatrixMultiply.strategy", 0);
@@ -808,7 +808,7 @@ public class MatrixMultiply {
 	 *	@throws	Exception
 	 */
 	
-	public static void runJob (Configuration conf, String inputPathA, String inputPathB,
+	public static void runJob (Configuration conf, String inputPathA,
 		String outputDirPath, String tempDirPath, int strategy, int R1, int R2,
 		int I, int K, int J, int IB, int KB, int JB)
 			throws Exception
@@ -816,8 +816,8 @@ public class MatrixMultiply {
 		if (conf == null) throw new Exception("conf is null");
 		if (inputPathA == null || inputPathA.length() == 0)
 			throw new Exception("inputPathA is null or empty");
-		if (inputPathB == null || inputPathB.length() == 0)
-			throw new Exception("inputPathB is null or empty");
+//		if (inputPathB == null || inputPathB.length() == 0)
+//			throw new Exception("inputPathB is null or empty");
 		if (outputDirPath == null || outputDirPath.length() == 0)
 			throw new Exception("outputDirPath is null or empty");
 		if (tempDirPath == null || tempDirPath.length() == 0)
@@ -834,14 +834,14 @@ public class MatrixMultiply {
 		
 		FileSystem fs = FileSystem.get(conf);
 		inputPathA = fs.makeQualified(new Path(inputPathA)).toString();
-		inputPathB = fs.makeQualified(new Path(inputPathB)).toString();
+		//inputPathB = fs.makeQualified(new Path(inputPathB)).toString();
 		outputDirPath = fs.makeQualified(new Path(outputDirPath)).toString();
 		tempDirPath = fs.makeQualified(new Path(tempDirPath)).toString();
 		tempDirPath = tempDirPath + "/MatrixMultiply-" +
         	Integer.toString(new Random().nextInt(Integer.MAX_VALUE));
         	
 		conf.set("MatrixMultiply.inputPathA", inputPathA);
-		conf.set("MatrixMultiply.inputPathB", inputPathB);
+		//conf.set("MatrixMultiply.inputPathB", inputPathB);
 		conf.set("MatrixMultiply.outputDirPath", outputDirPath);
 		conf.set("MatrixMultiply.tempDirPath", tempDirPath);
 		conf.setInt("MatrixMultiply.strategy", strategy);
@@ -918,7 +918,7 @@ public class MatrixMultiply {
 			System.err.println("Syntax error in integer argument");
 			printUsageAndExit();
 		}
-		runJob(conf, inputPathA, inputPathB, outputDirPath, tempDirPath, strategy,
+		runJob(conf, inputPathA, outputDirPath, tempDirPath, strategy,
 			R1, R2, I, K, J, IB, KB, JB);
 	}
 }
