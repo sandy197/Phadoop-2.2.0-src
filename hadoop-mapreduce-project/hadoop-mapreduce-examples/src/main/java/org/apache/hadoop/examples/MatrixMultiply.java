@@ -729,7 +729,7 @@ public class MatrixMultiply {
 		job.setOutputKeyClass(IndexPair.class);
 		job.setOutputValueClass(IntWritable.class);		
 		FileInputFormat.addInputPath(job, new Path(conf.get("MatrixMultiply.inputPathA")));
-		FileInputFormat.addInputPath(job, new Path(conf.get("MatrixMultiply.inputPathB")));
+		//FileInputFormat.addInputPath(job, new Path(conf.get("MatrixMultiply.inputPathB")));
 		if (conf.getInt("MatrixMultiply.strategy", 0) == 4) {
 			FileOutputFormat.setOutputPath(job, new Path(conf.get("MatrixMultiply.outputDirPath")));
 		} else {
