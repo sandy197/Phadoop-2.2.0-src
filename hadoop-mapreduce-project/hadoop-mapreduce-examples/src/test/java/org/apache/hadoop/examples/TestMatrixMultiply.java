@@ -419,7 +419,7 @@ public class TestMatrixMultiply {
 		System.out.println("   IB = " + IB);
 		System.out.println("   KB = " + KB);
 		System.out.println("   JB = " + JB);
-		runOneTest(strategy, 8, 4, I, K, J, IB, KB, JB);
+		runOneTest(strategy, 1, 1, I, K, J, IB, KB, JB);
 	}
 
 	public static void main (String[] args)
