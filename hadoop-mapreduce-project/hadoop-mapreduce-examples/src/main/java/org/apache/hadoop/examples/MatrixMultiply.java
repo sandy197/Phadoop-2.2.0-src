@@ -71,17 +71,20 @@ public class MatrixMultiply {
 	public static class IndexPair implements WritableComparable {
 		public int index1;
 		public int index2;
+		public int aFlag;
 		public void write (DataOutput out)
 			throws IOException
 		{
 			out.writeInt(index1);
 			out.writeInt(index2);
+			out.writeInt(aFlag);
 		}
 		public void readFields (DataInput in)
 			throws IOException
 		{
 			index1 = in.readInt();
 			index2 = in.readInt();
+			aFlag = in.readInt();
 		}
 		public int compareTo (Object other) {
 			IndexPair o = (IndexPair)other;
@@ -95,6 +98,12 @@ public class MatrixMultiply {
 			} else if (this.index2 > o.index2) {
 				return +1;
 			}
+			if (this.aFlag < o.aFlag) {
+				return -1;
+			} else if (this.aFlag > o.aFlag) {
+				return +1;
+			}
+			
 			return 0;
 		}
 		public int hashCode () {
@@ -188,7 +197,7 @@ public class MatrixMultiply {
 			init(context);
 			FileSplit split = (FileSplit)context.getInputSplit();
 			path = split.getPath();
-			matrixA = path.toString().startsWith(inputPathA);
+			//matrixA = path.toString().startsWith(inputPathA);
 			if (DEBUG) {
 				System.out.println("##### Map setup: matrixA = " + matrixA + " for " + path);
 				System.out.println("   strategy = " + strategy);
@@ -225,7 +234,8 @@ public class MatrixMultiply {
 			int i = 0;
 			int k = 0;
 			int j = 0;
-			if (matrixA) {
+			boolean isA = indexPair.aFlag == 1;
+			if (isA) {
 				i = indexPair.index1;
 				if (i < 0 || i >= I) badIndex(i, I, "A row index");
 				k = indexPair.index2;
@@ -265,7 +275,7 @@ public class MatrixMultiply {
 					}
 					break;
 				case 2:
-					if (matrixA) {
+					if (isA) {
 						key.index1 = i/IB;
 						key.index2 = k/KB;
 						key.index3 = -1;

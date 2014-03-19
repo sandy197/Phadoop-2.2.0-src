@@ -30,7 +30,8 @@ public class TestMatrixMultiply {
 	
 	private static Random random = new Random();
 	
-	public static void writeMatrix (int[][] matrix, int rowDim, int colDim, String pathStr)
+	public static void writeMatrix (int[][] matrixA, int rowDimA, int colDimA, 
+			int[][] matrixB,int rowDimB, int colDimB, String pathStr)
 		throws IOException
 	{
 		Path path = new Path(pathStr);
@@ -39,12 +40,28 @@ public class TestMatrixMultiply {
 			SequenceFile.CompressionType.NONE);
 		MatrixMultiply.IndexPair indexPair = new MatrixMultiply.IndexPair();
 		IntWritable el = new IntWritable();
-		for (int i = 0; i < rowDim; i++) {
-			for (int j = 0; j < colDim; j++) {
-				int v = matrix[i][j];
+		
+		//A
+		for (int i = 0; i < rowDimA; i++) {
+			for (int j = 0; j < colDimA; j++) {
+				int v = matrixA[i][j];
 				if (v != 0) {
 					indexPair.index1 = i;
 					indexPair.index2 = j;
+					indexPair.aFlag = 1;
+					el.set(v);
+					writer.append(indexPair, el);
+				}
+			}
+		}
+		//B
+		for (int i = 0; i < rowDimB; i++) {
+			for (int j = 0; j < colDimB; j++) {
+				int v = matrixB[i][j];
+				if (v != 0) {
+					indexPair.index1 = i;
+					indexPair.index2 = j;
+					indexPair.aFlag = 0;
 					el.set(v);
 					writer.append(indexPair, el);
 				}
@@ -309,8 +326,8 @@ public class TestMatrixMultiply {
 	{
 		A = new int[][] { {1,0}, {0,1}};
 		B = new int[][] { {1,0}, {0,1}};
-		writeMatrix(A, 2, 2, INPUT_PATH_A);
-		writeMatrix(B, 2, 2, INPUT_OATH_B);
+//		writeMatrix(A, 2, 2, INPUT_PATH_A, true);
+//		writeMatrix(B, 2, 2, INPUT_OATH_B, false);
 		System.out.println();
 		System.out.println("Identity test");
 		runOneTest(1, 1, 1, 2, 2, 2, 2, 2, 2);
@@ -321,8 +338,8 @@ public class TestMatrixMultiply {
 	{
 		A = new int[][] { {1,2}, {3,4}};
 		B = new int[][] { {5,6}, {7,8}};
-		writeMatrix(A, 2, 2, INPUT_PATH_A);
-		writeMatrix(B, 2, 2, INPUT_OATH_B);
+//		writeMatrix(A, 2, 2, INPUT_PATH_A);
+//		writeMatrix(B, 2, 2, INPUT_OATH_B);
 		int strategy = 2;
 		int IB = 2;
 		int KB = 1;
@@ -349,8 +366,8 @@ public class TestMatrixMultiply {
 	{
 		A = new int[][] { {1,2,3}, {4,5,6}, {7,8,9}};
 		B = new int[][] { {10,11,12}, {13,14,15}, {16,17,18}};
-		writeMatrix(A, 3, 3, INPUT_PATH_A);
-		writeMatrix(B, 3, 3, INPUT_OATH_B);
+//		writeMatrix(A, 3, 3, INPUT_PATH_A);
+//		writeMatrix(B, 3, 3, INPUT_OATH_B);
 		for (int strategy = 1; strategy <= 4; strategy++) {
 			for (int IB = 1; IB <= 3; IB++) {
 				for (int KB = 1; KB <= 3; KB++) {
@@ -377,8 +394,8 @@ public class TestMatrixMultiply {
 		zero(B, 7, 12);
 		A[5][6] = 1;
 		B[6][7] = 1;
-		writeMatrix(A, 10, 7, INPUT_PATH_A);
-		writeMatrix(B, 7, 12, INPUT_OATH_B);
+//		writeMatrix(A, 10, 7, INPUT_PATH_A);
+//		writeMatrix(B, 7, 12, INPUT_OATH_B);
 		System.out.println();
 		System.out.println("Very sparse test");
 		runOneTest(1, 1, 1, 10, 7, 12, 3, 3, 3);
@@ -410,8 +427,8 @@ public class TestMatrixMultiply {
 		B = new int[K][J];
 		fillRandom(A, I, K, sparse);
 		fillRandom(B, K, J, !sparse);
-		writeMatrix(A, I, K, INPUT_PATH_A);
-		writeMatrix(B, K, J, INPUT_OATH_B);
+		writeMatrix(A, I, K, B, K, J, INPUT_PATH_A);
+		//writeMatrix(B, K, J, INPUT_OATH_B);
 		System.out.println("   strategy = " + strategy);
 		System.out.println("   I = " + I);
 		System.out.println("   K = " + K);
