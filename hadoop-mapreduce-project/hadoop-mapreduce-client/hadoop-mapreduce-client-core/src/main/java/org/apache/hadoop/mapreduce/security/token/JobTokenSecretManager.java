@@ -93,7 +93,7 @@ public class JobTokenSecretManager extends SecretManager<JobTokenIdentifier> {
    */
   public void removeTokenForJob(String jobId) {
     synchronized (currentJobTokens) {
-      currentJobTokens.remove(jobId);
+      //currentJobTokens.remove(jobId);
     }
   }
   
