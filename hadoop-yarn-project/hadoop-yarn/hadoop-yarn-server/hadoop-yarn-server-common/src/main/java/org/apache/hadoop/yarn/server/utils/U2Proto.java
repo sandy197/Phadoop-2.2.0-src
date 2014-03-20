@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -77,19 +78,39 @@ public class U2Proto {
 	}
 
 	public static class Request implements Serializable{
+		public static String ENV_SEPARATOR = "::";
+		public static String MAPPING_SEPARATOR = "->";
+		
 		private Command cmd;
 		private String hostName;
 		private int portNum;
 		private String TaskAttemptId;
 		private int jvmIdInt;
-		private Map<String, String> environment;
+		private String environment;
 		
 		public Map<String, String> getEnvironment() {
-			return environment;
+			Map<String, String> envMap = new HashMap<String, String>();
+			if(environment != null && environment.length() > 0){
+				String[] mappings = environment.split(ENV_SEPARATOR);
+				for(int i = 0; i < mappings.length; i++){
+					if(mappings[i].length() > 0){
+						String[] parts = mappings[i].split(MAPPING_SEPARATOR);
+						envMap.put(parts[0], parts[1]);
+					}
+				}	
+			}
+			return envMap;
 		}
 
 		public void setEnvironment(Map<String, String> environment) {
-			this.environment = environment;
+			StringBuilder sb = new StringBuilder();
+			if(environment != null){
+				for(String name : environment.keySet()){
+					sb.append(name).append(MAPPING_SEPARATOR).append(environment.get(name));
+					sb.append(ENV_SEPARATOR);
+				}
+			}
+			this.environment = sb.toString();
 		}
 
 		public Request(Command cmd){
