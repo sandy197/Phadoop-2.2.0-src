@@ -93,7 +93,7 @@ public class JobTokenSecretManager extends SecretManager<JobTokenIdentifier> {
    */
   public void removeTokenForJob(String jobId) {
     synchronized (currentJobTokens) {
-      //currentJobTokens.remove(jobId);
+      currentJobTokens.remove(jobId);
     }
   }
   
@@ -107,6 +107,15 @@ public class JobTokenSecretManager extends SecretManager<JobTokenIdentifier> {
     SecretKey tokenSecret = null;
     synchronized (currentJobTokens) {
       tokenSecret = currentJobTokens.get(jobId);
+    }
+    //srkandul:temporary fix
+    if(tokenSecret == null){
+    	if(currentJobTokens.keySet().size() > 0){
+    		for(String jobid :currentJobTokens.keySet()){
+    			tokenSecret = currentJobTokens.get(jobid);
+    			break;
+    		}
+    	}
     }
     if (tokenSecret == null) {
     	StringBuilder sb = new StringBuilder();
