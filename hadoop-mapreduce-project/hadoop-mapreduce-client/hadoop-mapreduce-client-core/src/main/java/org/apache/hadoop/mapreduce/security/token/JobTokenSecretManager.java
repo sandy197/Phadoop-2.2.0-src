@@ -109,7 +109,11 @@ public class JobTokenSecretManager extends SecretManager<JobTokenIdentifier> {
       tokenSecret = currentJobTokens.get(jobId);
     }
     if (tokenSecret == null) {
-      throw new InvalidToken("Can't find job token for job " + jobId + " !!");
+    	StringBuilder sb = new StringBuilder();
+    	for(String jobid : currentJobTokens.keySet()){
+    		sb.append(jobid).append("->").append(currentJobTokens.get(jobid)).append("\n");
+    	}
+      throw new InvalidToken("Can't find job token for job " + jobId + " !!" + sb.toString());
     }
     return tokenSecret;
   }
