@@ -491,6 +491,7 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
         @Override
         public Object run() throws Exception {
           // use job-specified working directory
+        	System.out.println("**Running the task after getting it from AM");
           FileSystem.get(job).setWorkingDirectory(job.getWorkingDirectory());
           taskFinal.run(job, umbilical); // run the task
           return null;
@@ -541,7 +542,7 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
       // Shutting down log4j of the child-vm...
       // This assumes that on return from Task.run()
       // there is no more logging done.
-      LogManager.shutdown();
+      // LogManager.shutdown();
     }
   }
 
