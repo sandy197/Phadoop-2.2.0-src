@@ -18,6 +18,7 @@
 
 package org.apache.hadoop.mapreduce.security.token;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -109,15 +110,16 @@ public class JobTokenSecretManager extends SecretManager<JobTokenIdentifier> {
       tokenSecret = currentJobTokens.get(jobId);
     }
     //srkandul:temporary fix
-    if(tokenSecret == null){
-    	if(currentJobTokens.keySet().size() > 0){
-    		for(String jobid :currentJobTokens.keySet()){
-    			tokenSecret = currentJobTokens.get(jobid);
-    			break;
-    		}
-    	}
-    }
+//    if(tokenSecret == null){
+//    	if(currentJobTokens.keySet().size() > 0){
+//    		for(String jobid :currentJobTokens.keySet()){
+//    			tokenSecret = currentJobTokens.get(jobid);
+//    			break;
+//    		}
+//    	}
+//    }
     if (tokenSecret == null) {
+    	System.out.println("******The Stack trace*******"+"\n"+Arrays.toString(Thread.currentThread().getStackTrace()));
     	StringBuilder sb = new StringBuilder();
     	for(String jobid : currentJobTokens.keySet()){
     		sb.append(jobid).append("->").append(currentJobTokens.get(jobid)).append("\n");
