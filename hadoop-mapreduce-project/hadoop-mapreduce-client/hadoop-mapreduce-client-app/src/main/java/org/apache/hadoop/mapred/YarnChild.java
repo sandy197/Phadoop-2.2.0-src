@@ -423,6 +423,9 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
     // initialize metrics
     DefaultMetricsSystem.initialize(
         StringUtils.camelize(firstTaskid.getTaskType().name()) +"Task");
+    
+    //to refresh the tokens
+    UserGroupInformation.setLoginUser(null);
 
     // Security framework already loaded the tokens into current ugi
     Credentials credentials =
