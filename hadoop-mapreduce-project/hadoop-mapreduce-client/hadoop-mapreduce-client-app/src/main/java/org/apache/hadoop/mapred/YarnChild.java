@@ -327,7 +327,13 @@ public YarnChild(){
 					  int portAM = request.getPortNum();
 					  String taskAttemptId = request.getTaskAttemptId();
 					  int jvmIdInt = request.getJvmIdInt();
+					  ThreadPinning tp = new ThreadPinning();
+					  System.out.println("**Before env setup : HADOOP_TOKEN_FILE_LOCATION -> " +
+							  tp.get_env("HADOOP_TOKEN_FILE_LOCATION"));
+					  
 					  yc.setupEnv(request.getEnvironment());
+					  System.out.println("**After env setup : HADOOP_TOKEN_FILE_LOCATION -> " +
+							  tp.get_env("HADOOP_TOKEN_FILE_LOCATION"));
 					  yc.yarnChildMain(hostAM, portAM, taskAttemptId, jvmIdInt);
 					  //TODO:see if containerLaunch needs an ACK response
 					  oos.writeObject(new U2Proto.Response(U2Proto.Status.U2_SUCCESS));
