@@ -27,6 +27,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.io.ObjectInputStream;
@@ -73,6 +74,8 @@ import org.apache.log4j.LogManager;
 //import org.apache.hadoop.yarn.ipc.U2Proto;
 import org.apache.hadoop.yarn.server.utils.U2Proto;
 import org.ncsu.sys.*;
+
+import java.lang.reflect.Field;
 
 /**
  * The main() for MapReduce task processes.
@@ -331,7 +334,7 @@ public YarnChild(){
 					  System.out.println("**Before env setup : HADOOP_TOKEN_FILE_LOCATION -> " +
 							  tp.get_env("HADOOP_TOKEN_FILE_LOCATION"));
 					  
-					  yc.setupEnv(request.getEnvironment());
+					  yc.setEnv(request.getEnvironment());
 					  System.out.println("**After env setup : HADOOP_TOKEN_FILE_LOCATION -> " +
 							  tp.get_env("HADOOP_TOKEN_FILE_LOCATION"));
 					  yc.yarnChildMain(hostAM, portAM, taskAttemptId, jvmIdInt);
@@ -380,6 +383,42 @@ public YarnChild(){
 	  }
   }
   
+  protected void setEnv(Map<String, String> newenv)
+  {
+    try
+      {
+          Class<?> processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment");
+          Field theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment");
+          theEnvironmentField.setAccessible(true);
+          Map<String, String> env = (Map<String, String>) theEnvironmentField.get(null);
+          env.putAll(newenv);
+          Field theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment");
+          theCaseInsensitiveEnvironmentField.setAccessible(true);
+          Map<String, String> cienv = (Map<String, String>)     theCaseInsensitiveEnvironmentField.get(null);
+          cienv.putAll(newenv);
+      }
+      catch (NoSuchFieldException e)
+      {
+        try {
+          Class[] classes = Collections.class.getDeclaredClasses();
+          Map<String, String> env = System.getenv();
+          for(Class cl : classes) {
+              if("java.util.Collections$UnmodifiableMap".equals(cl.getName())) {
+                  Field field = cl.getDeclaredField("m");
+                  field.setAccessible(true);
+                  Object obj = field.get(env);
+                  Map<String, String> map = (Map<String, String>) obj;
+                  map.clear();
+                  map.putAll(newenv);
+              }
+          }
+        } catch (Exception e2) {
+          e2.printStackTrace();
+        }
+      } catch (Exception e1) {
+          e1.printStackTrace();
+      } 
+  }
   
 public void setupEnv(Map<String, String> env){
 	ThreadPinning tp = new ThreadPinning();
