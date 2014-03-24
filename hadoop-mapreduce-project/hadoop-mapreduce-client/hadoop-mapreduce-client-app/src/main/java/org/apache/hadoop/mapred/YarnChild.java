@@ -307,7 +307,7 @@ public YarnChild(){
 	  try{
 		  while(!yc.isStopChild()){
 			  if(isFirst){
-				  yc.yarnChildMain(args[0], Integer.parseInt(args[1]), args[2], Integer.parseInt(args[3]));
+				  yc.yarnChildMain(args[0], Integer.parseInt(args[1]), args[2], Integer.parseInt(args[3]), false);
 				  LOG.info("**returned from the yarnchildmain invocation");
 				  isFirst = false;
 				  continue;
@@ -331,13 +331,13 @@ public YarnChild(){
 					  String taskAttemptId = request.getTaskAttemptId();
 					  int jvmIdInt = request.getJvmIdInt();
 					  ThreadPinning tp = new ThreadPinning();
-					  System.out.println("**Before env setup : HADOOP_TOKEN_FILE_LOCATION -> " +
+					  if(DEBUG) System.out.println("**Before env setup : HADOOP_TOKEN_FILE_LOCATION -> " +
 							  tp.get_env("HADOOP_TOKEN_FILE_LOCATION"));
 					  
 					  yc.setEnv(request.getEnvironment());
-					  System.out.println("**After env setup : HADOOP_TOKEN_FILE_LOCATION -> " +
+					  if(DEBUG) System.out.println("**After env setup : HADOOP_TOKEN_FILE_LOCATION -> " +
 							  tp.get_env("HADOOP_TOKEN_FILE_LOCATION"));
-					  yc.yarnChildMain(hostAM, portAM, taskAttemptId, jvmIdInt);
+					  yc.yarnChildMain(hostAM, portAM, taskAttemptId, jvmIdInt, true);
 					  //TODO:see if containerLaunch needs an ACK response
 					  oos.writeObject(new U2Proto.Response(U2Proto.Status.U2_SUCCESS));
 					  
@@ -433,7 +433,7 @@ public void setupEnv(Map<String, String> env){
 	
 }
 
-public void yarnChildMain(String host, int port, String taskAttemptId, int jvmIdInt) throws Throwable {
+public void yarnChildMain(String host, int port, String taskAttemptId, int jvmIdInt, boolean refreshUserCredentials) throws Throwable {
 //  public static void main1(String[] args) throws Throwable {
     Thread.setDefaultUncaughtExceptionHandler(new YarnUncaughtExceptionHandler());
     LOG.debug("Child starting");
@@ -464,7 +464,8 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
         StringUtils.camelize(firstTaskid.getTaskType().name()) +"Task");
     
     //to refresh the tokens
-    UserGroupInformation.setLoginUser(null);
+    if(refreshUserCredentials)
+    	UserGroupInformation.setLoginUser(null);
 
     // Security framework already loaded the tokens into current ugi
     Credentials credentials =
