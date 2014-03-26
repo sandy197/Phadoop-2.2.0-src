@@ -181,6 +181,11 @@ public class MatrixMultiply {
 			index2 = in.readInt();
 			v = in.readInt();
 		}
+		public void set(int sum){
+			index1 = -1;
+			index2 = -1;
+			v = sum;
+		}
 	}
 	
 	/**	The job 1 mapper class. */
@@ -381,7 +386,7 @@ public class MatrixMultiply {
 	/**	The job 1 reducer class. */
 	
 	public static class Job1Reducer
-		extends Reducer<Key, Value, IndexPair, IntWritable>
+		extends Reducer<Key, Value, Key, Value>
 	{
 		private int[][] A;
 		private int[][] B;
@@ -389,8 +394,8 @@ public class MatrixMultiply {
 		private int sib, skb, sjb;
 		private int aRowDim, aColDim, bColDim;
 		private float density1, density2;
-		private IndexPair indexPair = new IndexPair();
-		private IntWritable el = new IntWritable();
+		private Key indexPair = new Key();
+		private Value el = new Value();
 		
 		public void setup (Context context) {
 			init(context);
@@ -427,7 +432,7 @@ public class MatrixMultiply {
 		
 		private void printReduceOutput () {
 			System.out.println("##### Reduce output: (" + indexPair.index1 + "," + 
-				indexPair.index2 + ") " + el.get());
+				indexPair.index2 + ") " + el.v);
 		}
 		
 		private int getDim (int blockNum, int lastBlockNum, int blockSize, 
@@ -525,7 +530,8 @@ public class MatrixMultiply {
 					long start = System.nanoTime();
 					if (sum != 0) {
 						indexPair.index1 = ibase + i;
-						indexPair.index2 = jbase + j;
+						indexPair.index2 = -1;
+						indexPair.index3 = jbase + j;
 						el.set(sum);
 						context.write(indexPair, el);
 						if (DEBUG) printReduceOutput();
@@ -578,6 +584,18 @@ public class MatrixMultiply {
 			throws IOException, InterruptedException 
 		{
 			ThreadPinning tp = new ThreadPinning();
+			int sum = 0;
+			//job 2 reduce function
+			if(key.index2 < 0){
+				//sum up all the values and write
+				for(Value val : valueList){
+					sum += val.v;
+				}
+				el.set(sum);
+				context.write(key, el);
+				return;
+			}
+			
 			if(key.index3 < 0){
 				//(ib*NKB + kb) % numPartitions
 				tp.set_affinity((((key.index1 * NKB + key.index2) + 1) % 8) + 8);
@@ -726,8 +744,8 @@ public class MatrixMultiply {
 		job.setPartitionerClass(Job1Partitioner.class);		
 		job.setMapOutputKeyClass(Key.class);
 		job.setMapOutputValueClass(Value.class);
-		job.setOutputKeyClass(IndexPair.class);
-		job.setOutputValueClass(IntWritable.class);		
+		job.setOutputKeyClass(Key.class);
+		job.setOutputValueClass(Value.class);		
 		FileInputFormat.addInputPath(job, new Path(conf.get("MatrixMultiply.inputPathA")));
 		//FileInputFormat.addInputPath(job, new Path(conf.get("MatrixMultiply.inputPathB")));
 		if (conf.getInt("MatrixMultiply.strategy", 0) == 4) {
@@ -750,10 +768,10 @@ public class MatrixMultiply {
 		job.setInputFormatClass(SequenceFileInputFormat.class);
 		job.setOutputFormatClass(SequenceFileOutputFormat.class);
 		job.setMapperClass(Mapper.class);
-		job.setCombinerClass(IntSumReducer.class);
-		job.setReducerClass(IntSumReducer.class);
-		job.setOutputKeyClass(IndexPair.class);
-		job.setOutputValueClass(IntWritable.class);		
+		job.setCombinerClass(Job1Reducer.class);
+		job.setReducerClass(Job1Reducer.class);
+		job.setOutputKeyClass(Key.class);
+		job.setOutputValueClass(Value.class);		
 		FileInputFormat.addInputPath(job, new Path(conf.get("MatrixMultiply.tempDirPath")));
 		FileOutputFormat.setOutputPath(job, new Path(conf.get("MatrixMultiply.outputDirPath")));
 		boolean ok = job.waitForCompletion(true);
