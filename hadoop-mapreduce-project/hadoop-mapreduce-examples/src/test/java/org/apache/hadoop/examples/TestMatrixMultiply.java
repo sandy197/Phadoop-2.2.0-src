@@ -421,7 +421,7 @@ public class TestMatrixMultiply {
 		int K = 60;//random.nextInt(dimRandom) + dimMin;
 		int J = 60;//random.nextInt(dimRandom) + dimMin;
 		int IB = 30;//random.nextInt(I) + 1;
-		int KB = 15;//random.nextInt(K) + 1;
+		int KB = 30;//random.nextInt(K) + 1;
 		int JB = 30;//random.nextInt(J) + 1;
 		A = new int[I][K];
 		B = new int[K][J];
@@ -436,7 +436,7 @@ public class TestMatrixMultiply {
 		System.out.println("   IB = " + IB);
 		System.out.println("   KB = " + KB);
 		System.out.println("   JB = " + JB);
-		runOneTest(strategy, 8, 4, I, K, J, IB, KB, JB);
+		runOneTest(strategy, 4, 4, I, K, J, IB, KB, JB);
 	}
 
 	public static void main (String[] args)
