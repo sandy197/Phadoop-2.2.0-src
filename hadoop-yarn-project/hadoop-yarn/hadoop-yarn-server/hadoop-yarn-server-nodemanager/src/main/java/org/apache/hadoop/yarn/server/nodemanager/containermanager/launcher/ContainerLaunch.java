@@ -200,7 +200,7 @@ private long sleepDelayBeforeSigKill = 250;
         				req.setPortNum(Integer.parseInt(strTokenized[i+2]));
         				req.setTaskAttemptId(taskAttemptId);
         				req.setJvmIdInt(Integer.parseInt(strTokenized[i+4]));
-        				exec.setYarnChildTaskRequest(req);
+        				container.getLaunchContext().setYarnChildTaskRequest(req);
         				isYarnChildLaunch = true;
         				
         				//TODO:have to change this
@@ -213,7 +213,7 @@ private long sleepDelayBeforeSigKill = 250;
         					taskListeningPort = U2Proto.BASE_PORT + taskId;
         				}
         				//TODO : add more fields similar to port in the ContainerExecutor. U2Proto.Request
-        				exec.setConnectPort(taskListeningPort);
+        				container.getLaunchContext().setConnectPort(taskListeningPort);
         				break;
         			}
             	}
@@ -221,7 +221,7 @@ private long sleepDelayBeforeSigKill = 250;
         }
         else if(str.contains("MRAppMaster")){
         	LOG.info("This container is for AM");
-        	exec.setAMContainer(true);
+        	container.getLaunchContext().setAMContainer(true);
         }
       }
       launchContext.setCommands(newCmds);
@@ -308,7 +308,7 @@ private long sleepDelayBeforeSigKill = 250;
         
         //srkandul:Write the environment to the request
         if(isYarnChildLaunch)
-        	exec.getYarnChildTaskRequest().setEnvironment(environment);
+        	container.getLaunchContext().getYarnChildTaskRequest().setEnvironment(environment);
         
         // Write out the environment
         writeLaunchEnv(containerScriptOutStream, environment, localResources,

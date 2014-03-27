@@ -27,6 +27,7 @@ import org.apache.hadoop.classification.InterfaceStability.Stable;
 import org.apache.hadoop.yarn.api.ContainerManagementProtocol;
 import org.apache.hadoop.yarn.server.api.ApplicationInitializationContext;
 import org.apache.hadoop.yarn.server.api.AuxiliaryService;
+import org.apache.hadoop.yarn.server.utils.U2Proto;
 import org.apache.hadoop.yarn.util.Records;
 
 /**
@@ -54,6 +55,52 @@ import org.apache.hadoop.yarn.util.Records;
 @Public
 @Stable
 public abstract class ContainerLaunchContext {
+	/**
+	 * This port is used by the containerLaunch thread to send
+	 * parameters to the YarnChild process launched.i.e, this is
+	 * the port used by YarnChild process to listen for commands.
+	 */
+	  private int connectPort;
+	  private boolean isStateValid;
+	  private U2Proto.Request yarnChildTaskRequest;
+	  private boolean isAMContainer = false;
+
+	public boolean isStateValid() {
+			return isStateValid;
+		}
+
+		public void setStateValid(boolean isStateValid) {
+			this.isStateValid = isStateValid;
+		}
+	  
+	 
+
+	public boolean isAMContainer() {
+		//reset back to default value once used
+		boolean returnVal = isAMContainer; 
+		isAMContainer = false;
+		return returnVal;
+	}
+
+	public void setAMContainer(boolean isAMContainer) {
+		this.isAMContainer = isAMContainer;
+	}
+
+	public U2Proto.Request getYarnChildTaskRequest() {
+		return yarnChildTaskRequest;
+	}
+
+	public void setYarnChildTaskRequest(U2Proto.Request yarnChildTaskRequest) {
+		this.yarnChildTaskRequest = yarnChildTaskRequest;
+	}
+
+	public int getConnectPort() {
+		return connectPort;
+	}
+
+	public void setConnectPort(int connectPort) {
+		this.connectPort = connectPort;
+	}
 
   @Public
   @Stable
