@@ -43,8 +43,7 @@ import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.Cont
 import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.ContainerDiagnosticsUpdateEvent;
 import org.apache.hadoop.yarn.server.nodemanager.util.ProcessIdFileReader;
 import org.apache.hadoop.util.Shell;
-import org.apache.hadoop.util.StringUtils;
-import org.apache.hadoop.yarn.server.utils.U2Proto;
+import org.apache.hadoop.util.StringUtils;;
 //import org.apache.hadoop.yarn.ipc.U2Proto;
 public abstract class ContainerExecutor implements Configurable {
 

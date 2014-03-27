@@ -32,12 +32,12 @@
     <yarn.basedir>${project.parent.basedir}</yarn.basedir>
   </properties>
 	
-  <dependencies>
+<!--  <dependencies>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-yarn-server-common</artifactId>
     </dependency>
-  </dependencies>
+  </dependencies> -->
 
   <build>
     <plugins>

@@ -27,7 +27,7 @@ import org.apache.hadoop.classification.InterfaceStability.Stable;
 import org.apache.hadoop.yarn.api.ContainerManagementProtocol;
 import org.apache.hadoop.yarn.server.api.ApplicationInitializationContext;
 import org.apache.hadoop.yarn.server.api.AuxiliaryService;
-import org.apache.hadoop.yarn.server.utils.U2Proto;
+import org.apache.hadoop.yarn.util.U2Proto;
 import org.apache.hadoop.yarn.util.Records;
 
 /**

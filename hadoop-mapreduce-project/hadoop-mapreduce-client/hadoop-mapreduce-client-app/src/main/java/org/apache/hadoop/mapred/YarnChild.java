@@ -72,7 +72,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationAttemptId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.apache.log4j.LogManager;
 //import org.apache.hadoop.yarn.ipc.U2Proto;
-import org.apache.hadoop.yarn.server.utils.U2Proto;
+import org.apache.hadoop.yarn.util.U2Proto;
 import org.ncsu.sys.*;
 
 import java.lang.reflect.Field;
