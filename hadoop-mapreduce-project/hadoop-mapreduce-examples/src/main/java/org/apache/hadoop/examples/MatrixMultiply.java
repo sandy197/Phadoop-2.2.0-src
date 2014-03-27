@@ -768,7 +768,7 @@ public class MatrixMultiply {
 		job.setInputFormatClass(SequenceFileInputFormat.class);
 		job.setOutputFormatClass(SequenceFileOutputFormat.class);
 		job.setMapperClass(Mapper.class);
-		job.setCombinerClass(Job1Reducer.class);
+		//job.setCombinerClass(Job1Reducer.class);
 		job.setReducerClass(Job1Reducer.class);
 		job.setOutputKeyClass(Key.class);
 		job.setOutputValueClass(Value.class);		

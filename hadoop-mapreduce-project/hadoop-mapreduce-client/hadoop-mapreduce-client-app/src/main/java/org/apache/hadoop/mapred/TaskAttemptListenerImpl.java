@@ -421,6 +421,13 @@ public class TaskAttemptListenerImpl extends CompositeService
 
     // Try to look up the task. We remove it directly as we don't give
     // multiple tasks to a JVM
+    System.out.println("Looking for :" + jvmId + "In the list:");
+    for(WrappedJvmID jvmid : jvmIDToActiveAttemptMap.keySet()){
+    	System.out.println(jvmid.toString());
+    }
+    System.out.println("End of list");
+    
+    
     if (!jvmIDToActiveAttemptMap.containsKey(wJvmID)) {
       LOG.info("JVM with ID: " + jvmId + " is invalid and will be killed.");
       jvmTask = TASK_FOR_INVALID_JVM;
