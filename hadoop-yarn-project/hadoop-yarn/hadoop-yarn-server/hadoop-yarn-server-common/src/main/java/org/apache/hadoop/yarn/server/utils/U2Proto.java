@@ -112,6 +112,21 @@ public class U2Proto {
 			}
 			this.environment = sb.toString();
 		}
+		
+		public String toString(){
+			StringBuilder sb = new StringBuilder();
+//			private Command cmd;
+//			private String hostName;
+//			private int portNum;
+//			private String TaskAttemptId;
+//			private int jvmIdInt;
+//			private String environment;
+			sb.append("CMD:").append(cmd).append("\n")
+				.append("TaskAttemptID:").append(hostName).append("\n")
+					.append("jvmid").append(jvmIdInt);
+			
+			return sb.toString();
+		}
 
 		public Request(Command cmd){
 			this.cmd = cmd;

@@ -324,6 +324,7 @@ public YarnChild(){
 				  U2Proto.Request request = (U2Proto.Request)ois.readObject();
 				  //TODO: put all the below code as registered handler
 				  // handle the request
+				  System.out.println("**Request received:\n" + request);
 				  if(request.getCmd() == U2Proto.Command.U2_RUN_TASK){
 					  
 					  String hostAM = request.getHostName();
@@ -331,12 +332,7 @@ public YarnChild(){
 					  String taskAttemptId = request.getTaskAttemptId();
 					  int jvmIdInt = request.getJvmIdInt();
 					  ThreadPinning tp = new ThreadPinning();
-					  if(DEBUG) System.out.println("**Before env setup : HADOOP_TOKEN_FILE_LOCATION -> " +
-							  tp.get_env("HADOOP_TOKEN_FILE_LOCATION"));
-					  
-					  yc.setEnv(request.getEnvironment());
-					  if(DEBUG) System.out.println("**After env setup : HADOOP_TOKEN_FILE_LOCATION -> " +
-							  tp.get_env("HADOOP_TOKEN_FILE_LOCATION"));
+					  yc.setEnv(request.getEnvironment());					  
 					  yc.yarnChildMain(hostAM, portAM, taskAttemptId, jvmIdInt, true);
 					  //TODO:see if containerLaunch needs an ACK response
 					  oos.writeObject(new U2Proto.Response(U2Proto.Status.U2_SUCCESS));
@@ -490,12 +486,6 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
       }
     });
 
-	//srkandul
-	System.out.println(umbilical.getClass().getName());
-	if(umbilical instanceof  TaskAttemptContextImpl){	
-		System.out.println("************* Type is TaskAttemptContextImpl ****************");
-	}
-
     // report non-pid to application master
     JvmContext context = new JvmContext(jvmId, "-1000");
     LOG.debug("PID: " + System.getenv().get("JVM_PID"));
@@ -509,12 +499,12 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
       for (int idle = 0; null == myTask; ++idle) {
         long sleepTimeMilliSecs = Math.min(idle * 500, 1500);
         LOG.info("Sleeping for " + sleepTimeMilliSecs
-            + "ms before retrying again. Got null now.");
+            + "ms before retrying again for jvmid : " + context.jvmId + ". Got null now.");
         MILLISECONDS.sleep(sleepTimeMilliSecs);
         myTask = umbilical.getTask(context);
       }
       if (myTask.shouldDie()) {
-    	  LOG.info("**Die signal for mytask");
+    	  LOG.info("**Die signal for mytask with jvmid : " + context.jvmId);
         return;
       }
 
@@ -789,6 +779,8 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
     final JobConf job = new JobConf(MRJobConfig.JOB_CONF_FILE);
     job.setCredentials(credentials);
 
+    if(DEBUG) System.out.println("**Ennironment variable "+ Environment.CONTAINER_ID.name() + ":"
+    			+ System.getenv(Environment.CONTAINER_ID.name()));
     ApplicationAttemptId appAttemptId =
         ConverterUtils.toContainerId(
             System.getenv(Environment.CONTAINER_ID.name()))
