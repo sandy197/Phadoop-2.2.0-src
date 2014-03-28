@@ -9,25 +9,15 @@ package org.apache.hadoop.ipc;
  * @author sandeep
  *
  */
-public class GenericMatrix {
+public interface GenericMatrix<MATRIX_TYPE> {
 	
-	private int[][] matrix;
-	private boolean isMatrixSet;
-	public int[][] getMatrix() {
-		return matrix;
-	}
-	public void setMatrix(int[][] matrix) {
-		if(matrix != null){
-			this.matrix = matrix;
-			this.isMatrixSet = true;
-		}
-	}
-	public boolean isMatrixSet() {
-		return isMatrixSet;
-	}
-	public void setMatrixSet(boolean isMatrixSet) {
-		this.isMatrixSet = isMatrixSet;
-	}
+//	private int[][] matrix;
+//	private boolean isMatrixSet;
+	
+	public MATRIX_TYPE getMatrix();
+	public void setMatrix(MATRIX_TYPE matrix);
+	public boolean isMatrixSet();
+	public void setMatrixSet(boolean isMatrixSet);
 	
 	//can add more fields if needed
 

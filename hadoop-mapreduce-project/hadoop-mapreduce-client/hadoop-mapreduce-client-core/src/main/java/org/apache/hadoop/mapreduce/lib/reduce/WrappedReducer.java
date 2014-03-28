@@ -72,17 +72,15 @@ public class WrappedReducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
       this.reduceContext = reduceContext; 
     }
 //srkandul
-    public GenericMatrix getMatrix(){
+    public GenericMatrix<?> getMatrix(){
     	//get matrix from the job conf inside reduceContext
     	Configuration conf = reduceContext.getConfiguration();
     	return conf.getMatrix();
     }
     
-    public void setMatrix(int[][] matrix){
-    	GenericMatrix gm = new GenericMatrix();
-    	gm.setMatrix(matrix);
+    public void setMatrix(GenericMatrix<?> matrix){
     	Configuration conf = reduceContext.getConfiguration();
-    	conf.setMatrix(gm);
+    	conf.setMatrix(matrix);
     }
 
     @Override

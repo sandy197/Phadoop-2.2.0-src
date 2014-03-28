@@ -513,7 +513,7 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
 
       // Create the job-conf and set credentials
       final JobConf job = configureTask(task, credentials, jt);
-
+      job.setMatrix(this.matrixRead);
       // Initiate Java VM metrics
       JvmMetrics.initSingleton(jvmId.toString(), job.getSessionId());
       childUGI = UserGroupInformation.createRemoteUser(System
@@ -536,6 +536,7 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
           return null;
         }
       });
+      this.matrixRead = job.getMatrix();
     } catch (FSError e) {
       LOG.fatal("FSError from child", e);
       umbilical.fsError(taskid, e.getMessage());

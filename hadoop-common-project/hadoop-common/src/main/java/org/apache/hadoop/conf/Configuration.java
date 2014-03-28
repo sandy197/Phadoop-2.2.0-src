@@ -173,13 +173,13 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
     LogFactory.getLog("org.apache.hadoop.conf.Configuration.deprecation");
 
 //srkandul
-  private GenericMatrix matrix;
+  private GenericMatrix<?> matrix;
 
-  public GenericMatrix getMatrix() {
+  public GenericMatrix<?> getMatrix() {
 	return matrix;
 }
 
-public void setMatrix(GenericMatrix matrix) {
+public void setMatrix(GenericMatrix<?> matrix) {
 	this.matrix = matrix;
 }
 
