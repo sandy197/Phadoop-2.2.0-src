@@ -1,4 +1,4 @@
-package org.apache.hadoop.yarn.server.utils;
+package org.apache.hadoop.yarn.util;
 //package org.apache.hadoop.yarn.ipc;
 
 import java.io.IOException;
@@ -122,7 +122,7 @@ public class U2Proto {
 //			private int jvmIdInt;
 //			private String environment;
 			sb.append("CMD:").append(cmd).append("\n")
-				.append("TaskAttemptID:").append(hostName).append("\n")
+				.append("TaskAttemptID:").append(TaskAttemptId).append("\n")
 					.append("jvmid").append(jvmIdInt);
 			
 			return sb.toString();

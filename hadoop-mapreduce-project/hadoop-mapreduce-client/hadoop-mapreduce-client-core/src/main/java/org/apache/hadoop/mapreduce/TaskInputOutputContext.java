@@ -37,9 +37,9 @@ import org.apache.hadoop.ipc.GenericMatrix;
 public interface TaskInputOutputContext<KEYIN,VALUEIN,KEYOUT,VALUEOUT> 
        extends TaskAttemptContext {
 //srkandul
-	public GenericMatrix getMatrix();
+	public GenericMatrix<?> getMatrix();
 	
-	public void setMatrix(int[][] matrix);
+	public void setMatrix(GenericMatrix<?> matrix);
   /**
    * Advance to the next key, value pair, returning null if at end.
    * @return the key object that was read into, or null if no more

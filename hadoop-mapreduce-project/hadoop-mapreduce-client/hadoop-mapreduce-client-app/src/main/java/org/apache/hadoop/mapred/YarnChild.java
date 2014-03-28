@@ -72,7 +72,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationAttemptId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.apache.log4j.LogManager;
 //import org.apache.hadoop.yarn.ipc.U2Proto;
-import org.apache.hadoop.yarn.server.utils.U2Proto;
+import org.apache.hadoop.yarn.util.U2Proto;
 import org.ncsu.sys.*;
 
 import java.lang.reflect.Field;
@@ -513,7 +513,9 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
 
       // Create the job-conf and set credentials
       final JobConf job = configureTask(task, credentials, jt);
-
+      if(this.matrixRead != null){
+    	  job.setMatrix(this.matrixRead);
+      }
       // Initiate Java VM metrics
       JvmMetrics.initSingleton(jvmId.toString(), job.getSessionId());
       childUGI = UserGroupInformation.createRemoteUser(System
@@ -536,6 +538,7 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
           return null;
         }
       });
+      this.matrixRead = job.getMatrix();
     } catch (FSError e) {
       LOG.fatal("FSError from child", e);
       umbilical.fsError(taskid, e.getMessage());

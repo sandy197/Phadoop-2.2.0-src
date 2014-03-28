@@ -51,7 +51,7 @@ import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.Cont
 import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.ContainerDiagnosticsUpdateEvent;
 import org.apache.hadoop.yarn.server.nodemanager.containermanager.launcher.ContainerLaunch;
 import org.apache.hadoop.yarn.server.nodemanager.containermanager.localizer.ContainerLocalizer;
-import org.apache.hadoop.yarn.server.utils.U2Proto;
+import org.apache.hadoop.yarn.util.U2Proto;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -191,7 +191,7 @@ public class DefaultContainerExecutor extends ContainerExecutor {
         containerIdStr, this.getConf());
 
       LOG.info("launchContainer: " + Arrays.toString(command));
-      if(U2Proto.isTaskProcessListening(this.getConnectPort())){
+      if(U2Proto.isTaskProcessListening(container.getLaunchContext().getConnectPort())){
     	  LOG.info("Before shExec**, port unavalable");
       }
       else
@@ -205,21 +205,21 @@ public class DefaultContainerExecutor extends ContainerExecutor {
       if (isContainerActive(containerId)) {
     	  //handle case for application manager.
     	//srkandul : get the port from the jvmIdInt
-    	  if(!this.isAMContainer()){
+    	  if(!container.getLaunchContext().isAMContainer()){
     		  try{
-		    	  if(U2Proto.isTaskProcessListening(this.getConnectPort())){
+		    	  if(U2Proto.isTaskProcessListening(container.getLaunchContext().getConnectPort())){
 		    		  LOG.info("And the process is alive... hence will send task runnning params");
-		    		  socket = new Socket(InetAddress.getLocalHost().getHostName(),this.getConnectPort());
-			    	  LOG.info("Connected to process listening on : "+ this.getConnectPort());
-		    		  U2Proto.Request processRequest = new U2Proto.Request(U2Proto.Command.U2_RUN_TASK);
-		    		  //get the request values from the command
-		    		  processRequest.setHostName(this.getYarnChildTaskRequest().getHostName());
-		    		  processRequest.setJvmIdInt(this.getYarnChildTaskRequest().getJvmIdInt());
-		    		  processRequest.setPortNum(this.getYarnChildTaskRequest().getPortNum());
-		    		  processRequest.setTaskAttemptId(this.getYarnChildTaskRequest().getTaskAttemptId());
-		    		  processRequest.setEnvironment(this.getYarnChildTaskRequest().getEnvironment());
+		    		  socket = new Socket(InetAddress.getLocalHost().getHostName(),container.getLaunchContext().getConnectPort());
+			    	  LOG.info("Connected to process listening on : "+ container.getLaunchContext().getConnectPort());
+//		    		  U2Proto.Request processRequest = new U2Proto.Request(U2Proto.Command.U2_RUN_TASK);
+//		    		  //get the request values from the command
+//		    		  processRequest.setHostName(this.getYarnChildTaskRequest().getHostName());
+//		    		  processRequest.setJvmIdInt(this.getYarnChildTaskRequest().getJvmIdInt());
+//		    		  processRequest.setPortNum(this.getYarnChildTaskRequest().getPortNum());
+//		    		  processRequest.setTaskAttemptId(this.getYarnChildTaskRequest().getTaskAttemptId());
+//		    		  processRequest.setEnvironment(this.getYarnChildTaskRequest().getEnvironment());
 		    		  
-		    		  U2Proto.Response response = U2Proto.getResponse(processRequest, socket);
+		    		  U2Proto.Response response = U2Proto.getResponse(container.getLaunchContext().getYarnChildTaskRequest(), socket);
 		    		  if(response!=null) LOG.info("**Response received:" + response.getStatus());
 						//socket.close();
 					

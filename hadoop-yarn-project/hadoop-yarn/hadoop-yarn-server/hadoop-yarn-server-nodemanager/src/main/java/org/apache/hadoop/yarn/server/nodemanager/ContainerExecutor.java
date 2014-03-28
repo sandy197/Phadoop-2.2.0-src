@@ -43,8 +43,7 @@ import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.Cont
 import org.apache.hadoop.yarn.server.nodemanager.containermanager.container.ContainerDiagnosticsUpdateEvent;
 import org.apache.hadoop.yarn.server.nodemanager.util.ProcessIdFileReader;
 import org.apache.hadoop.util.Shell;
-import org.apache.hadoop.util.StringUtils;
-import org.apache.hadoop.yarn.server.utils.U2Proto;
+import org.apache.hadoop.util.StringUtils;;
 //import org.apache.hadoop.yarn.ipc.U2Proto;
 public abstract class ContainerExecutor implements Configurable {
 
@@ -52,53 +51,7 @@ public abstract class ContainerExecutor implements Configurable {
   final public static FsPermission TASK_LAUNCH_SCRIPT_PERMISSION =
     FsPermission.createImmutable((short) 0700);
 //srkandul
-  /**
- * This port is used by the containerLaunch thread to send
- * parameters to the YarnChild process launched.i.e, this is
- * the port used by YarnChild process to listen for commands.
- */
-  private int connectPort;
-  private boolean isStateValid;
-  private U2Proto.Request yarnChildTaskRequest;
-  private boolean isAMContainer = false;
-
-public boolean isStateValid() {
-		return isStateValid;
-	}
-
-	public void setStateValid(boolean isStateValid) {
-		this.isStateValid = isStateValid;
-	}
   
- 
-
-public boolean isAMContainer() {
-	//reset back to default value once used
-	boolean returnVal = isAMContainer; 
-	isAMContainer = false;
-	return returnVal;
-}
-
-public void setAMContainer(boolean isAMContainer) {
-	this.isAMContainer = isAMContainer;
-}
-
-public U2Proto.Request getYarnChildTaskRequest() {
-	return yarnChildTaskRequest;
-}
-
-public void setYarnChildTaskRequest(U2Proto.Request yarnChildTaskRequest) {
-	this.yarnChildTaskRequest = yarnChildTaskRequest;
-}
-
-public int getConnectPort() {
-	return connectPort;
-}
-
-public void setConnectPort(int connectPort) {
-	this.connectPort = connectPort;
-}
-
   private Configuration conf;
 
   private ConcurrentMap<ContainerId, Path> pidFiles =
