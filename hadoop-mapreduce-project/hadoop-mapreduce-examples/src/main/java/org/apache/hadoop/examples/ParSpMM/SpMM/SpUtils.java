@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import org.ncsu.sys.SpMM.HeapEntry;
-import org.ncsu.sys.SpMM.HeapEntryComp;
-import org.ncsu.sys.SpMM.StackEntry;
-import org.ncsu.sys.SpMMMR.SpMMTypes.Pair;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Pair;
+
+
 
 public class SpUtils {
 	

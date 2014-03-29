@@ -1,7 +1,7 @@
 package org.apache.hadoop.examples.ParSpMM.SpMMMR;
 
+import org.apache.hadoop.examples.ParSpMM.SpMM.SpDCSC;
 import org.apache.hadoop.ipc.GenericMatrix;
-import org.ncsu.sys.SpMM.SpDCSC;
 
 public class SpMMMatrix implements GenericMatrix<SpDCSC> {
 

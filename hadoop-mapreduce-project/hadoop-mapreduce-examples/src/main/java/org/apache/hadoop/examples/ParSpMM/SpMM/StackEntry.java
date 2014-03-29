@@ -1,6 +1,7 @@
 package org.apache.hadoop.examples.ParSpMM.SpMM;
 
-import org.ncsu.sys.SpMMMR.SpMMTypes.Pair;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Pair;
+
 
 public class StackEntry{
 	public int value;

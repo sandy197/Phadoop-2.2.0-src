@@ -3,14 +3,14 @@ package org.apache.hadoop.examples.ParSpMM.SpMMMR;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.IndexPair;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Key;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Value;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.ncsu.sys.SpMMMR.SpMMTypes.IndexPair;
-import org.ncsu.sys.SpMMMR.SpMMTypes.Key;
-import org.ncsu.sys.SpMMMR.SpMMTypes.Value;
 
 public class SpMMMapper extends Mapper<SpMMTypes.IndexPair, IntWritable, SpMMTypes.Key, SpMMTypes.Value> {
 

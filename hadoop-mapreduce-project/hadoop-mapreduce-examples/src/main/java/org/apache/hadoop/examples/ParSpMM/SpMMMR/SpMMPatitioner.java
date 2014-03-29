@@ -1,8 +1,9 @@
 package org.apache.hadoop.examples.ParSpMM.SpMMMR;
 
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Key;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Value;
 import org.apache.hadoop.mapreduce.Partitioner;
-import org.ncsu.sys.SpMMMR.SpMMTypes.Key;
-import org.ncsu.sys.SpMMMR.SpMMTypes.Value;
+
 
 public class SpMMPatitioner extends Partitioner<SpMMTypes.Key, SpMMTypes.Value> {
 

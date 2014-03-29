@@ -3,7 +3,8 @@ package org.apache.hadoop.examples.ParSpMM.SpMM;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ncsu.sys.SpMMMR.SpMMTypes.Value;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Value;
+
 
 public class SpMMTest {
 	

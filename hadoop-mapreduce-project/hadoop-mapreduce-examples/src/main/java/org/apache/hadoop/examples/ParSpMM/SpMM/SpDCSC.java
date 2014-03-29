@@ -8,9 +8,9 @@ import java.util.Map.Entry;
 import java.util.Comparator;
 
 import org.apache.commons.collections.ResettableIterator;
-import org.ncsu.sys.SpMMMR.SpMMTypes;
-import org.ncsu.sys.SpMMMR.SpMMTypes.Pair;
-import org.ncsu.sys.SpMMMR.SpMMTypes.Value;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Pair;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Value;
+
 
 public class SpDCSC extends SpMat {
 	List<Integer> cp;

@@ -5,17 +5,18 @@ import java.util.List;
 
 import org.apache.commons.collections.ResettableIterator;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.examples.ParSpMM.SpMM.SpDCSC;
+import org.apache.hadoop.examples.ParSpMM.SpMM.StackEntry;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.IndexPair;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Key;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Value;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.ipc.GenericMatrix;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.join.ResetableIterator;
-import org.ncsu.sys.SpMM.SpDCSC;
-import org.ncsu.sys.SpMM.StackEntry;
-import org.ncsu.sys.SpMMMR.SpMMTypes.IndexPair;
-import org.ncsu.sys.SpMMMR.SpMMTypes.Key;
-import org.ncsu.sys.SpMMMR.SpMMTypes.Value;
+
 
 public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 	
