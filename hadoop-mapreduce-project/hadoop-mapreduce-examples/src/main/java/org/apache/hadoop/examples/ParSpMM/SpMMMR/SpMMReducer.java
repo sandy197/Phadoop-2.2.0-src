@@ -167,6 +167,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 	private GenericMatrix<?> buildOrGet(Iterable<Value> values, int kB2,
 			int jB2, Context context) {
 		if(useTaskPool && context.getMatrix() != null){
+			System.out.println("**Getting matrix already read from fs. Skipping reading the file");
 			return context.getMatrix();
 		}
 		else{
