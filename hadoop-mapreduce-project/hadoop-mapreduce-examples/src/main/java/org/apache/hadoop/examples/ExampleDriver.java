@@ -18,6 +18,7 @@
 
 package org.apache.hadoop.examples;
 
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMDriver;
 import org.apache.hadoop.examples.dancing.DistributedPentomino;
 import org.apache.hadoop.examples.dancing.Sudoku;
 import org.apache.hadoop.examples.pi.DistBbp;
