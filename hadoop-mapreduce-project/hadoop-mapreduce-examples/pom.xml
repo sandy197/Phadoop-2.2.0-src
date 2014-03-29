@@ -96,6 +96,11 @@
      </dependency>
      <dependency>
        <groupId>org.apache.hadoop</groupId>
+       <artifactId>hadoop-mapreduce-client-core</artifactId>
+       <scope>compile</scope>
+     </dependency>
+     <dependency>
+       <groupId>org.apache.hadoop</groupId>
        <artifactId>hadoop-mapreduce-client-hs</artifactId>
        <scope>test</scope>
      </dependency>
@@ -109,12 +114,12 @@
       <artifactId>guava</artifactId>
       <scope>provided</scope>
      </dependency>
-	<dependency>
+<!--<dependency>
       <groupId>org.ncsu.sys</groupId>
       <artifactId>threadpin</artifactId>
       <version>1.0-SNAPSHOT</version>
       <scope>compile</scope>
-    </dependency>
+    </dependency>-->
   </dependencies>
   
   <build>

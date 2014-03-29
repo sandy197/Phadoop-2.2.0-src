@@ -18,6 +18,7 @@
 
 package org.apache.hadoop.examples;
 
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMDriver;
 import org.apache.hadoop.examples.dancing.DistributedPentomino;
 import org.apache.hadoop.examples.dancing.Sudoku;
 import org.apache.hadoop.examples.pi.DistBbp;
@@ -72,6 +73,7 @@ public class ExampleDriver {
       pgd.addClass("terasort", TeraSort.class, "Run the terasort");
       pgd.addClass("teravalidate", TeraValidate.class, "Checking results of terasort");
       pgd.addClass("matrixmultiply", MatrixMultiply.class, "Multiplies two matrices by employing blocking, to avoid multiple IOs");
+      pgd.addClass("spmm", SpMMDriver.class, "Multiplies two matrices by employing blocking, to avoid multiple IOs");
  
       exitCode = pgd.run(argv);
     }
