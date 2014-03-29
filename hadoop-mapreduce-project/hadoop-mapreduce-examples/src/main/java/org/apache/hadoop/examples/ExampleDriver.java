@@ -72,6 +72,7 @@ public class ExampleDriver {
       pgd.addClass("terasort", TeraSort.class, "Run the terasort");
       pgd.addClass("teravalidate", TeraValidate.class, "Checking results of terasort");
       pgd.addClass("matrixmultiply", MatrixMultiply.class, "Multiplies two matrices by employing blocking, to avoid multiple IOs");
+      pgd.addClass("spmm", SpMMDriver.class, "Multiplies two matrices by employing blocking, to avoid multiple IOs");
  
       exitCode = pgd.run(argv);
     }
