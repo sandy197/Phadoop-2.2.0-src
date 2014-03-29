@@ -68,7 +68,7 @@ public class SpMMDriver {
 	 * @param bCols
 	 * @param blocksize		Number of aRows/bCols each block contains
 	 */
-	public void SpMM(int aRows, int aColsbRows, int bCols, 
+	public void SpMM(int strategy, int aRows, int aColsbRows, int bCols, 
 						int aRowBlk, int aColbRowBlk, int bColBlk){
 		try {
 		if (conf == null) throw new Exception("conf is null");
@@ -91,6 +91,7 @@ public class SpMMDriver {
 	    conf.set("SpMM.inputPathB", inputPathB);
 	    conf.set("SpMM.outputDirPath", outPath);
 	    conf.set("SpMM.tempDirPath", tempDirPath);
+	    conf.setInt("SpMM.strategy", strategy);
 	    conf.setInt("SpMM.R1", 8);
 	    conf.setInt("SpMM.R2", 4);
 	    conf.setInt("SpMM.I", aRows);
@@ -372,7 +373,7 @@ public class SpMMDriver {
 		};
 		driver.writeMatrix(A, I, K, SPMM_INPUT_PATH_A);
 		driver.writeMatrix(B, K, J, SPMM_INPUT_PATH_B);
-		driver.SpMM(I, K, J, IB, KB, JB);
+		driver.SpMM(2, I, K, J, IB, KB, JB);
 	}
 	
 	/*
