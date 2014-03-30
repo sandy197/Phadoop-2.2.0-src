@@ -104,9 +104,22 @@ public class SpMMDriver {
 		fs.delete(new Path(tempDirPath), true);
 		fs.delete(new Path(outPath), true);
 		
-	    for(int k = 0; k < aColsbRows/aColbRowBlk; k++){
+		int k_max = 0;
+		switch(strategy){
+		case 1:
+			k_max = aColsbRows/aColbRowBlk;
+			break;
+		case 2:
+			k_max = aRows/aRowBlk;
+			break;
+		default:
+			break;
+		}
+		
+		
+	    for(int k = 0; k < k_max; k++){
 	    	conf.setInt("SpMM.iteration", k);
-	    	bCastJob(conf, k, k < 1);
+	    	bCastJob(conf, strategy, k, k < 1);
 		}
 	    //TODO:implement this
 	    aggregateJob(conf, aColsbRows/aColbRowBlk);
@@ -164,7 +177,7 @@ public class SpMMDriver {
 	 * @param k
 	 * @throws Exception 
 	 */
-	private void bCastJob(Configuration config, int k, boolean isFirstIter) throws Exception {
+	private void bCastJob(Configuration config, int strategy, int k, boolean isFirstIter) throws Exception {
 		//TODO:Form keys and read only those pertaining to the block. 
 		//Make use of the sorting order.
 		config.setInt("SpMM.iteration", k);
@@ -179,7 +192,17 @@ public class SpMMDriver {
 	    job.setOutputFormatClass(SequenceFileOutputFormat.class);
 	    job.setMapperClass(SpMMMapper.class);
 	    job.setReducerClass(SpMMReducer.class);
-	    job.setPartitionerClass(SpMMPatitioner.class);
+	    switch(strategy){
+	    case 1:
+	    	job.setPartitionerClass(SpMMPatitioner.class);
+	    	break;
+	    case 2:
+	    	job.setPartitionerClass(SpMMPartitioner2.class);
+	    	break;
+	    default:
+	    	job.setPartitionerClass(SpMMPatitioner.class);
+	    	break;	
+	    }
 	    job.setMapOutputKeyClass(Key.class);
 	    job.setMapOutputValueClass(Value.class);
 	    job.setOutputKeyClass(Key.class);
