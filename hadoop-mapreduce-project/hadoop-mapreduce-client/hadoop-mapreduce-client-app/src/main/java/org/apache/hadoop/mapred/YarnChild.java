@@ -539,6 +539,9 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
         }
       });
       this.matrixRead = job.getMatrix();
+      if(this.matrixRead == null){
+    	  LOG.info("** null value set for the matrix");
+      }
     } catch (FSError e) {
       LOG.fatal("FSError from child", e);
       umbilical.fsError(taskid, e.getMessage());
