@@ -89,43 +89,88 @@ public class SpMMMapper extends Mapper<SpMMTypes.IndexPair, IntWritable, SpMMTyp
 			if (j < 0 || j >= J) badIndex(j, J, "B column index");
 		}
 		value.v = el.get();
-		//matrix A
-		if(matrixA){
-			// only allow A[;iteration] blocks
-			int colRangeStart = iteration * KB;
-			int colRangeEnd = colRangeStart + (KB -1);
-			if(k >= colRangeStart && k <= colRangeEnd ){
-				key.index1 = i/IB;
-				key.index2 = k/KB;
-				key.m = 0; //for A
-				value.index1 = i % IB;
-				value.index2 = k % KB;
-				for (int jb = 0; jb < NJB; jb++) {
-					key.index3 = jb;
-					context.write(key, value);
+		switch (strategy) {
+		case 1:
+			if(matrixA){
+				// only allow A[;iteration] blocks
+				int colRangeStart = iteration * KB;
+				int colRangeEnd = colRangeStart + (KB -1);
+				if(k >= colRangeStart && k <= colRangeEnd ){
+					key.index1 = i/IB;
+					key.index2 = k/KB;
+					key.m = 0; //for A
+					value.index1 = i % IB;
+					value.index2 = k % KB;
+					for (int jb = 0; jb < NJB; jb++) {
+						key.index3 = jb;
+						context.write(key, value);
+						if (DEBUG) printMapOutput(key, value);
+					}
 					if (DEBUG) printMapOutput(key, value);
 				}
-				if (DEBUG) printMapOutput(key, value);
 			}
-		}
-		//matrix B
-		else{
-			// only allow B[iteration;] blocks
-			int rowRangeStart = iteration * KB;
-			int rowRangeEnd = rowRangeStart + (KB -1);
-			if(k >= rowRangeStart && k <= rowRangeEnd ){
+			//matrix B
+			else{
+				// only allow B[iteration;] blocks
+				int rowRangeStart = iteration * KB;
+				int rowRangeEnd = rowRangeStart + (KB -1);
+				if(k >= rowRangeStart && k <= rowRangeEnd ){
+					key.index2 = k/KB;
+					key.index3 = j/JB;
+					key.m = 1; // for B
+					value.index1 = k % KB;
+					value.index2 = j % JB;
+					for (int ib = 0; ib < NIB; ib++) {
+						key.index1 = ib;
+						context.write(key, value);
+						if (DEBUG) printMapOutput(key, value);
+					}
+				}
+			}
+			break;
+		case 2:
+			if(matrixA){
+				// only allow A[iteration;] blocks
+				int rowRangeStart = iteration * IB;
+				int rowRangeEnd = rowRangeStart + (IB -1);
+				if(i >= rowRangeStart && i <= rowRangeEnd ){
+					key.index1 = i/IB;
+					key.index2 = k/KB;
+					key.m = 0; //for A
+					value.index1 = i % IB;
+					value.index2 = k % KB;
+					for (int jb = 0; jb < NJB; jb++) {
+						key.index3 = jb;
+						context.write(key, value);
+						if (DEBUG) printMapOutput(key, value);
+					}
+					if (DEBUG) printMapOutput(key, value);
+				}
+			}
+			//matrix B
+			else{
+				// send each block to a particular process
+//				int rowRangeStart = iteration * KB;
+//				int rowRangeEnd = rowRangeStart + (KB -1);
+//				if(k >= rowRangeStart && k <= rowRangeEnd ){
 				key.index2 = k/KB;
 				key.index3 = j/JB;
 				key.m = 1; // for B
 				value.index1 = k % KB;
 				value.index2 = j % JB;
-				for (int ib = 0; ib < NIB; ib++) {
-					key.index1 = ib;
-					context.write(key, value);
-					if (DEBUG) printMapOutput(key, value);
-				}
+				//for (int ib = 0; ib < NIB; ib++) {
+				key.index1 = key.index2;
+				context.write(key, value);
+				if (DEBUG) printMapOutput(key, value);
+					
+//				}
 			}
+			break;
+		default:
+			break;
 		}
+			//matrix A
+			
 	}
 	
 	private void printMapInput (SpMMTypes.IndexPair indexPair, IntWritable el) {
@@ -151,6 +196,7 @@ public class SpMMMapper extends Mapper<SpMMTypes.IndexPair, IntWritable, SpMMTyp
 		inputPathB = conf.get("SpMM.inputPathB");
 		//outputDirPath = conf.get("SpMM.outputDirPath");
 		tempDirPath = conf.get("SpMM.tempDirPath");
+		strategy = conf.getInt("SpMM.strategy", 1);
 		
 		iteration = conf.getInt("SpMM.iteration", 0);
 		R1 = conf.getInt("SpMM.R1", 0);

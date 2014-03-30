@@ -172,6 +172,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 		}
 		else{
 			GenericMatrix<?> genMatrix = build(values, kB2, jB2, context);
+			System.out.println("**Setting matrix");
 			context.setMatrix(genMatrix);
 			return genMatrix;
 		}

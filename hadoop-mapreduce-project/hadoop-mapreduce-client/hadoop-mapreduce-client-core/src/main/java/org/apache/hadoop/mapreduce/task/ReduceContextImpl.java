@@ -129,7 +129,7 @@ public class ReduceContextImpl<KEYIN,VALUEIN,KEYOUT,VALUEOUT>
 
 //srkandul
 @Override
-public GenericMatrix getMatrix() {
+public GenericMatrix<?> getMatrix() {
 	GenericMatrix matrix = null;
 	if(conf.getMatrix() != null 
 			&& conf.getMatrix().isMatrixSet())
@@ -138,10 +138,8 @@ public GenericMatrix getMatrix() {
 }
 
 @Override
-public void setMatrix(int[][] matrix) {
-	GenericMatrix gm = new GenericMatrix();
-	gm.setMatrix(matrix);
-	conf.setMatrix(gm);
+public void setMatrix(GenericMatrix<?> matrix) {
+	conf.setMatrix(matrix);
 	
 }
 
