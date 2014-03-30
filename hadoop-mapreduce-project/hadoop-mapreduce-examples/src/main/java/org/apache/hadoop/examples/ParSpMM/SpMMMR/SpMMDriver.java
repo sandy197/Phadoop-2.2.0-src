@@ -122,7 +122,7 @@ public class SpMMDriver {
 	    	bCastJob(conf, strategy, k, k < 1);
 		}
 	    //TODO:implement this
-	    aggregateJob(conf, aColsbRows/aColbRowBlk);
+	    aggregateJob(conf, k_max);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -201,7 +201,7 @@ public class SpMMDriver {
 	    	break;
 	    default:
 	    	job.setPartitionerClass(SpMMPatitioner.class);
-	    	break;	
+	    	break;
 	    }
 	    job.setMapOutputKeyClass(Key.class);
 	    job.setMapOutputValueClass(Value.class);
