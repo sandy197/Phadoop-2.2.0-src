@@ -227,7 +227,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 		useTaskPool = conf.getBoolean("SpMM.useTaskPool", false);
 		isSparseMM = conf.getBoolean("SpMM.isSparseMM", false);
 		inputPathA = conf.get("SpMM.inputPathA");
-		inputPathB = conf.get("SpMM.inputPathB");
+		//input	 = conf.get("SpMM.inputPathB");
 		outputDirPath = conf.get("SpMM.outputDirPath");
 		tempDirPath = conf.get("SpMM.tempDirPath");
 		R1 = conf.getInt("SpMM.R1", 0);

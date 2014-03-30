@@ -35,7 +35,7 @@ public class SpMMDriver {
 	
 	private static final String SPMM_DATA_DIR = "tmp/spmm/";
 	private static final String SPMM_INPUT_PATH_A = SPMM_DATA_DIR + "/A";
-	private static final String SPMM_INPUT_PATH_B = SPMM_DATA_DIR + "/B";
+	//private static final String SPMM_INPUT_PATH_B = SPMM_DATA_DIR + "/B";
 	private static final String SPMM_TEMP_DIR_PATH = SPMM_DATA_DIR;
 	private static final String SPMM_TEMP_OUTPUT_PATH = SPMM_DATA_DIR + "/tmp/C";
 	private static final String SPMM_OUTPUT_PATH = SPMM_DATA_DIR + "/C";
@@ -77,7 +77,7 @@ public class SpMMDriver {
 			fs = FileSystem.get(conf);
 		
 		String inputPathA = fs.makeQualified(new Path(SPMM_INPUT_PATH_A)).toString();
-		String inputPathB = fs.makeQualified(new Path(SPMM_INPUT_PATH_B)).toString();
+		//String inputPathB = fs.makeQualified(new Path(SPMM_INPUT_PATH_B)).toString();
 		String outPath = fs.makeQualified(new Path(SPMM_OUTPUT_PATH)).toString();
 	    String tempDirPath = fs.makeQualified(new Path(SPMM_TEMP_DIR_PATH)).toString();
 	    tempDirPath = SPMM_TEMP_DIR_PATH + "/SpMM-" +
@@ -88,12 +88,12 @@ public class SpMMDriver {
 	    conf.setBoolean("SpMM.isSparseMM", true);
 	    
 	    conf.set("SpMM.inputPathA", inputPathA);
-	    conf.set("SpMM.inputPathB", inputPathB);
+	    //conf.set("SpMM.inputPathB", inputPathB);
 	    conf.set("SpMM.outputDirPath", outPath);
 	    conf.set("SpMM.tempDirPath", tempDirPath);
 	    conf.setInt("SpMM.strategy", strategy);
-	    conf.setInt("SpMM.R1", 8);
-	    conf.setInt("SpMM.R2", 4);
+	    conf.setInt("SpMM.R1", 1);
+	    conf.setInt("SpMM.R2", 1);
 	    conf.setInt("SpMM.I", aRows);
 	    conf.setInt("SpMM.K", aColsbRows);
 	    conf.setInt("SpMM.J", bCols);
@@ -208,8 +208,8 @@ public class SpMMDriver {
 	    job.setOutputKeyClass(Key.class);
 	    job.setOutputValueClass(Value.class);
 	    FileInputFormat.addInputPath(job, new Path(conf.get("SpMM.inputPathA")));
-	    if(isFirstIter)
-	    	FileInputFormat.addInputPath(job, new Path(conf.get("SpMM.inputPathB")));
+//	    if(isFirstIter)
+//	    	FileInputFormat.addInputPath(job, new Path(conf.get("SpMM.inputPathB")));
 	    FileOutputFormat.setOutputPath(job, (new Path(conf.get("SpMM.tempDirPath") + k)));
 	    
 	    boolean ok = job.waitForCompletion(true);
@@ -229,7 +229,9 @@ public class SpMMDriver {
 	
 	
 	@SuppressWarnings("deprecation")
-	public void writeMatrix (int[][] matrix, int rowDim, int colDim, String pathStr)
+	//public void writeMatrix (int[][] matrix, int rowDim, int colDim, String pathStr)
+	public void writeMatrix (int[][] matrix, int rowDim, int colDim, 
+								int[][] matrixB, int rowDimB, int colDimB, String pathStr)
 		    throws IOException
 	  {
 	    Path path = new Path(pathStr);
@@ -244,11 +246,25 @@ public class SpMMDriver {
 	        if (v != 0) {
 	          indexPair.index1 = i;
 	          indexPair.index2 = j;
+	          indexPair.aFlag = 1;
 	          el.set(v);
 	          writer.append(indexPair, el);
 	        }
 	      }
 	    }
+	    
+	    for (int i = 0; i < rowDimB; i++) {
+		      for (int j = 0; j < colDimB; j++) {
+		        int v = matrixB[i][j];
+		        if (v != 0) {
+		          indexPair.index1 = i;
+		          indexPair.index2 = j;
+		          indexPair.aFlag = 0;
+		          el.set(v);
+		          writer.append(indexPair, el);
+		        }
+		      }
+		    }
 	    writer.close();
 	  }
 	
@@ -394,8 +410,8 @@ public class SpMMDriver {
 				{0,1,0,0,0,5,0,7,0,9,10,0,0,0,14, 15,0,0,18,0,0,0,22,0,0,0,26,0,0,29, 45,0,0,0,0,0,0,0,0,0,0,0,57,0,59, 0,0,32,0,34,0,0,0,0,0,0,41,0,43,0}
 				
 		};
-		driver.writeMatrix(A, I, K, SPMM_INPUT_PATH_A);
-		driver.writeMatrix(B, K, J, SPMM_INPUT_PATH_B);
+		driver.writeMatrix(A, I, K, B, K, J, SPMM_INPUT_PATH_A);
+		//driver.writeMatrix(B, K, J, SPMM_INPUT_PATH_B);
 		driver.SpMM(2, I, K, J, IB, KB, JB);
 	}
 	

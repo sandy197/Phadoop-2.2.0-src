@@ -57,7 +57,8 @@ public class SpMMMapper extends Mapper<SpMMTypes.IndexPair, IntWritable, SpMMTyp
 		init(context);
 		FileSplit split = (FileSplit)context.getInputSplit();
 		path = split.getPath();
-		matrixA = path.toString().startsWith(inputPathA);
+		//matrixA = path.toString().startsWith(inputPathA);
+		
 		if (DEBUG) {
 			System.out.println("##### Map setup: matrixA = " + matrixA + " for " + path);
 			System.out.println("   R1 = " + R1);
@@ -77,7 +78,9 @@ public class SpMMMapper extends Mapper<SpMMTypes.IndexPair, IntWritable, SpMMTyp
 		int i = 0;
 		int k = 0;
 		int j = 0;
-		if (matrixA) {
+		boolean isA = indexPair.aFlag == 1;
+		//if (matrixA) {
+		if (isA) {
 			i = indexPair.index1;
 			if (i < 0 || i >= I) badIndex(i, I, "A row index");
 			k = indexPair.index2;
@@ -91,7 +94,8 @@ public class SpMMMapper extends Mapper<SpMMTypes.IndexPair, IntWritable, SpMMTyp
 		value.v = el.get();
 		switch (strategy) {
 		case 1:
-			if(matrixA){
+		//	if(matrixA){
+		if(isA){
 				// only allow A[;iteration] blocks
 				int colRangeStart = iteration * KB;
 				int colRangeEnd = colRangeStart + (KB -1);
@@ -193,7 +197,7 @@ public class SpMMMapper extends Mapper<SpMMTypes.IndexPair, IntWritable, SpMMTyp
 		Configuration conf = context.getConfiguration();
 		useTaskPool = conf.getBoolean("SpMM.useTaskPool", false);
 		inputPathA = conf.get("SpMM.inputPathA");
-		inputPathB = conf.get("SpMM.inputPathB");
+		//inputPathB = conf.get("SpMM.inputPathB");
 		//outputDirPath = conf.get("SpMM.outputDirPath");
 		tempDirPath = conf.get("SpMM.tempDirPath");
 		strategy = conf.getInt("SpMM.strategy", 1);
