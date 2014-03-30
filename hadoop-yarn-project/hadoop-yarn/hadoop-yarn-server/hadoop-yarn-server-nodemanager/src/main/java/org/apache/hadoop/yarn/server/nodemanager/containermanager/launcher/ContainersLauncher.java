@@ -134,6 +134,8 @@ public class ContainersLauncher extends AbstractService
         running.put(containerId, launch);
         System.out.println("**ExecutorService: submitted container :" + containerId + " for launch. Executor info : " );
         printContainerExecInfo((ThreadPoolExecutor)containerLauncher);
+        if(((ThreadPoolExecutor)containerLauncher).getCorePoolSize() == 0)
+        	((ThreadPoolExecutor)containerLauncher).setCorePoolSize(10);
         break;
       case CLEANUP_CONTAINER:
         ContainerLaunch launcher = running.remove(containerId);
