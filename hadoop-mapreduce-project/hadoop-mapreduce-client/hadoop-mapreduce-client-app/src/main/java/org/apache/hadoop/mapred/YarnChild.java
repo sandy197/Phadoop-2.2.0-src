@@ -86,7 +86,7 @@ public class YarnChild {
   
   private static final boolean DEBUG = true;
   //srkandul : for the sake of git
-  public GenericMatrix matrixRead;
+  public GenericMatrix<?> matrixRead = null;
   //TODO:populate in job conf !
   private boolean stopChild = false;
 
@@ -514,6 +514,7 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
       // Create the job-conf and set credentials
       final JobConf job = configureTask(task, credentials, jt);
       if(this.matrixRead != null){
+    	  System.out.println("**matrixRead is not null, hence set in the job conf");
     	  job.setMatrix(this.matrixRead);
       }
       // Initiate Java VM metrics
