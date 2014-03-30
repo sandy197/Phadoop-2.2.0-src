@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -106,6 +107,13 @@ public class ContainersLauncher extends AbstractService
     containerLauncher.shutdownNow();
     super.serviceStop();
   }
+  
+  private void printContainerExecInfo(ThreadPoolExecutor tpexec){
+	  System.out.println("Core pool size:" + tpexec.getCorePoolSize());
+	  System.out.println("Max thread pool size: " + tpexec.getMaximumPoolSize());
+	  System.out.println("Largest pool size" + tpexec.getLargestPoolSize());
+	  System.out.println("Active thread count:" + tpexec.getActiveCount());
+  }
 
   @SuppressWarnings("unchecked")
   @Override
@@ -124,6 +132,8 @@ public class ContainersLauncher extends AbstractService
               event.getContainer(), dirsHandler, containerManager);
         containerLauncher.submit(launch);
         running.put(containerId, launch);
+        System.out.println("**ExecutorService: submitted container :" + containerId + " for launch. Executor info : " );
+        printContainerExecInfo((ThreadPoolExecutor)containerLauncher);
         break;
       case CLEANUP_CONTAINER:
         ContainerLaunch launcher = running.remove(containerId);
