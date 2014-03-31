@@ -133,7 +133,8 @@ public class SpMMMapper extends Mapper<SpMMTypes.IndexPair, IntWritable, SpMMTyp
 			}
 			break;
 		case 2:
-			if(matrixA){
+//			if(matrixA){
+			if(isA){
 				// only allow A[iteration;] blocks
 				int rowRangeStart = iteration * IB;
 				int rowRangeEnd = rowRangeStart + (IB -1);
