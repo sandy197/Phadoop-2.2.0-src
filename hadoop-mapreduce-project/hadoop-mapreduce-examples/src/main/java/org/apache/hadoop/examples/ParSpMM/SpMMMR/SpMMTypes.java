@@ -20,7 +20,6 @@ public class SpMMTypes {
 	public static class IndexPair implements WritableComparable {
 		public int index1;
 		public int index2;
-		public int aFlag = 0;
 		
 		public IndexPair(){
 			
@@ -36,14 +35,12 @@ public class SpMMTypes {
 		{
 			out.writeInt(index1);
 			out.writeInt(index2);
-			out.writeInt(aFlag);
 		}
 		public void readFields (DataInput in)
 			throws IOException
 		{
 			index1 = in.readInt();
 			index2 = in.readInt();
-			aFlag = in.readInt();
 		}
 		public int compareTo (Object other) {
 			IndexPair o = (IndexPair)other;
@@ -57,13 +54,9 @@ public class SpMMTypes {
 			} else if (this.index2 > o.index2) {
 				return +1;
 			}
-			if (this.aFlag < o.aFlag) {
-				return -1;
-			} else if (this.aFlag > o.aFlag) {
-				return +1;
-			}
 			return 0;
 		}
+		
 		public int hashCode () {
 			return index1 << 16 + index2;
 		}
