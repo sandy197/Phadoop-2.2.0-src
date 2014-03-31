@@ -30,8 +30,8 @@ import org.apache.hadoop.util.GenericOptionsParser;
 public class SpMMDriver {
 	
 	// a logical 2 x 4 core grid
-	public static final int SPMM_PROC_GRID_DIMM_X = 4;
-	public static final int SPMM_PROC_GRID_DIMM_Y = 2;
+	public static final int SPMM_PROC_GRID_DIMM_X = 1;
+	public static final int SPMM_PROC_GRID_DIMM_Y = 1;
 	
 	private static final String SPMM_DATA_DIR = "tmp/spmm/";
 	private static final String SPMM_INPUT_PATH_A = SPMM_DATA_DIR + "/A";
@@ -281,8 +281,8 @@ public class SpMMDriver {
 		int J = 60;
 		
 		int IB = 30;
-		int KB = 15;
-		int JB = 30;
+		int KB = 60;
+		int JB = 60;
 		
 		int[][] A = { {0,1,2,0,4,5,6,7,8,9,10,11,12,13,14, 15,0,17,18,19,20,0,22,23,24,0,26,27,0,29, 0,31,32,0,34,35,0,37,38,0,40,41,0,43,0, 45,0,47,0,0,0,51,0,53,0,55,0,57,0,59},
 				{0,1,2,0,4,5,6,7,8,9,10,11,12,13,14, 15,0,17,18,19,20,0,22,23,24,0,26,27,0,29, 0,31,32,0,34,35,0,37,38,0,40,41,0,43,0, 45,0,47,0,0,0,51,0,53,0,55,0,57,0,59},
