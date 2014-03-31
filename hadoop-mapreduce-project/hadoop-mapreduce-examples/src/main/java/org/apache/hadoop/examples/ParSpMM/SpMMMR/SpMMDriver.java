@@ -92,7 +92,7 @@ public class SpMMDriver {
 	    conf.set("SpMM.outputDirPath", outPath);
 	    conf.set("SpMM.tempDirPath", tempDirPath);
 	    conf.setInt("SpMM.strategy", strategy);
-	    conf.setInt("SpMM.R1", 8);
+	    conf.setInt("SpMM.R1", 6);
 	    conf.setInt("SpMM.R2", 4);
 	    conf.setInt("SpMM.I", aRows);
 	    conf.setInt("SpMM.K", aColsbRows);
@@ -119,10 +119,16 @@ public class SpMMDriver {
 		
 	    for(int k = 0; k < k_max; k++){
 	    	conf.setInt("SpMM.iteration", k);
+	    	long start = System.nanoTime();
 	    	bCastJob(conf, strategy, k, k < 1);
+	    	long end = System.nanoTime();
+	    	System.out.println("Time taken for bcast execution:"+(end - start));
 		}
 	    //TODO:implement this
+	    long start = System.nanoTime();
 	    aggregateJob(conf, k_max);
+	    long end = System.nanoTime();
+	    System.out.println("Time taken for aggregate execution:"+(end - start));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -396,7 +402,10 @@ public class SpMMDriver {
 		};
 		driver.writeMatrix(A, I, K, SPMM_INPUT_PATH_A);
 		driver.writeMatrix(B, K, J, SPMM_INPUT_PATH_B);
+		long start = System.nanoTime();
 		driver.SpMM(2, I, K, J, IB, KB, JB);
+		long end = System.nanoTime();
+		System.out.println("Time taken for total execution:" + (end - start));
 	}
 	
 	/*
