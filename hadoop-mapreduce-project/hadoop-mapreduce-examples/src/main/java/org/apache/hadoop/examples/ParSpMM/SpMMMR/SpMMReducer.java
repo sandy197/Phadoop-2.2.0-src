@@ -55,6 +55,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 	private static int lastJBlockSize;
 	
 	private int sib, skb, sjb;
+	private boolean isABuilt, isBBuilt;
 
 	public void reduce(SpMMTypes.Key key, Iterable<SpMMTypes.Value> values, Context context)	
 			throws IOException, InterruptedException {
@@ -80,14 +81,25 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
             sib = ib;
             skb = kb;
             A = build(values, IB, KB, context);
+            isABuilt = true;
+            
           } else {
             //if (ib != sib || kb != skb) return;
             //bColDim = getDim(jb, lastJBlockNum, JB, lastJBlockSize);
-            B = buildOrGet(values, KB, JB, context);
-            //multiply & emit
-            //support building normal matrix as well.
-            multiplyAndEmit(context, ib, jb);
+            B = build(values, KB, JB, context);
+            isBBuilt = true;
           }
+          //multiply & emit
+          //support building normal matrix as well.
+          //check if the matrix is already read if B is null
+          if(B == null && useTaskPool && context.getMatrix() != null){
+      			System.out.println("**Getting matrix already read from fs. Skipping reading the file");
+      			B = context.getMatrix();
+      			isBBuilt = true;
+      		}
+          //multiply only of both A and B are populated
+          if(isABuilt && isBBuilt)
+          multiplyAndEmit(context, ib, jb);
 	}
 
 	private void multiplyAndEmit(Context context, int ib2,
@@ -220,6 +232,9 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 		sib = -1;
 		skb = -1;
 		sjb = -1;
+		
+		isABuilt = false;
+		isBBuilt = false;
 	}
 	
 	private void init(JobContext context) {
