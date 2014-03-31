@@ -57,6 +57,11 @@ public class SpMMTypes {
 			} else if (this.index2 > o.index2) {
 				return +1;
 			}
+			if (this.aFlag < o.aFlag) {
+				return -1;
+			} else if (this.aFlag > o.aFlag) {
+				return +1;
+			}
 			return 0;
 		}
 		public int hashCode () {
