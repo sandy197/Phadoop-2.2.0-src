@@ -270,7 +270,7 @@ public class SpMMDriver {
 		int K = 60;
 		int J = 60;
 		
-		int IB = 30;
+		int IB = 20;
 		int KB = 20;
 		int JB = 30;
 		
