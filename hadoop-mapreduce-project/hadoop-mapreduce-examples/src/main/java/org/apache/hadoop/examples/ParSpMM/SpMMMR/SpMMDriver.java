@@ -85,7 +85,7 @@ public class SpMMDriver {
 
 	    //TODO:take these as command line param
 	    conf.setBoolean("SpMM.useTaskPool", true);
-	    conf.setBoolean("SpMM.isSparseMM", true);
+	    conf.setBoolean("SpMM.isSparseMM", false);
 	    
 	    conf.set("SpMM.inputPathA", inputPathA);
 	    conf.set("SpMM.inputPathB", inputPathB);
