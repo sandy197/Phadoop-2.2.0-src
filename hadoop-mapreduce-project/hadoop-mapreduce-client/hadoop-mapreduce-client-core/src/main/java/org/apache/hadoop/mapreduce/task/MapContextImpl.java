@@ -60,7 +60,7 @@ public class MapContextImpl<KEYIN,VALUEIN,KEYOUT,VALUEOUT>
     this.split = split;
   }
   @Override
-public GenericMatrix getMatrix() {
+public GenericMatrix<?> getMatrix() {
 	GenericMatrix matrix = null;
 	if(conf.getMatrix() != null 
 			&& conf.getMatrix().isMatrixSet())
@@ -69,7 +69,7 @@ public GenericMatrix getMatrix() {
 }
 
 @Override
-public void setMatrix(int[][] matrix) {
+public void setMatrix(GenericMatrix<?> matrix) {
 	// TODO Auto-generated method stub
 	
 }
