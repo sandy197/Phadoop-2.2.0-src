@@ -59,13 +59,13 @@ class ChainReduceContextImpl<KEYIN, VALUEIN, KEYOUT, VALUEOUT> implements
   }
 
 	@Override
-public GenericMatrix getMatrix() {
+public GenericMatrix<?> getMatrix() {
 	// TODO Auto-generated method stub
 	return null;
 }
 
 @Override
-public void setMatrix(int[][] gm) {
+public void setMatrix(GenericMatrix<?> gm) {
 	// TODO Auto-generated method stub
 	
 }
