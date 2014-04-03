@@ -147,7 +147,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 					for (int k = 0; k < KB; k++) {
 						//srkandul
 						if(a[i][k] != 0 && b[k][j] != 0){
-							sum += b[i][k] * b[k][j];
+							sum += a[i][k] * b[k][j];
 						}
 					}
 					}
@@ -155,6 +155,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 					multiplyTime += end_m - start_m;
 					long start = System.nanoTime();
 					if (sum != 0) {
+						indexPair = new Key();
 						indexPair.index1 = ibase + i;
 						indexPair.index2 = -1;
 						indexPair.index3 = jbase + j;
