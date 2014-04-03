@@ -9,6 +9,7 @@ public class RegMatrix implements GenericMatrix<int[][]> {
 	
 	public RegMatrix(int[][] matrix){
 		this.matrix = matrix;
+		this.isMatrixSet = true;
 	}
 	
 	
@@ -21,7 +22,8 @@ public class RegMatrix implements GenericMatrix<int[][]> {
 
 	@Override
 	public void setMatrix(int[][] matrix) {
-		this.matrix = matrix;		
+		this.matrix = matrix;
+		this.isMatrixSet = true;
 	}
 
 	@Override
