@@ -71,13 +71,13 @@ public class WrappedMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
       this.mapContext = mapContext;
     }
 @Override
-public GenericMatrix getMatrix() {
+public GenericMatrix<?> getMatrix() {
 Configuration conf = mapContext.getConfiguration();
     	return conf.getMatrix();
 }
 
 @Override
-public void setMatrix(int[][] gm) {
+public void setMatrix(GenericMatrix<?> gm) {
 	// TODO Auto-generated method stub
 	
 }
