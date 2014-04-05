@@ -266,13 +266,13 @@ public class SpMMDriver {
 		fs.mkdirs(new Path(SPMM_DATA_DIR));
 		SpMMDriver driver = new SpMMDriver(true, true);
 		//assumed core grid (2 x 3)\
-		int I = 60;
-		int K = 60;
-		int J = 60;
+		int I = Integer.parseInt(args[0]);
+		int K = Integer.parseInt(args[1]);
+		int J = Integer.parseInt(args[2]);
 		
-		int IB = 15;
-		int KB = 20;
-		int JB = 30;
+		int IB = Integer.parseInt(args[3]);
+		int KB = Integer.parseInt(args[4]);
+		int JB = Integer.parseInt(args[5]);
 		
 		int[][] A = { {0,1,2,0,4,5,6,7,8,9,10,11,12,13,14, 15,0,17,18,19,20,0,22,23,24,0,26,27,0,29, 0,31,32,0,34,35,0,37,38,0,40,41,0,43,0, 45,0,47,0,0,0,51,0,53,0,55,0,57,0,59},
 				{0,1,2,0,4,5,6,7,8,9,10,11,12,13,14, 15,0,17,18,19,20,0,22,23,24,0,26,27,0,29, 0,31,32,0,34,35,0,37,38,0,40,41,0,43,0, 45,0,47,0,0,0,51,0,53,0,55,0,57,0,59},
