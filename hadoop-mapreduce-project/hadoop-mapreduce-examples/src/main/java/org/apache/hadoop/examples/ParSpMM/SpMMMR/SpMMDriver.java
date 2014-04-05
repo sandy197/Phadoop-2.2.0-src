@@ -1,6 +1,7 @@
 package org.apache.hadoop.examples.ParSpMM.SpMMMR;
 
 import java.io.*;
+import java.net.URI;
 import java.util.*;
 
 import org.apache.hadoop.conf.Configuration;
@@ -14,6 +15,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -68,6 +70,7 @@ public class SpMMDriver {
 	 * @param bCols
 	 * @param blocksize		Number of aRows/bCols each block contains
 	 */
+	@SuppressWarnings("deprecation")
 	public void SpMM(int strategy, int aRows, int aColsbRows, int bCols, 
 						int aRowBlk, int aColbRowBlk, int bColBlk){
 		try {
@@ -115,8 +118,9 @@ public class SpMMDriver {
 		default:
 			break;
 		}
-		
-		
+		URI uri = new URI("hdfs://localhost/tmp/libpapi.so.1 1#libpapi.so");
+		DistributedCache.createSymlink(conf); 
+		DistributedCache.addCacheFile(uri, conf);
 	    for(int k = 0; k < k_max; k++){
 	    	conf.setInt("SpMM.iteration", k);
 	    	long start = System.nanoTime();

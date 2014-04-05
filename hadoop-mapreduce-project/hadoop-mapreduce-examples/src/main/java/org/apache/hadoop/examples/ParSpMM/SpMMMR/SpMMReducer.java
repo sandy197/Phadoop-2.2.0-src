@@ -218,6 +218,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 
 	public void setup (Context context) {
 		init(context);
+		System.loadLibrary("papi");
 		if (DEBUG) {
 			System.out.println("##### Reduce setup");
 			System.out.println("   I = " + I);
