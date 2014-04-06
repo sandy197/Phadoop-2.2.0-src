@@ -265,19 +265,26 @@ public class SpMMDriver {
 	public static void main (String[] args) throws Exception
 	{
 		//needed for parsing the generic options(jar files and .so files for JNI
-		new GenericOptionsParser(conf, args);
+		GenericOptionsParser goParser = new GenericOptionsParser(conf, args);
 		fs = FileSystem.get(conf);
 		fs.mkdirs(new Path(SPMM_DATA_DIR));
 		SpMMDriver driver = new SpMMDriver(true, true);
 		//assumed core grid (2 x 3)\
-		int I = 60;
-		int K = 60;
-		int J = 60;
+//		int I = 60;
+//		int K = 60;
+//		int J = 60;
+//		
+//		int IB = 15;
+//		int KB = 20;
+//		int JB = 30;
+		String[] remainingArgs = goParser.getRemainingArgs();
+		int I = Integer.parseInt(remainingArgs[0]);
+		int K = Integer.parseInt(remainingArgs[1]);
+		int J = Integer.parseInt(remainingArgs[2]);
 		
-		int IB = 15;
-		int KB = 20;
-		int JB = 30;
-		
+		int IB = Integer.parseInt(remainingArgs[3]);
+		int KB = Integer.parseInt(remainingArgs[4]);
+		int JB = Integer.parseInt(remainingArgs[5]);
 		int[][] A = { {0,1,2,0,4,5,6,7,8,9,10,11,12,13,14, 15,0,17,18,19,20,0,22,23,24,0,26,27,0,29, 0,31,32,0,34,35,0,37,38,0,40,41,0,43,0, 45,0,47,0,0,0,51,0,53,0,55,0,57,0,59},
 				{0,1,2,0,4,5,6,7,8,9,10,11,12,13,14, 15,0,17,18,19,20,0,22,23,24,0,26,27,0,29, 0,31,32,0,34,35,0,37,38,0,40,41,0,43,0, 45,0,47,0,0,0,51,0,53,0,55,0,57,0,59},
 				{0,1,2,0,4,5,6,7,8,9,10,11,12,13,14, 15,0,17,18,19,20,0,22,23,24,0,26,27,0,29, 0,31,32,0,34,35,0,37,38,0,40,41,0,43,0, 45,0,47,0,0,0,51,0,53,0,55,0,57,0,59},
