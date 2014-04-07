@@ -332,6 +332,7 @@ public YarnChild(){
 					  String taskAttemptId = request.getTaskAttemptId();
 					  int jvmIdInt = request.getJvmIdInt();
 					  ThreadPinning tp = new ThreadPinning();
+					  tp.set_affinity(13);
 					  yc.setEnv(request.getEnvironment());					  
 					  yc.yarnChildMain(hostAM, portAM, taskAttemptId, jvmIdInt, true);
 					  //TODO:see if containerLaunch needs an ACK response

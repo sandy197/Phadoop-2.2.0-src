@@ -16,6 +16,7 @@ import org.apache.hadoop.ipc.GenericMatrix;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.join.ResetableIterator;
+import org.ncsu.sys.ThreadPinning;
 
 
 public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
@@ -98,8 +99,19 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
       			isBBuilt = true;
       		}
           //multiply only of both A and B are populated
-          if(isABuilt && isBBuilt)
-          multiplyAndEmit(context, ib, jb);
+          if(isABuilt && isBBuilt){
+        	  ThreadPinning tp = new ThreadPinning();
+        	  tp.start_counters();
+        	  multiplyAndEmit(context, ib, jb);
+        	  long[] counterValues = tp.stop_counters();
+        	  StringBuilder sb = new StringBuilder();
+        	  sb.append("$$\t");
+        	  for(int i = 0; i < counterValues.length; i++){
+                  //System.out.println("Counter Values");
+                  sb.append(counterValues[i]+ "\t");
+        	  }
+        	  System.out.println(sb.toString());
+          }
 	}
 
 	private void multiplyAndEmit(Context context, int ib2,
