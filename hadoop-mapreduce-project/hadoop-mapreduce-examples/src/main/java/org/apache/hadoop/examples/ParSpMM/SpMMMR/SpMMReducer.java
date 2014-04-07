@@ -87,7 +87,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
           } else {
             //if (ib != sib || kb != skb) return;
             //bColDim = getDim(jb, lastJBlockNum, JB, lastJBlockSize);
-            B = build(values, KB, JB, context);
+            B = buildAndSet(values, KB, JB, context);
             isBBuilt = true;
           }
           //multiply & emit
@@ -189,18 +189,12 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 		}
 	}
 	
-	private GenericMatrix<?> buildOrGet(Iterable<Value> values, int kB2,
+	private GenericMatrix<?> buildAndSet(Iterable<Value> values, int kB2,
 			int jB2, Context context) {
-		if(useTaskPool && context.getMatrix() != null){
-			System.out.println("**Getting matrix already read from fs. Skipping reading the file");
-			return context.getMatrix();
-		}
-		else{
-			GenericMatrix<?> genMatrix = build(values, kB2, jB2, context);
-			System.out.println("**Setting matrix");
-			context.setMatrix(genMatrix);
-			return genMatrix;
-		}
+		GenericMatrix<?> genMatrix = build(values, kB2, jB2, context);
+		System.out.println("**Setting matrix");
+		context.setMatrix(genMatrix);
+		return genMatrix;
 	}
 
 	private GenericMatrix<?> build(Iterable<Value> values, int m, int n, Context context) {
