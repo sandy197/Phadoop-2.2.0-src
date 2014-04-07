@@ -57,6 +57,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 	
 	private int sib, skb, sjb;
 	private boolean isABuilt, isBBuilt;
+	private int multiplyCount = 0;
 
 	public void reduce(SpMMTypes.Key key, Iterable<SpMMTypes.Value> values, Context context)	
 			throws IOException, InterruptedException {
@@ -100,12 +101,14 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
       		}
           //multiply only of both A and B are populated
           if(isABuilt && isBBuilt){
+        	  multiplyCount++;
         	  ThreadPinning tp = new ThreadPinning();
         	  tp.start_counters();
         	  multiplyAndEmit(context, ib, jb);
         	  long[] counterValues = tp.stop_counters();
         	  StringBuilder sb = new StringBuilder();
         	  sb.append("$$\t");
+        	  sb.append(multiplyCount +"\t");
         	  for(int i = 0; i < counterValues.length; i++){
                   //System.out.println("Counter Values");
                   sb.append(counterValues[i]+ "\t");
