@@ -25,7 +25,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 	private Key indexPair;
 	private Value el = new Value();
 	
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 
 	private boolean useTaskPool;
 	private boolean isSparseMM;

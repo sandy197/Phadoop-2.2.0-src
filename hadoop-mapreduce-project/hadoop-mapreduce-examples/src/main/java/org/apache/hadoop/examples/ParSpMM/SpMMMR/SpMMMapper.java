@@ -14,7 +14,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 public class SpMMMapper extends Mapper<SpMMTypes.IndexPair, IntWritable, SpMMTypes.Key, SpMMTypes.Value> {
 
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 	
 	private boolean useTaskPool;
 	private Path path;
@@ -145,7 +145,7 @@ public class SpMMMapper extends Mapper<SpMMTypes.IndexPair, IntWritable, SpMMTyp
 						context.write(key, value);
 						if (DEBUG) printMapOutput(key, value);
 					}
-					if (DEBUG) printMapOutput(key, value);
+					//if (DEBUG) printMapOutput(key, value);
 				}
 			}
 			//matrix B
