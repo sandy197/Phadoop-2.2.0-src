@@ -293,8 +293,11 @@ public YarnChild(){
 	  TaskAttemptID taskAttempt = TaskAttemptID.forName(args[2]);
 	  if(taskAttempt.getTaskType() == TaskType.MAP)
 		  listeningPort = U2Proto.MAP_BASE_PORT + taskAttempt.getTaskID().getId();
-	  else
+	  else{
 		  listeningPort = U2Proto.BASE_PORT + taskAttempt.getTaskID().getId();
+		  ThreadPinning tp = new ThreadPinning();
+		  tp.set_affinity((8+taskAttempt.getTaskID().getId())%16);
+	  }
 	  LOG.info("Yarn process launched, listening on port:" + listeningPort);
 	  //Create listening socket using the listening port
 	  try{
@@ -331,8 +334,8 @@ public YarnChild(){
 					  int portAM = request.getPortNum();
 					  String taskAttemptId = request.getTaskAttemptId();
 					  int jvmIdInt = request.getJvmIdInt();
-					  ThreadPinning tp = new ThreadPinning();
-					  tp.set_affinity(13);
+//					  ThreadPinning tp = new ThreadPinning();
+//					  tp.set_affinity(taskAttempt.getTaskID().getId());
 					  yc.setEnv(request.getEnvironment());					  
 					  yc.yarnChildMain(hostAM, portAM, taskAttemptId, jvmIdInt, true);
 					  //TODO:see if containerLaunch needs an ACK response
