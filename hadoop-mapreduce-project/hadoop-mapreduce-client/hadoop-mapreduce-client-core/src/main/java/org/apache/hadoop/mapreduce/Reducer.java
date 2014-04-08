@@ -171,13 +171,14 @@ public class Reducer<KEYIN,VALUEIN,KEYOUT,VALUEOUT> {
 		long start = System.nanoTime();	
 		boolean isFirst = true;
     ThreadPinning tp = new ThreadPinning();
+    tp.set_thread_affinity((context.getTaskAttemptID().getTaskID().getId() + 8)%16);
     setup(context);
     try {
-//srkandul
+    //srkandul
 	System.out.println("Reduce thread spawn with id:"+ tp.get_thread_id());
 	System.out.println("******The Stack trace*******"+"\n"+Arrays.toString(Thread.currentThread().getStackTrace()));
 	//tp.set_affinity(15);
-//
+	
       while (context.nextKey()) {
 	if(isFirst){/*
 		tp.set_affinity(context.getCurrentKey().index1 +
