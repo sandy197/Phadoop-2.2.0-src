@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.collections.ResettableIterator;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.examples.ParSpMM.SpMM.SpDCSC;
+import org.apache.hadoop.examples.ParSpMM.SpMM.SpUtils;
 import org.apache.hadoop.examples.ParSpMM.SpMM.StackEntry;
 import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.IndexPair;
 import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Key;
@@ -104,11 +105,26 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
         	  multiplyCount++;
         	  ThreadPinning tp = new ThreadPinning();
         	  tp.start_counters();
+        	  long start = System.nanoTime();
         	  multiplyAndEmit(context, ib, jb);
+        	  long end = System.nanoTime();
         	  long[] counterValues = tp.stop_counters();
+      		// density(B),nnzc(B),x*y*Intersect(nnzc(A), nnzr(B)),execTime
         	  StringBuilder sb = new StringBuilder();
         	  sb.append("$$\t");
-        	  sb.append(multiplyCount +"\t");
+        	  if(A instanceof SpMMMatrix && B instanceof SpMMMatrix){
+        		  int intersectCount = SpUtils.setIntersectionCount(((SpMMMatrix)A).getnzcIndices(), ((SpMMMatrix)B).getnzrIndices());
+            		//avg nz elements per nzc of A
+        		  float x = (float)((SpMMMatrix)A).getAvgNZperNZC();
+            		//avg nz elements per nzr of B
+        		  float y = (float)((SpMMMatrix)B).getAvgNZperNZR();
+            		// density(A), density(B), nnzc(B), x*y*Intersect(nnzc(A), nnzr(B)),execTime        	  
+              	  
+              	  sb.append(((float)((SpMMMatrix)A).getMatrixDensity())+"\t"+
+      						((float)((SpMMMatrix)B).getMatrixDensity())+"\t"+((SpMMMatrix)B).getMatrix().nzc+"\t"+
+      						(x*y*intersectCount)+"\t"+intersectCount+"\t"+(end - start)+"\t");
+        	  }
+        	  //sb.append(multiplyCount +"\t");
         	  for(int i = 0; i < counterValues.length; i++){
                   //System.out.println("Counter Values");
                   sb.append(counterValues[i]+ "\t");

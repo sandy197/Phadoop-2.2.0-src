@@ -35,6 +35,8 @@ public class SpMMDriver {
 	public static final int SPMM_PROC_GRID_DIMM_X = 2;
 	public static final int SPMM_PROC_GRID_DIMM_Y = 3;
 	
+	public static final int NZ_INCRIMENT = 5;
+	
 	private static final String SPMM_DATA_DIR = "tmp/spmm/";
 	private static final String SPMM_INPUT_PATH_A = SPMM_DATA_DIR + "/A";
 	private static final String SPMM_INPUT_PATH_B = SPMM_DATA_DIR + "/B";
@@ -88,7 +90,7 @@ public class SpMMDriver {
 
 	    //TODO:take these as command line param
 	    conf.setBoolean("SpMM.useTaskPool", true);
-	    conf.setBoolean("SpMM.isSparseMM", false);
+	    conf.setBoolean("SpMM.isSparseMM", true);
 	    
 	    conf.set("SpMM.inputPathA", inputPathA);
 	    conf.set("SpMM.inputPathB", inputPathB);
@@ -269,7 +271,7 @@ public class SpMMDriver {
 		fs = FileSystem.get(conf);
 		fs.mkdirs(new Path(SPMM_DATA_DIR));
 		SpMMDriver driver = new SpMMDriver(true, true);
-		//assumed core grid (2 x 3)\
+//		assumed core grid (2 x 3)\
 //		int I = 60;
 //		int K = 60;
 //		int J = 60;
@@ -285,6 +287,10 @@ public class SpMMDriver {
 		int IB = Integer.parseInt(remainingArgs[3]);
 		int KB = Integer.parseInt(remainingArgs[4]);
 		int JB = Integer.parseInt(remainingArgs[5]);
+		
+		int nzc = Integer.parseInt(remainingArgs[6]);
+		int nzr = Integer.parseInt(remainingArgs[7]);
+		
 		/*
 		int[][] A = { {0,1,2,0,4,5,6,7,8,9,10,11,12,13,14, 15,0,17,18,19,20,0,22,23,24,0,26,27,0,29, 0,31,32,0,34,35,0,37,38,0,40,41,0,43,0, 45,0,47,0,0,0,51,0,53,0,55,0,57,0,59},
 				{0,1,2,0,4,5,6,7,8,9,10,11,12,13,14, 15,0,17,18,19,20,0,22,23,24,0,26,27,0,29, 0,31,32,0,34,35,0,37,38,0,40,41,0,43,0, 45,0,47,0,0,0,51,0,53,0,55,0,57,0,59},
@@ -416,8 +422,8 @@ public class SpMMDriver {
 		int[][] A = new int[I][K];
 		int[][] B = new int[K][J];
 		
-		buildMatrix(A, I, K);
-		buildMatrix(B, K, J);
+		buildBlockedMatrix(A, I, K, IB, KB, nzc, nzr, false);
+		buildBlockedMatrix(B, K, J, KB, JB, nzc, nzr, true);
 		
 		driver.writeMatrix(A, I, K, SPMM_INPUT_PATH_A);
 		driver.writeMatrix(B, K, J, SPMM_INPUT_PATH_B);
@@ -436,6 +442,65 @@ public class SpMMDriver {
 				a2[i][j] = rand.nextInt(1000);
 			}
 		}		
+	}
+	
+	private static int calcIndex(HashSet<Integer> hset, Random colIndx, int rangeStart, int rangeEnd){
+		int cidx;
+		do {
+		cidx = colIndx.nextInt(rangeEnd - rangeStart) % rangeEnd;
+		cidx = cidx < 0 ? cidx * -1:cidx;
+		} while(hset.contains(cidx));
+		hset.add(cidx);
+		return cidx;
+	}
+	
+	private static void buildBlockedMatrix(int [][]A, int rows, int cols, int brows, int bcols, int nzc, int nzr, boolean isRowMajor){
+		HashSet<Integer> rhset, chset;
+		Random randNum = new Random();
+		Random colIndx = new Random();	
+		Random rowIndx = new Random();
+		for(int i = 0; i < rows; i++){
+			for(int j = 0; j < cols; j++){
+				A[i][j] = 0;
+			}
+		}
+		for(int roffset = 0; roffset < rows; roffset += brows){
+			for(int coffset = 0; coffset < cols; coffset += bcols){
+				int nzr_d, nzc_d;
+				nzr_d = nzr + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * NZ_INCRIMENT;
+				nzc_d = nzc + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * NZ_INCRIMENT;
+				int rowCount =0, colCount = 0;
+				if(isRowMajor){
+					rhset = new HashSet<Integer>();
+					while(rowCount < nzr_d){
+						int ridx = roffset + calcIndex(rhset, rowIndx, 0, brows);;
+						colCount = 0;
+						chset = new HashSet<Integer>();
+						while(colCount < nzc_d){
+							int cidx = coffset + calcIndex(chset, colIndx, 0, bcols);
+							A[ridx][cidx] = randNum.nextInt();
+							colCount++;
+						}
+						rowCount++;
+					}
+				}
+				else{
+					chset = new HashSet<Integer>();
+					while(colCount < nzc_d){
+						int cidx = coffset + calcIndex(chset, colIndx, 0, bcols);
+						rowCount = 0;
+						rhset = new HashSet<Integer>();
+						while(rowCount < nzr_d){
+							int ridx =  roffset + calcIndex(rhset, rowIndx, 0, brows);
+							A[ridx][cidx] = randNum.nextInt();
+							rowCount++;
+						}
+						colCount++;
+					}
+				}
+			}
+		}
+		
 	}
 	
 	/*

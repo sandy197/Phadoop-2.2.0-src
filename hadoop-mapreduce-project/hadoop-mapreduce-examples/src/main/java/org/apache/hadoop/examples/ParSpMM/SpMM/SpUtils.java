@@ -3,6 +3,7 @@ package org.apache.hadoop.examples.ParSpMM.SpMM;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Pair;
 
@@ -78,6 +79,17 @@ public class SpUtils {
 		for(int k = start; k < end; k++){
 			colnums[k - start] = ir.get(k);
 		}
+	}
+	
+	public static int setIntersectionCount(Set<Integer> set1, Set<Integer> set2){
+		int count = 0;
+		if(set1 != null && set2 != null){
+			for(Integer setEl : set1){
+				if(set2.contains(setEl))
+					count++;
+			}
+		}
+		return count;
 	}
 
 	public static int ceil(float cf) {

@@ -18,6 +18,7 @@ public interface GenericMatrix<MATRIX_TYPE> {
 	public void setMatrix(MATRIX_TYPE matrix);
 	public boolean isMatrixSet();
 	public void setMatrixSet(boolean isMatrixSet);
+	public float getMatrixDensity();
 	
 	//can add more fields if needed
 

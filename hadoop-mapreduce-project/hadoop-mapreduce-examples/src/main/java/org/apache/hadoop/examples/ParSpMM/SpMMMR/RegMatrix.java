@@ -36,4 +36,17 @@ public class RegMatrix implements GenericMatrix<int[][]> {
 		this.isMatrixSet = isMatrixSet;
 	}
 
+
+	@Override
+	public float getMatrixDensity() {
+		int[][] matrix = this.getMatrix();
+		int count = 0;
+		for(int i = 0; i < matrix.length; i++)
+			for(int j = 0; j < matrix[0].length; j++){
+				if(matrix[i][j] != 0){
+					count++;
+				}
+			}
+		return (float)count/(matrix.length * matrix[0].length);
+	}
 }

@@ -2,8 +2,10 @@ package org.apache.hadoop.examples.ParSpMM.SpMM;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.Comparator;
 
@@ -13,13 +15,13 @@ import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Value;
 
 
 public class SpDCSC extends SpMat {
-	List<Integer> cp;
-	List<Integer> jc;
-	List<Integer> ir;
-	List<Integer> numArray;
+	public List<Integer> cp;
+	public List<Integer> jc;
+	public List<Integer> ir;
+	public List<Integer> numArray;
 	
-	int nz;
-	int nzc;
+	public int nz;
+	public int nzc;
 	
 	
 //	public SpDCSC(){
@@ -178,6 +180,18 @@ public class SpDCSC extends SpMat {
 	@Override
 	public SpMat SpMatMerge(SpMat B) {
 		return null;
+	}
+
+	public Set<Integer> getnzcIndices(){
+		Set<Integer> nzcSet = new HashSet<Integer>();
+		nzcSet.addAll(jc);
+		return nzcSet;
+	}
+	
+	public Set<Integer> getnzrIndices(){
+		Set<Integer> nzrSet = new HashSet<Integer>();
+		nzrSet.addAll(ir);
+		return nzrSet;
 	}
 	
 	

@@ -1,5 +1,7 @@
 package org.apache.hadoop.examples.ParSpMM.SpMMMR;
 
+import java.util.Set;
+
 import org.apache.hadoop.examples.ParSpMM.SpMM.SpDCSC;
 import org.apache.hadoop.ipc.GenericMatrix;
 
@@ -33,7 +35,23 @@ public class SpMMMatrix implements GenericMatrix<SpDCSC> {
 		this.isMatrixSet = isMatrixSet;		
 	}
 	
+	public float getMatrixDensity(){
+		return (float)spMat.nz/(spMat.m * spMat.n);
+	}
 	
+	public float getAvgNZperNZC(){
+		return (float)spMat.nz/spMat.nzc;
+	}
 	
+	public float getAvgNZperNZR(){
+		return (float)spMat.nz/spMat.getnzrIndices().size();
+	}
 	
+	public Set<Integer> getnzrIndices(){
+		return spMat.getnzrIndices();
+	}
+	
+	public Set<Integer> getnzcIndices(){
+		return spMat.getnzcIndices();
+	}
 }
