@@ -121,7 +121,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
             		// density(A), density(B), nnzc(B), x*y*Intersect(nnzc(A), nnzr(B)),execTime        	  
               	  
               	  sb.append(((float)((SpMMMatrix)A).getMatrixDensity())+"\t"+
-      						((float)((SpMMMatrix)B).getMatrixDensity())+"\t"+((SpMMMatrix)B).getMatrix().nzc+"\t"+
+      						((float)((SpMMMatrix)B).getMatrixDensity())+"\t"+((SpMMMatrix)B).getMatrix().jc.size()+"\t"+
       						(x*y*intersectCount)+"\t"+intersectCount+"\t"+(end - start)+"\t");
         	  }
         	  //sb.append(multiplyCount +"\t");
