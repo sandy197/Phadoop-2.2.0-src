@@ -467,13 +467,18 @@ public class SpMMDriver {
 		for(int roffset = 0; roffset < rows; roffset += brows){
 			for(int coffset = 0; coffset < cols; coffset += bcols){
 				int nzr_d, nzc_d;
-				nzr_d = nzr + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * NZ_INCRIMENT;
-				nzc_d = nzc + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * NZ_INCRIMENT;
+//				nzr_d = nzr + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * NZ_INCRIMENT;
+//				nzc_d = nzc + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * NZ_INCRIMENT;
+				
+				
+				
 				int rowCount =0, colCount = 0;
 				if(isRowMajor){
+					nzr_d = nzr + ((roffset/brows)) * NZ_INCRIMENT;
+					nzc_d = nzc + ((roffset/brows)) * NZ_INCRIMENT;
 					rhset = new HashSet<Integer>();
 					while(rowCount < nzr_d){
-						int ridx = roffset + calcIndex(rhset, rowIndx, 0, brows);;
+						int ridx = roffset + calcIndex(rhset, rowIndx, 0, brows);
 						colCount = 0;
 						chset = new HashSet<Integer>();
 						while(colCount < nzc_d){
@@ -485,6 +490,8 @@ public class SpMMDriver {
 					}
 				}
 				else{
+					nzr_d = nzr + (coffset/bcols) * NZ_INCRIMENT;
+					nzc_d = nzc + (coffset/bcols) * NZ_INCRIMENT;
 					chset = new HashSet<Integer>();
 					while(colCount < nzc_d){
 						int cidx = coffset + calcIndex(chset, colIndx, 0, bcols);
