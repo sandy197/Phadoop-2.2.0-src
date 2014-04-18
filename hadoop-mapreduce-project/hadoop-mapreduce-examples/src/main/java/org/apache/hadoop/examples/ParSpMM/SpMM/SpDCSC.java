@@ -15,6 +15,9 @@ import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Value;
 
 
 public class SpDCSC extends SpMat {
+	
+	public static boolean DEBUG = true;
+	
 	public List<Integer> cp;
 	public List<Integer> jc;
 	public List<Integer> ir;
@@ -52,9 +55,10 @@ public class SpDCSC extends SpMat {
 		ir.add(rowIdx);
 		
 		//fill arrays
-		
+		if(DEBUG) System.out.println("**Order for construction");
 		while(itr1.hasNext()){
 			Value value = (Value)itr1.next();
+			if(DEBUG) System.out.println(value);
 			rowIdx = value.index1;
 			colIdx = value.index2;
 			numArray.add(value.v);
