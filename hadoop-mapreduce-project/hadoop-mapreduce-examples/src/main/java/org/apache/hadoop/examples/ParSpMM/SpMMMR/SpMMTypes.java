@@ -141,16 +141,16 @@ public class SpMMTypes {
 		@Override
 		public int compareTo(Object o) {
 			Value other = (Value)o;
-			if(this.index1 < other.index1){
-				return -1;
-			}
-			else if(this.index1 > other.index1){
-				return 1;
-			}
 			if(this.index2 < other.index2){
 				return -1;
 			}
 			else if(this.index2 > other.index2){
+				return 1;
+			}
+			if(this.index1 < other.index1){
+				return -1;
+			}
+			else if(this.index1 > other.index1){
 				return 1;
 			}
 			return 0;

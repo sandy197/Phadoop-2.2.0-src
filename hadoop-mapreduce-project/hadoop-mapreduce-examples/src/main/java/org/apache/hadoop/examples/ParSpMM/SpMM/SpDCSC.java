@@ -51,7 +51,9 @@ public class SpDCSC extends SpMat {
 		ArrayList<Value> valList = new ArrayList<Value>();
 		//sort all values before creating the SpMatrix
 		while(itr1.hasNext()){
-			valList.add((Value)itr1.next());
+			Value val = (Value)itr1.next();
+			Value newVal = new Value(val.index1, val.index2, val.v);
+			valList.add(newVal);
 		}
 		Collections.sort(valList);
 		
