@@ -2,6 +2,7 @@ package org.apache.hadoop.examples.ParSpMM.SpMM;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +34,7 @@ public class SpDCSC extends SpMat {
 	/**
 	 * TODO:Add params based on the arguments used to create this object
 	 */
+	@SuppressWarnings("unchecked")
 	public SpDCSC(Iterable<Value> values, int m, int n){
 		super(m,n);		
 		
@@ -44,8 +46,17 @@ public class SpDCSC extends SpMat {
 		
 		int nzcColCount = 0;
 		int nzCount = 0;
+		
 		Iterator<Value> itr1 = values.iterator();
-		Value val = (Value)itr1.next();
+		ArrayList<Value> valList = new ArrayList<Value>();
+		//sort all values before creating the SpMatrix
+		while(itr1.hasNext()){
+			valList.add((Value)itr1.next());
+		}
+		Collections.sort(valList);
+		
+		Iterator<Value> itr2 = valList.iterator();
+		Value val = (Value)itr2.next();
 		int rowIdx = val.index1;
 		int colIdx = val.index2;
 		cp.add(nzCount++);
@@ -56,8 +67,8 @@ public class SpDCSC extends SpMat {
 		
 		//fill arrays
 		if(DEBUG) System.out.println("**Order for construction");
-		while(itr1.hasNext()){
-			Value value = (Value)itr1.next();
+		while(itr2.hasNext()){
+			Value value = (Value)itr2.next();
 			if(DEBUG) System.out.println(value.index1+","+value.index2);
 			rowIdx = value.index1;
 			colIdx = value.index2;
