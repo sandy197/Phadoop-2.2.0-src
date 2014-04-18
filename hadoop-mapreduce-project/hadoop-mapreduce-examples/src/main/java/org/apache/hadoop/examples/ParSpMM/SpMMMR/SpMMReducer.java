@@ -139,6 +139,8 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 			SpDCSC a, b;
 			a = (SpDCSC) A.getMatrix();
 			b = (SpDCSC) B.getMatrix();
+			System.out.println(a);
+			System.out.println(b);
 			long start = System.nanoTime();
 			List<StackEntry> multStack = a.SpMatMultiply(b);
 			long end = System.nanoTime();
