@@ -106,7 +106,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
         	  ThreadPinning tp = new ThreadPinning();
         	  tp.start_counters();
         	  long start = System.nanoTime();
-        	  multiplyAndEmit(context, ib, jb);
+        	  long multiplyTime = multiplyAndEmit(context, ib, jb);
         	  long end = System.nanoTime();
         	  long[] counterValues = tp.stop_counters();
       		// density(B),nnzc(B),x*y*Intersect(nnzc(A), nnzr(B)),execTime
@@ -122,7 +122,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
               	  
               	  sb.append(((float)((SpMMMatrix)A).getMatrixDensity())+"\t"+
       						((float)((SpMMMatrix)B).getMatrixDensity())+"\t"+((SpMMMatrix)B).getMatrix().jc.size()+"\t"+
-      						(x*y*intersectCount)+"\t"+intersectCount+"\t"+(end - start)+"\t");
+      						(x*y*intersectCount)+"\t"+intersectCount+"\t"+multiplyTime+"\t"+(end - start)+"\t");
         	  }
         	  //sb.append(multiplyCount +"\t");
         	  for(int i = 0; i < counterValues.length; i++){
@@ -133,13 +133,15 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
           }
 	}
 
-	private void multiplyAndEmit(Context context, int ib2,
+	private long multiplyAndEmit(Context context, int ib2,
 			int jb2) {
 		if(isSparseMM){
 			SpDCSC a, b;
 			a = (SpDCSC) A.getMatrix();
 			b = (SpDCSC) B.getMatrix();
+			long start = System.nanoTime();
 			List<StackEntry> multStack = a.SpMatMultiply(b);
+			long end = System.nanoTime();
 			for(StackEntry se : multStack){
 				if(se.value != 0){
 					indexPair = new Key();
@@ -158,6 +160,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 					}
 				}
 			}
+			return end - start;
 		}
 		else{
 			//regular matrix multiply
@@ -205,6 +208,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 					writingTime += end - start;
 				}
 			}
+			return multiplyTime;
 		}
 	}
 	
