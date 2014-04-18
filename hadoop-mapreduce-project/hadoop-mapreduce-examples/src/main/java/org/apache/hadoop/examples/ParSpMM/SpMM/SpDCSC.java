@@ -58,7 +58,7 @@ public class SpDCSC extends SpMat {
 		if(DEBUG) System.out.println("**Order for construction");
 		while(itr1.hasNext()){
 			Value value = (Value)itr1.next();
-			if(DEBUG) System.out.println(value);
+			if(DEBUG) System.out.println(value.index1+","+value.index2);
 			rowIdx = value.index1;
 			colIdx = value.index2;
 			numArray.add(value.v);
