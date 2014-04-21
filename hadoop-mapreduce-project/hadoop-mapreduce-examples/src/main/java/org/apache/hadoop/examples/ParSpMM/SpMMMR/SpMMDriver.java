@@ -474,8 +474,10 @@ public class SpMMDriver {
 				
 				int rowCount =0, colCount = 0;
 				if(isRowMajor){
-					nzr_d = nzr + ((roffset/brows)) * NZ_INCRIMENT;
-					nzc_d = nzc + ((roffset/brows)) * NZ_INCRIMENT;
+//					nzr_d = nzr + ((roffset/brows)) * NZ_INCRIMENT;
+//					nzc_d = nzc + ((roffset/brows)) * NZ_INCRIMENT;
+					nzr_d = nzr + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * NZ_INCRIMENT;
+					nzc_d = nzc + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * NZ_INCRIMENT;
 					rhset = new HashSet<Integer>();
 					while(rowCount < nzr_d){
 						int ridx = roffset + calcIndex(rhset, rowIndx, 0, brows);
