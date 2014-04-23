@@ -8,6 +8,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.examples.ParSpMM.SpMM.SpDCSC;
 import org.apache.hadoop.examples.ParSpMM.SpMM.SpUtils;
 import org.apache.hadoop.examples.ParSpMM.SpMM.StackEntry;
+import org.apache.hadoop.examples.ParSpMM.SpMM.SyncPrimitive;
+import org.apache.hadoop.examples.ParSpMM.SpMM.SyncPrimitive.Barrier;
 import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.IndexPair;
 import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Key;
 import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Value;
@@ -17,6 +19,7 @@ import org.apache.hadoop.ipc.GenericMatrix;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.join.ResetableIterator;
+import org.apache.zookeeper.KeeperException;
 import org.ncsu.sys.ThreadPinning;
 
 
@@ -26,6 +29,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 	private Key indexPair;
 	private Value el = new Value();
 	
+	public static String ZK_ADDRESS = "10.1.255.13:2181";
 	private static final boolean DEBUG = true;
 
 	private boolean useTaskPool;
@@ -107,6 +111,16 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
         	  tp.start_counters();
         	  long start = System.nanoTime();
         	  long multiplyTime = multiplyAndEmit(context, ib, jb);
+        	  Barrier b = new Barrier(ZK_ADDRESS, "/b1", 6);
+              try{
+                  boolean flag = b.enter();
+                  System.out.println("Entered barrier: " + 6);
+                  if(!flag) System.out.println("Error when entering the barrier");
+              } catch (KeeperException e){
+            	  e.printStackTrace();
+              } catch (InterruptedException e){
+            	  e.printStackTrace();
+              }
         	  long end = System.nanoTime();
         	  long[] counterValues = tp.stop_counters();
       		// density(B),nnzc(B),x*y*Intersect(nnzc(A), nnzr(B)),execTime
