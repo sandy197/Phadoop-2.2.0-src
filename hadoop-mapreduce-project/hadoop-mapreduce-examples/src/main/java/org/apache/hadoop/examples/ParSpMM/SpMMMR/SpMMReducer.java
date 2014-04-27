@@ -111,16 +111,16 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
         	  tp.start_counters();
         	  long start = System.nanoTime();
         	  long multiplyTime = multiplyAndEmit(context, ib, jb);
-        	  Barrier b = new Barrier(ZK_ADDRESS, "/b1", 6);
-              try{
-                  boolean flag = b.enter();
-                  System.out.println("Entered barrier: " + 6);
-                  if(!flag) System.out.println("Error when entering the barrier");
-              } catch (KeeperException e){
-            	  e.printStackTrace();
-              } catch (InterruptedException e){
-            	  e.printStackTrace();
-              }
+//        	  Barrier b = new Barrier(ZK_ADDRESS, "/b1", 6);
+//              try{
+//                  boolean flag = b.enter();
+//                  System.out.println("Entered barrier: " + 6);
+//                  if(!flag) System.out.println("Error when entering the barrier");
+//              } catch (KeeperException e){
+//            	  e.printStackTrace();
+//              } catch (InterruptedException e){
+//            	  e.printStackTrace();
+//              }
         	  long end = System.nanoTime();
         	  long[] counterValues = tp.stop_counters();
       		// density(B),nnzc(B),x*y*Intersect(nnzc(A), nnzr(B)),execTime
