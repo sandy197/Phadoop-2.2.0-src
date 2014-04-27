@@ -444,21 +444,21 @@ public class MatrixMultiply {
 		private int build (int[][] matrix, int rowDim, int colDim, 
 			Iterable<Value> valueList, Context cxt) 
 		{
-			if(useTaskPool){
-				if(!cxt.getMatrix().isMatrixSet()){
-					int nnz_count = build_orig(matrix, rowDim, colDim, valueList);
-					cxt.setMatrix(matrix);
-					return nnz_count;
-				}
-				else{
-					System.out.println("Reusing the matrix");
-					matrix = cxt.getMatrix().getMatrix();
-					return -1;
-				}
-			}
-			else {
+//			if(useTaskPool){
+//				if(!cxt.getMatrix().isMatrixSet()){
+//					int nnz_count = build_orig(matrix, rowDim, colDim, valueList);
+//					cxt.setMatrix(matrix);
+//					return nnz_count;
+//				}
+//				else{
+//					System.out.println("Reusing the matrix");
+//					matrix = cxt.getMatrix().getMatrix();
+//					return -1;
+//				}
+//			}
+//			else {
 				return  build_orig(matrix, rowDim, colDim, valueList);
-			}
+			
 		}
 		private int build_orig(int[][] matrix, int rowDim, int colDim,
                         Iterable<Value> valueList)
