@@ -498,10 +498,8 @@ public class SpMMDriver {
 				}
 				else{
 					if(!isUniform){
-//						nzr_d = nzr + (coffset/bcols) * NZ_INCRIMENT;
-//						nzc_d = nzc + (coffset/bcols) * NZ_INCRIMENT;
-						nzr_d = nzr + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * NZ_INCRIMENT;
-						nzc_d = nzc + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * NZ_INCRIMENT;
+						nzr_d = nzr + (coffset/bcols) * NZ_INCRIMENT;
+						nzc_d = nzc + (coffset/bcols) * NZ_INCRIMENT;
 					}
 					chset = new HashSet<Integer>();
 					while(colCount < nzc_d){
