@@ -433,6 +433,8 @@ public class SpMMDriver {
 		System.out.println("I="+ I+", K="+ K+", J,"+J+" IB="+ IB+", KB="+KB+", JB="+JB);
 		driver.SpMM(2, I, K, J, IB, KB, JB);
 		long end = System.nanoTime();
+		//recursive delete of data dir
+		fs.delete(new Path(SPMM_DATA_DIR), true);
 		System.out.println("Time taken for total execution:" + (end - start));
 	}
 	
