@@ -21,7 +21,7 @@ import org.apache.hadoop.examples.Kmeans.KMTypes.Value;
 
 public class KMDriver {
 	
-	//TODO : input/output paths
+	//input/output paths
 	private static final String KM_DATA_DIR = "tmp/kmeans/";
 	private static final String KM_CENTER_INPUT_PATH = KM_DATA_DIR + "/centerIn";
 	private static final String KM_CENTER_OUTPUT_PATH = KM_DATA_DIR + "/centerOut";
@@ -154,16 +154,12 @@ public class KMDriver {
 	    job.setOutputKeyClass(org.apache.hadoop.examples.Kmeans.KMTypes.Key.class);
 	    job.setOutputValueClass(org.apache.hadoop.examples.Kmeans.KMTypes.Value.class);
 	    
+	    //provide input data only for the initial iteration.
+	    if(iteration == 1)
+	    	FileInputFormat.addInputPath(job, new Path(conf.get("KM.inputDataPath")));
 	    
-	    //uncomment the following line when using Phadoop
-	    //if(iteration == 1)
-	    FileInputFormat.addInputPath(job, new Path(conf.get("KM.inputDataPath")));
 	    FileInputFormat.addInputPath(job, centersIn);
-	    
-	    FileOutputFormat.setOutputPath(job, centersOut);
-	    
-	    //TODO: fix all the paths and implement the algo as indicated in the site.
-	    
+	    FileOutputFormat.setOutputPath(job, centersOut);	    
 		if (!job.waitForCompletion(true))
 			return;
 	}

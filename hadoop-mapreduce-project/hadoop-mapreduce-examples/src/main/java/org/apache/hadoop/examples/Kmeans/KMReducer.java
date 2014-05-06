@@ -64,10 +64,18 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 		}
 		else{
 			//use build and set here
-			buildCentroids(values, vectors);
+			buildCentroidsAndSet(values, vectors, context);
 			isVbuilt = true;
 			//buildVectors(values, vectors);
 		}
+		
+		if(vectors == null && context.getMatrix() != null){
+  			if(DEBUG) System.out.println("##Getting vectors already read from fs. Skipping reading the file");
+  			RowListMatrix vectorList = (RowListMatrix) context.getMatrix();
+  			vectors = vectorList.getMatrix();
+  			isVbuilt = true;
+  		}
+		
 		//compute the partial clusters
 		if(isCbuilt && isVbuilt){
 			try{
@@ -257,6 +265,11 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 			centroidsLoc.add(valCopy);
 		}
 		
+	}
+	
+	private void buildCentroidsAndSet(Iterable<Value> values, List<Value> centroidsLoc, Context context) {
+		buildCentroids(values, centroidsLoc);
+		context.setMatrix(new RowListMatrix(centroidsLoc));
 	}
 	
 	private void printReduceInputKey (Key key) {
