@@ -113,7 +113,7 @@ public class KMDriver {
 		}
 	}
 	
-	private boolean isConverged(Path centersIn, Path centersOut, int convergenceDelta, boolean isFirstIter) {
+	private boolean isConverged(Path centersIn, Path centersOut, int convergenceDelta, boolean isFirstIter) throws Exception {
 		boolean converged = true;
 		List<Value> oldCentroids = KMUtils.getCentroidsFromFile(centersIn, !isFirstIter);
 		List<Value> newCentroids = KMUtils.getCentroidsFromFile(centersOut, true);
@@ -138,7 +138,13 @@ public class KMDriver {
 		return converged;
 	}
 
-	private boolean isConverged(Value oldCentroid, Value newCentroid, int convergenceDelta) {
+	private boolean isConverged(Value oldCentroid, Value newCentroid, int convergenceDelta) throws Exception {
+		if(oldCentroid == null){
+			throw new Exception("Old centroid is null");
+		}
+		else if(newCentroid == null){
+			throw new Exception("New centroid is null");
+		}
 		return KMUtils.getDistance(oldCentroid.getCoordinates(), 
 					newCentroid.getCoordinates()) <= convergenceDelta;
 	}
