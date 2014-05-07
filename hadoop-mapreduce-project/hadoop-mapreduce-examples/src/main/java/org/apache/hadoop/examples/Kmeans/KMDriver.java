@@ -49,8 +49,7 @@ public class KMDriver {
 		     System.out.println("USAGE: <COUNT> <K> <DIMENSION OF VECTORS> <MAXITERATIONS> <num of tasks> <convgDelta>");
 		      return;
 		}
-
-		conf = new Configuration();
+		
 		int count = Integer.parseInt(remainingArgs[0]);
 		int k = Integer.parseInt(remainingArgs[1]);
 		int dimension = Integer.parseInt(remainingArgs[2]);
