@@ -33,6 +33,7 @@ public class KMDriver {
 //	private static final String KM_INPUT_PATH_3 = KM_DATA_DIR + "/3";
 //	private static final String KM_INPUT_PATH_4 = KM_DATA_DIR + "/4";
 	private static final String KM_TEMP_CLUSTER_DIR_PATH = KM_DATA_DIR + "/tmpC";
+	private static final boolean DEBUG = true;
 	
 	private static FileSystem fs;
 	private static Configuration conf = new Configuration();
@@ -120,12 +121,16 @@ public class KMDriver {
 		Hashtable<Integer, Value> oldCentroidMap = new Hashtable<Integer,Value>();
 		Hashtable<Integer, Value> newCentroidMap = new Hashtable<Integer,Value>();
 		
+		if(DEBUG) System.out.println("***OldCentroids***");
 		for(Value centroid : oldCentroids){
 			oldCentroidMap.put(centroid.getCentroidIdx(), centroid);
+			if(DEBUG) System.out.println(centroid);
 		}
 		
+		if(DEBUG) System.out.println("***NewCentroids***");
 		for(Value centroid : newCentroids){
 			newCentroidMap.put(centroid.getCentroidIdx(), centroid);
+			if(DEBUG) System.out.println(centroid);
 		}
 		
 		for(Integer key : oldCentroidMap.keySet()){
