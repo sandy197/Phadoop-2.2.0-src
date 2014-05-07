@@ -72,12 +72,12 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 			//buildVectors(values, vectors);
 		}
 		
-		if(vectors == null && context.getMatrix() != null){
-  			if(DEBUG) System.out.println("##Getting vectors already read from fs. Skipping reading the file");
-  			RowListMatrix vectorList = (RowListMatrix) context.getMatrix();
-  			vectors = vectorList.getMatrix();
-  			isVbuilt = true;
-  		}
+//		if(vectors == null && context.getMatrix() != null){
+//  			if(DEBUG) System.out.println("##Getting vectors already read from fs. Skipping reading the file");
+//  			RowListMatrix vectorList = (RowListMatrix) context.getMatrix();
+//  			vectors = vectorList.getMatrix();
+//  			isVbuilt = true;
+//  		}
 		
 		//compute the partial clusters
 		if(isCbuilt && isVbuilt){
@@ -274,7 +274,7 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 	
 	private List<Value> buildCentroidsAndSet(Iterable<Value> values, Context context) {
 		List<Value> centroidsLoc = buildCentroids(values);
-		context.setMatrix(new RowListMatrix(centroidsLoc));
+//		context.setMatrix(new RowListMatrix(centroidsLoc));
 		return centroidsLoc;
 	}
 	

@@ -65,16 +65,16 @@ public class KMDriver {
 //	    conf.set("KM.centerOut", centerOut.toString());
 	    String inputDataPath = fs.makeQualified(new Path(KM_DATA_INPUT_PATH)).toString();
 	    String inputCenterPath = fs.makeQualified(new Path(KM_CENTER_INPUT_PATH)).toString();
-	    String outPath = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH)).toString();
+//	    String outPath = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH)).toString();
 	    String tempClusterDirPath = fs.makeQualified(new Path(KM_TEMP_CLUSTER_DIR_PATH)).toString();
 	    conf.set("KM.inputDataPath", inputDataPath);
 	    conf.set("KM.inputCenterPath", inputCenterPath);
-	    conf.set("KM.outputDirPath", outPath);
+//	    conf.set("KM.outputDirPath", outPath);
 	    conf.set("KM.tempClusterDir", tempClusterDirPath);
 	    conf.setInt("KM.R1", taskCount);
 	    
 	    fs.delete(new Path(tempClusterDirPath), true);
-		fs.delete(new Path(outPath), true);
+//		fs.delete(new Path(outPath), true);
 		
 		URI uri = new URI("hdfs://localhost/libraries/libpapi.so.1#libpapi.so");
 		DistributedCache.createSymlink(conf);
@@ -171,7 +171,7 @@ public class KMDriver {
 	    job.setOutputValueClass(org.apache.hadoop.examples.Kmeans.KMTypes.Value.class);
 	    
 	    //provide input data only for the initial iteration.
-	    if(iteration == 1)
+	    //if(iteration == 1)
 	    	FileInputFormat.addInputPath(job, new Path(conf.get("KM.inputDataPath")));
 	    
 	    FileInputFormat.addInputPath(job, centersIn);
