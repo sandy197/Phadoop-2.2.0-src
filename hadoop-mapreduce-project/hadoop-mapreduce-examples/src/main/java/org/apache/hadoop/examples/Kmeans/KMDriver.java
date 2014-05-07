@@ -118,6 +118,9 @@ public class KMDriver {
 		boolean converged = true;
 		List<Value> oldCentroids = KMUtils.getCentroidsFromFile(centersIn, !isFirstIter);
 		List<Value> newCentroids = KMUtils.getCentroidsFromFile(centersOut, true);
+		if(newCentroids.isEmpty()){
+			newCentroids = KMUtils.getCentroidsFromFile(centersOut, true);
+		}
 		Hashtable<Integer, Value> oldCentroidMap = new Hashtable<Integer,Value>();
 		Hashtable<Integer, Value> newCentroidMap = new Hashtable<Integer,Value>();
 		
