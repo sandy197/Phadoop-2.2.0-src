@@ -36,7 +36,8 @@ public class KMDriver {
 	
 	private static FileSystem fs;
 	private static Configuration conf = new Configuration();
-
+	
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws Exception {
 		GenericOptionsParser goParser = new GenericOptionsParser(conf, args);
 		fs = FileSystem.get(conf);

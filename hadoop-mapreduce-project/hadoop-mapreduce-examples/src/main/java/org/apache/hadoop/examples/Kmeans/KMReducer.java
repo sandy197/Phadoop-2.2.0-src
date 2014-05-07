@@ -23,6 +23,7 @@ import org.apache.hadoop.examples.Kmeans.KMTypes.Key;
 import org.apache.hadoop.examples.Kmeans.KMTypes.Value;
 import org.apache.hadoop.examples.Kmeans.KMTypes.VectorType;
 import org.apache.hadoop.examples.Kmeans.SyncPrimitive.Barrier;
+import org.ncsu.sys.ThreadPinning;
 
 public class KMReducer extends Reducer<Key, Value, Key, Value> {
 
@@ -50,7 +51,9 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 
 	public void reduce(Key _key, Iterable<Value> values, Context context)
 			throws IOException, InterruptedException {
-		
+		ThreadPinning tp = new ThreadPinning();
+		tp.start_counters();
+		tp.stop_counters();
 		if(DEBUG){ 
 			printReduceInputKey(_key);
 			//printReduceInputValues(values);
