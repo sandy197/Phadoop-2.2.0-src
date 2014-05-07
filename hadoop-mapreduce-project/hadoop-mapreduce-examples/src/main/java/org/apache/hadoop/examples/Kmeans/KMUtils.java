@@ -20,6 +20,8 @@ import org.apache.hadoop.examples.Kmeans.KMTypes.Value;
 import org.apache.hadoop.examples.Kmeans.KMTypes.VectorType;
 
 public class KMUtils {
+	private static final boolean DEBUG = true;
+
 	public static List<Value> getPartialCentroidsFromFile(Path filePath) {
 		List<Value> partialCentroids = new ArrayList<Value>();
 		Configuration conf = new Configuration();
@@ -62,6 +64,7 @@ public class KMUtils {
 			FileSystem fs = filePath.getFileSystem(conf);
 			if(isReduceOutput){
 				FileStatus[] parts = fs.listStatus(filePath);
+				if(DEBUG) System.out.println("Number of parts read: "+ parts.length+ " From :" + filePath.toString());
 			    for (FileStatus part : parts) {
 			      String name = part.getPath().getName();
 			      if (name.startsWith("part") && !name.endsWith(".crc")) {
