@@ -1,6 +1,7 @@
 package org.apache.hadoop.examples.Kmeans;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -73,6 +75,9 @@ public class KMDriver {
 	    fs.delete(new Path(tempClusterDirPath), true);
 		fs.delete(new Path(outPath), true);
 		
+		URI uri = new URI("hdfs://localhost/libraries/libpapi.so.1#libpapi.so");
+		DistributedCache.createSymlink(conf);
+		DistributedCache.addCacheFile(uri, conf);
 		//write input data and centers to the file paths accordingly
 		// NOTE: Make sure centers have a cluster identifier with it.
 		KMUtils.prepareInput(count, k, dimension, taskCount, conf, new Path(KM_DATA_INPUT_PATH), new Path(KM_CENTER_INPUT_PATH), fs);
