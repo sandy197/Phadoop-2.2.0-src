@@ -171,7 +171,7 @@ public class KMDriver {
 	    job.setOutputValueClass(org.apache.hadoop.examples.Kmeans.KMTypes.Value.class);
 	    
 	    //provide input data only for the initial iteration.
-	    //if(iteration == 1)
+	    if(iteration == 1)
 	    	FileInputFormat.addInputPath(job, new Path(conf.get("KM.inputDataPath")));
 	    
 	    FileInputFormat.addInputPath(job, centersIn);
