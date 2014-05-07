@@ -44,8 +44,8 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 		dimension = conf.getInt("KM.dimension", 2);
 		k = conf.getInt("KM.k", 6);
 		R1 = conf.getInt("KM.R1", 6);
-		centroids = new ArrayList<Value>();
-		vectors = new ArrayList<Value>();
+//		centroids = new ArrayList<Value>();
+//		vectors = new ArrayList<Value>();
 		isCbuilt = isVbuilt = false;
 	}
 
@@ -62,12 +62,12 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 		Value[] partialCentroids = null;
 		
 		if(_key.getType() == VectorType.CENTROID){
-			buildCentroids(values, centroids);
+			centroids = buildCentroids(values);
 			isCbuilt = true;
 		}
 		else{
 			//use build and set here
-			buildCentroidsAndSet(values, vectors, context);
+			vectors = buildCentroidsAndSet(values, context);
 			isVbuilt = true;
 			//buildVectors(values, vectors);
 		}
@@ -259,7 +259,8 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 		
 	}
 
-	private void buildCentroids(Iterable<Value> values, List<Value> centroidsLoc) {
+	private List<Value> buildCentroids(Iterable<Value> values) {
+		List<Value> centroidsLoc = new ArrayList<Value>();
 		for(Value val : values){
 			if(DEBUG) System.out.println("Adding value :" + val);
 			Value valCopy = new Value(val.getDimension());
@@ -267,12 +268,14 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 			valCopy.setCentroidIdx(val.getCentroidIdx());
 			centroidsLoc.add(valCopy);
 		}
+		return centroidsLoc;
 		
 	}
 	
-	private void buildCentroidsAndSet(Iterable<Value> values, List<Value> centroidsLoc, Context context) {
-		buildCentroids(values, centroidsLoc);
+	private List<Value> buildCentroidsAndSet(Iterable<Value> values, Context context) {
+		List<Value> centroidsLoc = buildCentroids(values);
 		context.setMatrix(new RowListMatrix(centroidsLoc));
+		return centroidsLoc;
 	}
 	
 	private void printReduceInputKey (Key key) {
