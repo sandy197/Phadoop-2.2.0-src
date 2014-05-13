@@ -97,14 +97,17 @@ public class KMDriver {
 //			e1.printStackTrace();
 //		}
 		try {
+			int iteration_const = 1;
 			while(!converged && iteration <= maxIterations){
 				
-					Path centersOut = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH, "iterationDummy-" + iteration));
-					if(!this.kmeansJob(centersIn, centersOut, iteration)){
+					Path centersOut = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH, "iterationDummy-"+iteration));
+					List<Value> oldCenters = KMUtils.getCentroidsFromFile(centersIn, false);
+					if(!this.kmeansJob(centersIn, centersOut, iteration_const)){
 						throw new Exception("Job unsuccessful!");
 					}
-					centersOut = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH, "iteration-" + iteration));
-					converged = isConverged(centersIn, centersOut, convergenceDelta, iteration == 1);
+					centersOut = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH, "iteration-" + iteration_const));
+					List<Value> newCenters = KMUtils.getCentroidsFromFile(centersOut, false);
+					converged = isConverged(oldCenters, newCenters, convergenceDelta);
 					if(!converged){
 						centersIn = centersOut;
 						System.out.println("## not converged, going for the next iteration with input from "+ centersIn.toString());
@@ -121,6 +124,11 @@ public class KMDriver {
 		boolean converged = true;
 		List<Value> oldCentroids = KMUtils.getCentroidsFromFile(centersIn, false);
 		List<Value> newCentroids = KMUtils.getCentroidsFromFile(centersOut, false);
+		return isConverged(oldCentroids, newCentroids, convergenceDelta);
+	}
+	
+	private boolean isConverged(List<Value> oldCentroids, List<Value> newCentroids, int convergenceDelta) throws Exception {
+		boolean converged = true;
 //		if(newCentroids.isEmpty()){
 //			newCentroids = KMUtils.getCentroidsFromFile(centersOut, true);
 //		}
