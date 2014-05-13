@@ -150,7 +150,7 @@ public class SpMMDriver {
 	private void aggregateJob(Configuration conf, int k) {
 		Job job;
 		try {
-			job = Job.getInstance(conf, "Sparse matrix multiplication aggregator");
+		job = Job.getInstance(conf, "Sparse matrix multiplication aggregator");
 		
 	    job.setJarByClass(SpMMMapper.class);
 	    job.setNumReduceTasks(conf.getInt("SpMM.R2", 0));

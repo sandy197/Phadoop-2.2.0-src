@@ -57,6 +57,7 @@ public class KMUtils {
 	}
 	
 	public static List<Value> getCentroidsFromFile(Path filePath, boolean isReduceOutput) {
+		if(DEBUG) System.out.println("##Reading from:"+ filePath.toString() + " at TS:" + System.nanoTime());
 		List<Value> partialCentroids = new ArrayList<Value>();
 		Configuration conf = new Configuration();
 		Reader reader = null;

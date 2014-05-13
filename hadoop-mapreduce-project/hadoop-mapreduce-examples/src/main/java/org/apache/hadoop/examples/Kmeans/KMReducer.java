@@ -97,7 +97,7 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 			Configuration conf = context.getConfiguration();
 			FileSystem fs = FileSystem.get(conf);
 			int taskId = context.getTaskAttemptID().getTaskID().getId();
-			//TODO: write the partial centroids to files
+			//write the partial centroids to files
 			Path path = new Path(conf.get("KM.tempClusterDir") + "/" + taskId);
 			System.out.println("##Writing to:" + path.toString());
 			SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, path,
