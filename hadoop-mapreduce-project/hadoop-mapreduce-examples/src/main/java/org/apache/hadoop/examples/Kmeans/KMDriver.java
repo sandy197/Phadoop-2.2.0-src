@@ -99,10 +99,11 @@ public class KMDriver {
 		try {
 			while(!converged && iteration <= maxIterations){
 				
-					Path centersOut = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH, "iteration-" + iteration));
+					Path centersOut = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH, "iterationDummy-" + iteration));
 					if(!this.kmeansJob(centersIn, centersOut, iteration)){
 						throw new Exception("Job unsuccessful!");
 					}
+					centersOut = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH, "iteration-" + iteration));
 					converged = isConverged(centersIn, centersOut, convergenceDelta, iteration == 1);
 					if(!converged){
 						centersIn = centersOut;
@@ -118,8 +119,8 @@ public class KMDriver {
 	
 	private boolean isConverged(Path centersIn, Path centersOut, int convergenceDelta, boolean isFirstIter) throws Exception {
 		boolean converged = true;
-		List<Value> oldCentroids = KMUtils.getCentroidsFromFile(centersIn, !isFirstIter);
-		List<Value> newCentroids = KMUtils.getCentroidsFromFile(centersOut, true);
+		List<Value> oldCentroids = KMUtils.getCentroidsFromFile(centersIn, false);
+		List<Value> newCentroids = KMUtils.getCentroidsFromFile(centersOut, false);
 //		if(newCentroids.isEmpty()){
 //			newCentroids = KMUtils.getCentroidsFromFile(centersOut, true);
 //		}
