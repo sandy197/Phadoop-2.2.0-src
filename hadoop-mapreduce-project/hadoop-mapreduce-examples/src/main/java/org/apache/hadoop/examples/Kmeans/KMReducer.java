@@ -119,9 +119,6 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 			writer.close();
 			System.out.println("##Writing to:" + path.toString() +" Done");
 			
-			if(DEBUG){
-				KMUtils.listFiles(new Path(conf.get("KM.tempClusterDir")), fs, conf);
-			}
 			//sync
 			Barrier b = new Barrier(ZK_ADDRESS, "/b-kmeans", R1);
 			try{
@@ -135,6 +132,10 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 				e.printStackTrace();
 			} catch (InterruptedException e){
 				e.printStackTrace();
+			}
+			
+			if(DEBUG){
+				KMUtils.listFiles(new Path(conf.get("KM.tempClusterDir")), fs, conf);
 			}
 			
 			//read files and compute newClusters only if its the task 0
