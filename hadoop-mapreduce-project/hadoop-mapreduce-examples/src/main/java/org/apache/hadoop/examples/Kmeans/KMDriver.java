@@ -65,11 +65,11 @@ public class KMDriver {
 //	    conf.set("KM.centerOut", centerOut.toString());
 	    String inputDataPath = fs.makeQualified(new Path(KM_DATA_INPUT_PATH)).toString();
 	    String inputCenterPath = fs.makeQualified(new Path(KM_CENTER_INPUT_PATH)).toString();
-//	    String outPath = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH)).toString();
+	    String outPath = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH)).toString();
 	    String tempClusterDirPath = fs.makeQualified(new Path(KM_TEMP_CLUSTER_DIR_PATH)).toString();
 	    conf.set("KM.inputDataPath", inputDataPath);
 	    conf.set("KM.inputCenterPath", inputCenterPath);
-//	    conf.set("KM.outputDirPath", outPath);
+	    conf.set("KM.outputDirPath", outPath);
 	    conf.set("KM.tempClusterDir", tempClusterDirPath);
 	    conf.setInt("KM.R1", taskCount);
 	    
@@ -164,9 +164,11 @@ public class KMDriver {
 	}
 
 	public boolean kmeansJob(Path centersIn, Path centersOut, int iteration) throws Exception{
+		//used by reducer to identify the iteration
+		conf.setInt("KM.iteration", iteration);
+		
 		Job job = Job.getInstance(conf, "kmeans");
 		job.setJarByClass(org.apache.hadoop.examples.Kmeans.KMDriver.class);
-		
 		job.setNumReduceTasks(conf.getInt("KM.R1", 6));
 	    System.out.println("Number of reduce tasks for job1 set to: "+ conf.getInt("KM.R1", 6));
 	    job.setInputFormatClass(SequenceFileInputFormat.class);

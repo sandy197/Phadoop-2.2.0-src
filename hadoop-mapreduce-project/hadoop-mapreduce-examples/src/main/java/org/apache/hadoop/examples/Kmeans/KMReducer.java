@@ -35,6 +35,7 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 	private int R1;
 	private boolean isCbuilt, isVbuilt;
 	private List<Value> centroids, vectors;
+	private int iteration;
 	
 	public void setup (Context context) {
 		init(context);
@@ -45,6 +46,7 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 		dimension = conf.getInt("KM.dimension", 2);
 		k = conf.getInt("KM.k", 6);
 		R1 = conf.getInt("KM.R1", 6);
+		iteration = conf.getInt("KM.iteration", 0);
 //		centroids = new ArrayList<Value>();
 //		vectors = new ArrayList<Value>();
 		isCbuilt = isVbuilt = false;
@@ -186,6 +188,12 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 					centroidIndices.add(centroid.getCentroidIdx());
 				}
 				
+				Path outputPath = new Path(conf.get("KM.outputDirPath"), "iteration-" + iteration);
+				System.out.println("##Writing to:" + outputPath.toString());
+				SequenceFile.Writer outputWriter = SequenceFile.createWriter(fs, conf, outputPath,
+					      Key.class, Value.class,
+					      SequenceFile.CompressionType.NONE);
+				
 				for(Integer key : auxCentroids.keySet()){
 					//compute new clusters
 					Value newCentroid = computeNewCentroid(auxCentroids.get(key));
@@ -193,7 +201,8 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 					// write it back as a standard reducer output !
 					// make sure all the k-cluster centroids are written even the ones with size-zero
 					if(newCentroid != null && centroidIndices.contains(key)){
-						context.write(new Key(key, VectorType.CENTROID), newCentroid);
+//						context.write(new Key(key, VectorType.CENTROID), newCentroid);
+						outputWriter.append(new Key(key, VectorType.CENTROID), newCentroid);
 						if(DEBUG) printReduceOutput(new Key(key, VectorType.CENTROID), newCentroid);
 						centroidIndices.remove(key);
 					}
@@ -205,10 +214,13 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 				
 				if(!centroidIndices.isEmpty()){
 					for(Integer key : centroidIndices) {
-						context.write(new Key(key, VectorType.CENTROID), centroidsMap.get(key));
+//						context.write(new Key(key, VectorType.CENTROID), centroidsMap.get(key));
+						outputWriter.append(new Key(key, VectorType.CENTROID), centroidsMap.get(key));
 						if(DEBUG) printReduceOutput(new Key(key, VectorType.CENTROID), centroidsMap.get(key));
 					}
 				}
+				
+				outputWriter.close();
 			}
 		}
 	}
