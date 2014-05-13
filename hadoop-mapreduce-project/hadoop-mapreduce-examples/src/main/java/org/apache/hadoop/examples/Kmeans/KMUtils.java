@@ -65,11 +65,12 @@ public class KMUtils {
 			FileSystem fs = filePath.getFileSystem(conf);
 			if(isReduceOutput){
 				FileStatus[] parts = fs.listStatus(filePath);
-				if(DEBUG) System.out.println("Number of parts read: "+ parts.length+ " From :" + filePath.toString());
+				if(DEBUG) System.out.println("##Number of parts read: "+ parts.length+ " From :" + filePath.toString());
 			    for (FileStatus part : parts) {
 			      String name = part.getPath().getName();
 			      if (name.startsWith("part") && !name.endsWith(".crc")) {
-			        reader = new SequenceFile.Reader(fs, part.getPath(), conf);
+			    	if(DEBUG) System.out.println("##Reading from : " + name);
+			        reader = new SequenceFile.Reader(conf, SequenceFile.Reader.file(part.getPath()));
 			        try {
 			          Key key = reader.getKeyClass().asSubclass(Key.class).newInstance();
 			          Value value = new Value();

@@ -121,6 +121,10 @@ public class KMDriver {
 		if(newCentroids.isEmpty()){
 			newCentroids = KMUtils.getCentroidsFromFile(centersOut, true);
 		}
+		if(newCentroids.isEmpty()){
+			if(DEBUG) System.out.println("Screw this! I am trying again with a normal read");
+			newCentroids = KMUtils.getCentroidsFromFile(centersOut, false);
+		}
 		Hashtable<Integer, Value> oldCentroidMap = new Hashtable<Integer,Value>();
 		Hashtable<Integer, Value> newCentroidMap = new Hashtable<Integer,Value>();
 		
