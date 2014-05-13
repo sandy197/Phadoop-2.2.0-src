@@ -1,5 +1,6 @@
 package org.apache.hadoop.examples.Kmeans;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,6 +55,25 @@ public class KMUtils {
         	}
         }
 		return partialCentroids;
+	}
+	
+	public static void listFiles(Path path, FileSystem fs, Configuration conf){
+		FileStatus[] parts = null;
+		try {
+			parts = fs.listStatus(new Path(conf.get("KM.tempClusterDir")));
+			System.out.println("##Listing for "+ path.toString());
+			for(FileStatus part : parts)
+				System.out.println(part.getPath().toString());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public static List<Value> getCentroidsFromFile(Path filePath, boolean isReduceOutput) {

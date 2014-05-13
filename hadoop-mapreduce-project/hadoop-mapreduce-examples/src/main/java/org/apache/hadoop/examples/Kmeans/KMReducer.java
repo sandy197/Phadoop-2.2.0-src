@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CreateFlag;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -117,6 +118,10 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 			}
 			writer.close();
 			System.out.println("##Writing to:" + path.toString() +" Done");
+			
+			if(DEBUG){
+				KMUtils.listFiles(new Path(conf.get("KM.tempClusterDir")), fs, conf);
+			}
 			//sync
 			Barrier b = new Barrier(ZK_ADDRESS, "/b-kmeans", R1);
 			try{
@@ -141,6 +146,11 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 						auxCentroids.put(partialCentroid.getCentroidIdx(), partialCentroid);
 				}
 				
+				//list all the files under tempClusterDir
+				if(DEBUG){
+					KMUtils.listFiles(new Path(conf.get("KM.tempClusterDir")), fs, conf);
+				}
+				
 				//add partial centers of other tasks to the hashmap
 				for(int i = 1; i < R1; i++){
 					//configureWithClusterInfo for reading a file
@@ -148,13 +158,18 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 					Path filePath = fs.makeQualified(path);
 					System.out.println("##Reading from:" + path.toString());
 					List<Value> partCentroidsFromFile = KMUtils.getPartialCentroidsFromFile(filePath);
-					for(Value partialCentroid : partCentroidsFromFile){
-						if(auxCentroids.containsKey(partialCentroid.getCentroidIdx())){
-							//TODO: clarify changes to count and consider corner cases
-							auxCentroids.get(partialCentroid.getCentroidIdx()).addVector(partialCentroid);
-						}
-						else{
-							auxCentroids.put(partialCentroid.getCentroidIdx(), partialCentroid);
+					if(partCentroidsFromFile != null && partCentroidsFromFile.isEmpty()){
+						if(DEBUG) System.out.println("##No partial centroids read from task:"+ i);
+					}
+					else{
+						for(Value partialCentroid : partCentroidsFromFile){
+							if(auxCentroids.containsKey(partialCentroid.getCentroidIdx())){
+								//TODO: clarify changes to count and consider corner cases
+								auxCentroids.get(partialCentroid.getCentroidIdx()).addVector(partialCentroid);
+							}
+							else{
+								auxCentroids.put(partialCentroid.getCentroidIdx(), partialCentroid);
+							}
 						}
 					}
 				}

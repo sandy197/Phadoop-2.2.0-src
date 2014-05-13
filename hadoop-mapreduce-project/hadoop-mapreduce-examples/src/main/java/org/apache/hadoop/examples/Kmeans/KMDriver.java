@@ -73,7 +73,7 @@ public class KMDriver {
 	    conf.set("KM.tempClusterDir", tempClusterDirPath);
 	    conf.setInt("KM.R1", taskCount);
 	    
-	    fs.delete(new Path(tempClusterDirPath), true);
+//	    fs.delete(new Path(tempClusterDirPath), true);
 //		fs.delete(new Path(outPath), true);
 		
 		URI uri = new URI("hdfs://localhost/libraries/libpapi.so.1#libpapi.so");
@@ -100,7 +100,9 @@ public class KMDriver {
 			while(!converged && iteration <= maxIterations){
 				
 					Path centersOut = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH, "iteration-" + iteration));
-					this.kmeansJob(centersIn, centersOut, iteration);
+					if(!this.kmeansJob(centersIn, centersOut, iteration)){
+						throw new Exception("Job unsuccessful!");
+					}
 					converged = isConverged(centersIn, centersOut, convergenceDelta, iteration == 1);
 					if(!converged){
 						centersIn = centersOut;
@@ -118,13 +120,13 @@ public class KMDriver {
 		boolean converged = true;
 		List<Value> oldCentroids = KMUtils.getCentroidsFromFile(centersIn, !isFirstIter);
 		List<Value> newCentroids = KMUtils.getCentroidsFromFile(centersOut, true);
-		if(newCentroids.isEmpty()){
-			newCentroids = KMUtils.getCentroidsFromFile(centersOut, true);
-		}
-		if(newCentroids.isEmpty()){
-			if(DEBUG) System.out.println("Screw this! I am trying again with a normal read");
-			newCentroids = KMUtils.getCentroidsFromFile(centersOut, false);
-		}
+//		if(newCentroids.isEmpty()){
+//			newCentroids = KMUtils.getCentroidsFromFile(centersOut, true);
+//		}
+//		if(newCentroids.isEmpty()){
+//			if(DEBUG) System.out.println("Screw this! I am trying again with a normal read");
+//			newCentroids = KMUtils.getCentroidsFromFile(centersOut, false);
+//		}
 		Hashtable<Integer, Value> oldCentroidMap = new Hashtable<Integer,Value>();
 		Hashtable<Integer, Value> newCentroidMap = new Hashtable<Integer,Value>();
 		
@@ -161,12 +163,12 @@ public class KMDriver {
 					newCentroid.getCoordinates()) <= convergenceDelta;
 	}
 
-	public void kmeansJob(Path centersIn, Path centersOut, int iteration) throws Exception{
+	public boolean kmeansJob(Path centersIn, Path centersOut, int iteration) throws Exception{
 		Job job = Job.getInstance(conf, "kmeans");
 		job.setJarByClass(org.apache.hadoop.examples.Kmeans.KMDriver.class);
 		
 		job.setNumReduceTasks(conf.getInt("KM.R1", 6));
-	    System.out.println("Number of reduce tasks for job1 set to: "+ conf.getInt("KM.R1", 0));
+	    System.out.println("Number of reduce tasks for job1 set to: "+ conf.getInt("KM.R1", 6));
 	    job.setInputFormatClass(SequenceFileInputFormat.class);
 	    job.setOutputFormatClass(SequenceFileOutputFormat.class);
  		job.setMapperClass(KMMapper.class);
@@ -183,8 +185,8 @@ public class KMDriver {
 	    
 	    FileInputFormat.addInputPath(job, centersIn);
 	    FileOutputFormat.setOutputPath(job, centersOut);	    
-		if (!job.waitForCompletion(true))
-			return;
+		return job.waitForCompletion(true);
+			
 	}
 
 }
