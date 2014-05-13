@@ -109,7 +109,7 @@ public class KMDriver {
 						System.out.println("## not converged, going for the next iteration with input from "+ centersIn.toString());
 					}
 					iteration++;
-					fs.delete(new Path(conf.get("KM.tempClusterDir")), true);
+//					fs.delete(new Path(conf.get("KM.tempClusterDir")), true);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
