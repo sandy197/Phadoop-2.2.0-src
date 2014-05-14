@@ -98,10 +98,13 @@ public class KMDriver {
 //		}
 		try {
 			int iteration_const = 1;
+			List<Value> oldCenters = null;
 			while(!converged && iteration <= maxIterations){
 				
 					Path centersOut = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH, "iterationDummy-"+iteration));
-					List<Value> oldCenters = KMUtils.getCentroidsFromFile(centersIn, false);
+					fs.delete(centersOut, true);					
+					if(oldCenters == null)
+						oldCenters = KMUtils.getCentroidsFromFile(centersIn, false);
 					if(!this.kmeansJob(centersIn, centersOut, iteration_const)){
 						throw new Exception("Job unsuccessful!");
 					}
@@ -110,6 +113,7 @@ public class KMDriver {
 					converged = isConverged(oldCenters, newCenters, convergenceDelta);
 					if(!converged){
 						centersIn = centersOut;
+						oldCenters = newCenters;
 						System.out.println("## not converged, going for the next iteration with input from "+ centersIn.toString());
 					}
 					iteration++;
