@@ -44,7 +44,7 @@ public class KMMapper extends Mapper<Key, Value, Key, Value> {
 			//send it to all reduce tasks
 			int centroidId = centroidIdxSeq++;
 			for(int i = 0; i < R1; i++){
-				ivalue.setCentroidIdx(centroidId);
+				//ivalue.setCentroidIdx(centroidId);
 				newKey = new Key(i, ikey.getType());
 				context.write(new Key(i, ikey.getType()), ivalue);
 				if(DEBUG) printMapOutput(newKey, ivalue);

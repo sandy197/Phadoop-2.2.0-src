@@ -46,8 +46,8 @@ public class KMDriver {
 		KMDriver driver = new KMDriver();
 		String[] remainingArgs = goParser.getRemainingArgs();
 		
-		if (remainingArgs.length < 6) {
-		     System.out.println("USAGE: <COUNT> <K> <DIMENSION OF VECTORS> <MAXITERATIONS> <num of tasks> <convgDelta>");
+		if (remainingArgs.length < 7) {
+		     System.out.println("USAGE: <COUNT> <K> <DIMENSION OF VECTORS> <MAXITERATIONS> <num of tasks> <convgDelta> <ratio...>");
 		      return;
 		}
 		
@@ -57,6 +57,15 @@ public class KMDriver {
 		int iterations = Integer.parseInt(remainingArgs[3]);
 		int taskCount = Integer.parseInt(remainingArgs[4]);
 		int convergenceDelta = Integer.parseInt(remainingArgs[5]);
+		if (remainingArgs.length !=  5 + taskCount) {
+		     System.out.println("Provide appropriate ratio for every task");
+		     return;
+		}
+		int[] ratio = new int[taskCount];
+		for(int i = 0; i < taskCount; i++){
+			ratio[i] = Integer.parseInt(remainingArgs[6+i]);
+		}
+		
 		conf.setInt("KM.maxiterations", iterations);		
 		conf.setInt("KM.k", k);
 		conf.setInt("KM.dimension", dimension);
@@ -81,7 +90,7 @@ public class KMDriver {
 		DistributedCache.addCacheFile(uri, conf);
 		//write input data and centers to the file paths accordingly
 		// NOTE: Make sure centers have a cluster identifier with it.
-		KMUtils.prepareInput(count, k, dimension, taskCount, conf, new Path(KM_DATA_INPUT_PATH), new Path(KM_CENTER_INPUT_PATH), fs);
+		KMUtils.prepareInput(count, k, dimension, taskCount, conf, new Path(KM_DATA_INPUT_PATH), new Path(KM_CENTER_INPUT_PATH), fs, ratio);
 		driver.kmeans(iterations, convergenceDelta);
 	}
 	

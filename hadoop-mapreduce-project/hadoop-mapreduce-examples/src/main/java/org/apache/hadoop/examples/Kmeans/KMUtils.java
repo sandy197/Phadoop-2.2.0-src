@@ -146,10 +146,10 @@ public class KMUtils {
 		return distance;
 	}
 	
-	public static int[] ratio = {2, 4, 8, 16, 32, 64};
+	//public static int[] ratio = {2, 4, 8, 16, 32, 64};
 	
 	public static void prepareInput(int count, int k, int dimension, int taskCount,
-		      Configuration conf, Path in, Path center, FileSystem fs)
+		      Configuration conf, Path in, Path center, FileSystem fs, int[] ratio)
 		      throws IOException {
 		int cIdxSeq = 0;
 		int rSigma = 0;
