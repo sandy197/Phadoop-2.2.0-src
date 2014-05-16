@@ -57,7 +57,7 @@ public class KMDriver {
 		int iterations = Integer.parseInt(remainingArgs[3]);
 		int taskCount = Integer.parseInt(remainingArgs[4]);
 		int convergenceDelta = Integer.parseInt(remainingArgs[5]);
-		if (remainingArgs.length !=  5 + taskCount) {
+		if (remainingArgs.length <  6 + taskCount) {
 		     System.out.println("Provide appropriate ratio for every task");
 		     return;
 		}
