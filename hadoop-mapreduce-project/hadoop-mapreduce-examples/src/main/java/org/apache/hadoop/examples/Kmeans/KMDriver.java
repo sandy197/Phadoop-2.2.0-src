@@ -40,6 +40,7 @@ public class KMDriver {
 	
 	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws Exception {
+		long start = System.nanoTime();
 		GenericOptionsParser goParser = new GenericOptionsParser(conf, args);
 		fs = FileSystem.get(conf);
 		fs.mkdirs(new Path(KM_DATA_DIR));
@@ -92,6 +93,8 @@ public class KMDriver {
 		// NOTE: Make sure centers have a cluster identifier with it.
 		KMUtils.prepareInput(count, k, dimension, taskCount, conf, new Path(KM_DATA_INPUT_PATH), new Path(KM_CENTER_INPUT_PATH), fs, ratio);
 		driver.kmeans(iterations, convergenceDelta);
+		long end = System.nanoTime();
+		System.out.println("Job successfully completed, Time taken: " + (end - start));
 	}
 	
 	public void kmeans(int maxIterations, int convergenceDelta){

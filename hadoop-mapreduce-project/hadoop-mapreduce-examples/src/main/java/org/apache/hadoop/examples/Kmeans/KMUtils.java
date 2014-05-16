@@ -176,7 +176,7 @@ public class KMUtils {
 		        CompressionType.NONE);
 		final SequenceFile.Writer dataWriter = SequenceFile.createWriter(fs, conf,
 		        in, Key.class, Value.class, CompressionType.NONE);
-		Random r = new Random();
+		Random r = new Random(1000);
 		for (int i = 0; i < count; i++) {
 			int[] arr = new int[dimension];
 			for (int d = 0; d < dimension; d++) {
