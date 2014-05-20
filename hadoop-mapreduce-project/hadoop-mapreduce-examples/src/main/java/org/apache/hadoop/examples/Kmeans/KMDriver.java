@@ -109,6 +109,7 @@ public class KMDriver {
 //			e1.printStackTrace();
 //		}
 		try {
+			boolean isFirstIter = true;
 			int iteration_const = 1;
 			List<Value> oldCenters = null;
 			while(!converged && iteration <= maxIterations){
@@ -117,9 +118,10 @@ public class KMDriver {
 					fs.delete(centersOut, true);					
 					if(oldCenters == null)
 						oldCenters = KMUtils.getCentroidsFromFile(centersIn, false);
-					if(!this.kmeansJob(centersIn, centersOut, iteration_const)){
+					if(!this.kmeansJob(centersIn, centersOut, iteration_const, isFirstIter)){
 						throw new Exception("Job unsuccessful!");
 					}
+					isFirstIter = false;
 					centersOut = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH, "iteration-" + iteration_const));
 					List<Value> newCenters = KMUtils.getCentroidsFromFile(centersOut, false);
 					converged = isConverged(oldCenters, newCenters, convergenceDelta);
@@ -188,7 +190,7 @@ public class KMDriver {
 					newCentroid.getCoordinates()) <= convergenceDelta;
 	}
 
-	public boolean kmeansJob(Path centersIn, Path centersOut, int iteration) throws Exception{
+	public boolean kmeansJob(Path centersIn, Path centersOut, int iteration, boolean isFirstIter) throws Exception{
 		//used by reducer to identify the iteration
 		conf.setInt("KM.iteration", iteration);
 		
@@ -207,7 +209,7 @@ public class KMDriver {
 	    job.setOutputValueClass(org.apache.hadoop.examples.Kmeans.KMTypes.Value.class);
 	    
 	    //provide input data only for the initial iteration.
-	    if(iteration == 1)
+	    if(isFirstIter)
 	    	FileInputFormat.addInputPath(job, new Path(conf.get("KM.inputDataPath")));
 	    
 	    FileInputFormat.addInputPath(job, centersIn);
