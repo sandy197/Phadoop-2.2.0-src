@@ -187,9 +187,9 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 					centroidsMap.put(centroid.getCentroidIdx(), centroid);
 					centroidIndices.add(centroid.getCentroidIdx());
 				}
-				
+				int mapTaskCount = conf.getInt("KM.mapTaskCount", 4);
 				List<SequenceFile.Writer> outputWriters = new ArrayList<SequenceFile.Writer>();
-				for(int i = 0; i < R1; i++){
+				for(int i = 0; i < mapTaskCount; i++){
 					Path outputPath = new Path(conf.get("KM.outputDirPath"), "iteration-" + i);
 					outputWriters.add(SequenceFile.createWriter(fs, conf, outputPath,
 						      Key.class, Value.class,

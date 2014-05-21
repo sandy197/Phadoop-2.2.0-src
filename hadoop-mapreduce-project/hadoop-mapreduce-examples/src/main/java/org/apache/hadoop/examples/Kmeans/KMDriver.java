@@ -70,7 +70,7 @@ public class KMDriver {
 		conf.setInt("KM.maxiterations", iterations);		
 		conf.setInt("KM.k", k);
 		conf.setInt("KM.dimension", dimension);
-		conf.setInt("KM.mapTaskCount", taskCount);
+		conf.setInt("KM.mapTaskCount", 4);
 //		conf.set("KM.centerIn", center.toString());
 //	    conf.set("KM.centerOut", centerOut.toString());
 	    String inputDataPath = fs.makeQualified(new Path(KM_DATA_INPUT_PATH)).toString();
@@ -191,7 +191,7 @@ public class KMDriver {
 	}
 
 	public boolean kmeansJob(Path centersIn, Path centersOut, int iteration, boolean isFirstIter) throws Exception{
-		int taskCount = conf.getInt("KM.R1", 6);
+		int mapTaskCount = conf.getInt("KM.mapTaskCount", 4);
 		//used by reducer to identify the iteration
 		conf.setInt("KM.iteration", iteration);
 		
@@ -215,7 +215,7 @@ public class KMDriver {
 	    	FileInputFormat.addInputPath(job, centersIn);
 	    }
 	    else{
-		    for(int i = 0 ; i < taskCount; i++){
+		    for(int i = 0 ; i < mapTaskCount; i++){
 		    	FileInputFormat.addInputPath(job, new Path(KM_CENTER_OUTPUT_PATH, "iteration-" + i));
 		    }
 	    }
