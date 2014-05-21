@@ -188,11 +188,19 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 					centroidIndices.add(centroid.getCentroidIdx());
 				}
 				
-				Path outputPath = new Path(conf.get("KM.outputDirPath"), "iteration-" + iteration);
-				System.out.println("##Writing to:" + outputPath.toString());
-				SequenceFile.Writer outputWriter = SequenceFile.createWriter(fs, conf, outputPath,
-					      Key.class, Value.class,
-					      SequenceFile.CompressionType.NONE);
+				List<SequenceFile.Writer> outputWriters = new ArrayList<SequenceFile.Writer>();
+				for(int i = 0; i < R1; i++){
+					Path outputPath = new Path(conf.get("KM.outputDirPath"), "iteration-" + i);
+					outputWriters.add(SequenceFile.createWriter(fs, conf, outputPath,
+						      Key.class, Value.class,
+						      SequenceFile.CompressionType.NONE));
+				}
+				
+//				Path outputPath = new Path(conf.get("KM.outputDirPath"), "iteration-" + iteration);
+//				System.out.println("##Writing to:" + outputPath.toString());
+//				SequenceFile.Writer outputWriter = SequenceFile.createWriter(fs, conf, outputPath,
+//					      Key.class, Value.class,
+//					      SequenceFile.CompressionType.NONE);
 				
 				for(Integer key : auxCentroids.keySet()){
 					//compute new clusters
@@ -202,7 +210,8 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 					// make sure all the k-cluster centroids are written even the ones with size-zero
 					if(newCentroid != null && centroidIndices.contains(key)){
 //						context.write(new Key(key, VectorType.CENTROID), newCentroid);
-						outputWriter.append(new Key(key, VectorType.CENTROID), newCentroid);
+						for(SequenceFile.Writer outputWriter : outputWriters)
+							outputWriter.append(new Key(key, VectorType.CENTROID), newCentroid);
 						if(DEBUG) printReduceOutput(new Key(key, VectorType.CENTROID), newCentroid);
 						centroidIndices.remove(key);
 					}
@@ -215,12 +224,13 @@ public class KMReducer extends Reducer<Key, Value, Key, Value> {
 				if(!centroidIndices.isEmpty()){
 					for(Integer key : centroidIndices) {
 //						context.write(new Key(key, VectorType.CENTROID), centroidsMap.get(key));
-						outputWriter.append(new Key(key, VectorType.CENTROID), centroidsMap.get(key));
+						for(SequenceFile.Writer outputWriter : outputWriters)
+							outputWriter.append(new Key(key, VectorType.CENTROID), centroidsMap.get(key));
 						if(DEBUG) printReduceOutput(new Key(key, VectorType.CENTROID), centroidsMap.get(key));
 					}
 				}
-				
-				outputWriter.close();
+				for(SequenceFile.Writer outputWriter : outputWriters)
+					outputWriter.close();
 			}
 		}
 	}

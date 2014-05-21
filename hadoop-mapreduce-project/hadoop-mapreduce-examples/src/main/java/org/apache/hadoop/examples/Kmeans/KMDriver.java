@@ -191,6 +191,7 @@ public class KMDriver {
 	}
 
 	public boolean kmeansJob(Path centersIn, Path centersOut, int iteration, boolean isFirstIter) throws Exception{
+		int taskCount = conf.getInt("KM.R1", 6);
 		//used by reducer to identify the iteration
 		conf.setInt("KM.iteration", iteration);
 		
@@ -209,13 +210,17 @@ public class KMDriver {
 	    job.setOutputValueClass(org.apache.hadoop.examples.Kmeans.KMTypes.Value.class);
 	    
 	    //provide input data only for the initial iteration.
-	    if(isFirstIter)
+	    if(isFirstIter){
 	    	FileInputFormat.addInputPath(job, new Path(conf.get("KM.inputDataPath")));
-	    
-	    FileInputFormat.addInputPath(job, centersIn);
+	    	FileInputFormat.addInputPath(job, centersIn);
+	    }
+	    else{
+		    for(int i = 0 ; i < taskCount; i++){
+		    	FileInputFormat.addInputPath(job, new Path(KM_CENTER_OUTPUT_PATH, "iteration-" + i));
+		    }
+	    }
 	    FileOutputFormat.setOutputPath(job, centersOut);	    
 		return job.waitForCompletion(true);
-			
 	}
 
 }

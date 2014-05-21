@@ -37,6 +37,7 @@ public class KMMapper extends Mapper<Key, Value, Key, Value> {
 			throws IOException, InterruptedException {
 		Key newKey = ikey;
 		if(ikey.getType() == VectorType.REGULAR){
+			if(context.getTaskAttemptID().getTaskID().getId() == 0)
 			context.write(newKey, ivalue);
 			if(DEBUG) printMapOutput(newKey, ivalue);
 		}
