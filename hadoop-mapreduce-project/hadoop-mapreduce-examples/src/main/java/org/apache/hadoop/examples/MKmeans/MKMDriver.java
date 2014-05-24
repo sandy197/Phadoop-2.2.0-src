@@ -1,5 +1,6 @@
 package org.apache.hadoop.examples.MKmeans;
 
+import java.net.URI;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -47,7 +49,6 @@ public class MKMDriver {
 			      return;
 			}
 
-			conf = new JobConf();
 			int count = Integer.parseInt(remainingArgs[0]);
 			int k = Integer.parseInt(remainingArgs[1]);
 			int dimension = Integer.parseInt(remainingArgs[2]);
@@ -89,6 +90,11 @@ public class MKMDriver {
 			for(int pj = 0; pj < paths.length; pj++){
 				paths[pj] = new Path(KM_DATA_INPUT_PATH, ""+pj);
 			}
+			
+//			URI uri = new URI("hdfs://localhost/libraries/libpapi.so.1#libpapi.so");
+//			DistributedCache.createSymlink(conf);
+//			DistributedCache.addCacheFile(uri, conf);
+			
 			MKMUtils.prepareInput(count, k, dimension, taskCount, conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, ratio);
 			long start = System.nanoTime();
 			driver.kmeans(iterations, convergenceDelta);
