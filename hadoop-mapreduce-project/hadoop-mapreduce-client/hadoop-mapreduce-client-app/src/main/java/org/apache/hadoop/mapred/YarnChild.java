@@ -454,8 +454,8 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
   //TODO:check if we really need this. 
     // A map task from the 2nd iteration can stop the child form the previous reduce run.
     // We cannot launch a separate process for the MAP task as we can not differentiate it. 
-    if(firstTaskid.getTaskType() == TaskType.MAP){
-    	LOG.info("Map task is set to be stopped");
+    if(firstTaskid.getTaskType() == TaskType.REDUCE){
+    	LOG.info("Reduce task is set to be stopped");
     	this.setStopChild(true);
     }
 
