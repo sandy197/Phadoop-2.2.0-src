@@ -10,11 +10,13 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.examples.MKmeans.MKMTypes.Values;
 import org.apache.hadoop.examples.MKmeans.MKMTypes.VectorType;
 
 public class MKMReducer extends Reducer<IntWritable, PartialCentroid, Key, Value> {
 
 	private int mapTaskCount;
+	private Values newCentroids;
 	private List<SequenceFile.Writer> writers;
 	
 	
@@ -24,6 +26,7 @@ public class MKMReducer extends Reducer<IntWritable, PartialCentroid, Key, Value
 		try {
 			fs = FileSystem.get(conf);
 			init(context);
+			newCentroids = new Values();
 			//initialize the list of sequence file writers
 			writers = new ArrayList<SequenceFile.Writer>();
 			for(int i = 0; i < mapTaskCount; i++){
@@ -51,6 +54,10 @@ public class MKMReducer extends Reducer<IntWritable, PartialCentroid, Key, Value
 	@Override
 	protected void cleanup(Context context) throws IOException,
 			InterruptedException {
+		//iterate the files and write newCentroids to each of them
+		for(SequenceFile.Writer writer : writers){
+			writer.append(new Key(1, VectorType.CENTROID), newCentroids);
+		}
 		super.cleanup(context);
 		//close writers
 		if(writers != null){
@@ -78,10 +85,11 @@ public class MKMReducer extends Reducer<IntWritable, PartialCentroid, Key, Value
 		}
 		try {
 			newCentroid = computeNewCentroid(newpCentroid);
+			newCentroids.getValues().add(newCentroid);
 			//TODO: iterate through all the file and write each of the newCentroids computed
-			for(SequenceFile.Writer writer : writers){
-				writer.append(new Key(1, VectorType.CENTROID), newCentroid);
-			}
+//			for(SequenceFile.Writer writer : writers){
+//				writer.append(new Key(1, VectorType.CENTROID), newCentroid);
+//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

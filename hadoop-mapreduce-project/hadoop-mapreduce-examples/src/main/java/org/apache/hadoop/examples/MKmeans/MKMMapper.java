@@ -11,7 +11,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer.Context;
-import org.apache.hadoop.examples.Kmeans.RowListMatrix;
 import org.apache.hadoop.examples.MKmeans.MKMTypes.Values;
 import org.apache.hadoop.examples.MKmeans.MKMTypes.VectorType;
 
