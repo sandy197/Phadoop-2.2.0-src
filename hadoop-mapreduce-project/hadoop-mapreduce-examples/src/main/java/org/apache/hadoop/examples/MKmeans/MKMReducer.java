@@ -32,7 +32,7 @@ public class MKMReducer extends Reducer<IntWritable, PartialCentroid, Key, Value
 			for(int i = 0; i < mapTaskCount; i++){
 				Path path = new Path(conf.get("KM.inputDataPath"), ""+i);
 				writers.add(SequenceFile.createWriter(fs, conf, path,
-					      Key.class, Value.class,
+					      Key.class, Values.class,
 					      SequenceFile.CompressionType.NONE));
 			}
 		} catch (IOException e) {
