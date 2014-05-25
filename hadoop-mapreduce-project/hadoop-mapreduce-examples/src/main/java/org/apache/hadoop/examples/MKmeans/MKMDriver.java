@@ -91,9 +91,9 @@ public class MKMDriver {
 				paths[pj] = new Path(KM_DATA_INPUT_PATH, ""+pj);
 			}
 			
-//			URI uri = new URI("hdfs://localhost/libraries/libpapi.so.1#libpapi.so");
-//			DistributedCache.createSymlink(conf);
-//			DistributedCache.addCacheFile(uri, conf);
+			URI uri = new URI("hdfs://localhost/libraries/libpapi.so.1#libpapi.so");
+			DistributedCache.createSymlink(conf);
+			DistributedCache.addCacheFile(uri, conf);
 			
 			MKMUtils.prepareInput(count, k, dimension, taskCount, conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, ratio);
 			long start = System.nanoTime();
