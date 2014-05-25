@@ -15,6 +15,7 @@ import org.apache.hadoop.examples.MKmeans.MKMTypes.VectorType;
 
 public class MKMReducer extends Reducer<IntWritable, PartialCentroid, Key, Value> {
 
+	private static boolean DEBUG = true;
 	private int mapTaskCount;
 	private Values newCentroids;
 	private List<SequenceFile.Writer> writers;
@@ -55,6 +56,11 @@ public class MKMReducer extends Reducer<IntWritable, PartialCentroid, Key, Value
 	protected void cleanup(Context context) throws IOException,
 			InterruptedException {
 		//iterate the files and write newCentroids to each of them
+		if(DEBUG){
+			System.out.println("*****new centroids*******");
+			for(Value val : newCentroids.getValues())
+				System.out.println(val);
+		}
 		for(SequenceFile.Writer writer : writers){
 			writer.append(new Key(1, VectorType.CENTROID), newCentroids);
 		}

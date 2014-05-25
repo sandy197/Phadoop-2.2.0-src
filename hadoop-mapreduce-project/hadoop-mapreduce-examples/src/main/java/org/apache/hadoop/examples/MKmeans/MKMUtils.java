@@ -159,7 +159,7 @@ public class MKMUtils {
 		if (fs.exists(center))
 			fs.delete(center, true);
 		final SequenceFile.Writer centerWriter = SequenceFile.createWriter(fs,
-		        conf, center, Key.class, Value.class,
+		        conf, center, Key.class, Values.class,
 		        CompressionType.NONE);
 		Values centers = new Values(k);
 		List<Value> centerArray = centers.getValues();
@@ -188,7 +188,7 @@ public class MKMUtils {
 					//Need this line for Phadoop and write centers along with the data and comment the one below it.
 					centerArray.add(vector);
 					//Need this for Phadoop version, so that the centers can be read for the first time
-					centerWriter.append(new Key(r.nextInt(taskCount), VectorType.CENTROID),vector);
+					//centerWriter.append(new Key(r.nextInt(taskCount), VectorType.CENTROID),vector);
 					ki++;
 				}
 			}
@@ -198,6 +198,7 @@ public class MKMUtils {
 			dataWriter.close();
 			if(DEBUG) System.out.println("Done writing to :"+ in[i].toString());
 		}
+		centerWriter.append(new Key(1, VectorType.CENTROID),centers);
 		centerWriter.close();
 	}
 	
