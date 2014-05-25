@@ -91,7 +91,7 @@ public class MKMReducer extends Reducer<IntWritable, PartialCentroid, Key, Value
 		}
 		try {
 			newCentroid = computeNewCentroid(newpCentroid);
-			newCentroids.getValues().add(newCentroid);
+			newCentroids.addValue(newCentroid);
 			//TODO: iterate through all the file and write each of the newCentroids computed
 //			for(SequenceFile.Writer writer : writers){
 //				writer.append(new Key(1, VectorType.CENTROID), newCentroid);

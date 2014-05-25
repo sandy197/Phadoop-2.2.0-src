@@ -70,6 +70,11 @@ public class MKMTypes {
 			this.values = values;
 		}
 		
+		public void addValue(Value value){
+			values.add(value);
+			valCount++;
+		}
+		
 		@Override
 		public void readFields(DataInput in) throws IOException {
 			valCount = in.readInt();
