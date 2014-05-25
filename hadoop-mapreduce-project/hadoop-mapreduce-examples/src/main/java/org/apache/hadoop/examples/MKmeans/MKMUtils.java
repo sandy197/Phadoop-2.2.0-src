@@ -80,10 +80,11 @@ public class MKMUtils {
 			        reader = new SequenceFile.Reader(fs, part.getPath(), conf);
 			        try {
 			          Key key = reader.getKeyClass().asSubclass(Key.class).newInstance();
-			          Value value = new Value();
-			          while (reader.next(key, value)) {
-			        	  partialCentroids.add(value);
-			        	  value = new Value();
+			          Values values = new Values();
+			          while (reader.next(key, values)) {
+			        	  for(Value value : values.getValues())
+								partialCentroids.add(value);
+			        	  values = new Values();
 			          }
 			        } catch (InstantiationException e) { // shouldn't happen
 			          e.printStackTrace();
@@ -106,10 +107,11 @@ public class MKMUtils {
 				} catch (IllegalAccessException e) {
 						throw new IllegalStateException(e);
 				}
-				Value value = new Value();
-				while (reader.next(key, value)) {
-					partialCentroids.add(value);
-					value = new Value();
+				Values values = new Values();
+				while (reader.next(key, values)) {
+					for(Value value : values.getValues())
+						partialCentroids.add(value);
+					values = new Values();
 				}
 			}
         } catch (IOException e) {
