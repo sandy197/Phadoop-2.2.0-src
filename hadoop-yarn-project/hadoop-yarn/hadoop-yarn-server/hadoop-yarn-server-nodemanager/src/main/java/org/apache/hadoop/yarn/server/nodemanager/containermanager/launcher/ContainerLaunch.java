@@ -435,8 +435,8 @@ private long sleepDelayBeforeSigKill = 250;
         LOG.debug("Sending signal to pid " + processId
             + " as user " + user
             + " for container " + containerIdStr);
-        //Do not kill the process if its a reduce type
-        if(this.getTaskType() != 'r'){
+        //Do not kill the process if its a reduce type or a map type
+        if(this.getTaskType() != 'r' || this.getTaskType() != 'm'){
         	LOG.info("**killing the process as its not a reduce type");
         	if (sleepDelayBeforeSigKill > 0) {
                 boolean result = exec.signalContainer(user,
