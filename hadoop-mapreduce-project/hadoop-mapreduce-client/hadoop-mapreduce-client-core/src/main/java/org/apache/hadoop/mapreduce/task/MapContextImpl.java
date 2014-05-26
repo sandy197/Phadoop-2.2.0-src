@@ -70,8 +70,7 @@ public GenericMatrix<?> getMatrix() {
 
 @Override
 public void setMatrix(GenericMatrix<?> matrix) {
-	// TODO Auto-generated method stub
-	
+	conf.setMatrix(matrix);	
 }
   /**
    * Get the input split for this map.
