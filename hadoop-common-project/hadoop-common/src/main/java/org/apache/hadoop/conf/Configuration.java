@@ -166,6 +166,8 @@ import com.google.common.base.Preconditions;
 @InterfaceStability.Stable
 public class Configuration implements Iterable<Map.Entry<String,String>>,
                                       Writable {
+	private static boolean DEBUG = true;
+	
   private static final Log LOG =
     LogFactory.getLog(Configuration.class);
 
@@ -180,6 +182,7 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
 }
 
 public void setMatrix(GenericMatrix<?> matrix) {
+	if(DEBUG) System.out.println("**Invoked set matrix");
 	this.matrix = matrix;
 }
 

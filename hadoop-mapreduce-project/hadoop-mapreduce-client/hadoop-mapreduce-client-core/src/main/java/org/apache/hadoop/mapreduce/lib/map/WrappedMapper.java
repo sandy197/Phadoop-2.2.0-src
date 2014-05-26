@@ -78,8 +78,8 @@ Configuration conf = mapContext.getConfiguration();
 
 @Override
 public void setMatrix(GenericMatrix<?> gm) {
-	// TODO Auto-generated method stub
-	
+	Configuration conf = mapContext.getConfiguration();
+	conf.setMatrix(gm);
 }
     /**
      * Get the input split for this map.
