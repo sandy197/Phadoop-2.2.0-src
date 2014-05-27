@@ -68,11 +68,18 @@ public class MKMTypes {
 		
 		public void setValues(List<Value> values) {
 			this.values = values;
+			this.valCount = values.size();
 		}
 		
 		public void addValue(Value value){
 			values.add(value);
 			valCount++;
+		}
+		
+		public void addValues(List<Value> values){
+			for(Value val : values){
+				this.addValue(val);
+			}
 		}
 		
 		@Override
