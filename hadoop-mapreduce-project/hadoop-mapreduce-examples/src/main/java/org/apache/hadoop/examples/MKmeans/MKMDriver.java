@@ -4,15 +4,11 @@ import java.net.URI;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -22,15 +18,11 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 public class MKMDriver {
 		
-		//TODO : input/output paths
+		//input/output paths
 		private static final String KM_DATA_DIR = "tmp/kmeans/";
 		private static final String KM_CENTER_INPUT_PATH = KM_DATA_DIR + "/centerIn";
 		private static final String KM_CENTER_OUTPUT_PATH = KM_DATA_DIR + "/centerOut";
 		private static final String KM_DATA_INPUT_PATH = KM_DATA_DIR + "/data";
-//		private static final String KM_INPUT_PATH_1 = KM_DATA_DIR + "/1";
-//		private static final String KM_INPUT_PATH_2 = KM_DATA_DIR + "/2";
-//		private static final String KM_INPUT_PATH_3 = KM_DATA_DIR + "/3";
-//		private static final String KM_INPUT_PATH_4 = KM_DATA_DIR + "/4";
 		private static final String KM_TEMP_CLUSTER_DIR_PATH = KM_DATA_DIR + "/tmpC";
 		private static final boolean DEBUG = true;
 		
@@ -44,25 +36,22 @@ public class MKMDriver {
 			MKMDriver driver = new MKMDriver();
 			String[] remainingArgs = goParser.getRemainingArgs();
 			
-			if (remainingArgs.length < 7) {
-			     System.out.println("USAGE: <COUNT> <K> <DIMENSION OF VECTORS> <MAXITERATIONS> <num of tasks> <convgDelta> <ratio...>");
+			if (remainingArgs.length < 10) {
+			     System.out.println("USAGE: <COUNT> <K> <DIMENSION OF VECTORS> <SegmentsPerDimension> "
+			     		+ "<MAXITERATIONS> <num of tasks> <convgDelta> <FirstTaskInputCount> <Diff/Ratio> <isLinear(0/1)>");
 			      return;
 			}
 
 			int count = Integer.parseInt(remainingArgs[0]);
 			int k = Integer.parseInt(remainingArgs[1]);
 			int dimension = Integer.parseInt(remainingArgs[2]);
-			int iterations = Integer.parseInt(remainingArgs[3]);
-			int taskCount = Integer.parseInt(remainingArgs[4]);
-			int convergenceDelta = Integer.parseInt(remainingArgs[5]);
-			if (remainingArgs.length <  6 + taskCount) {
-			     System.out.println("Provide appropriate ratio for every task");
-			     return;
-			}
-			int[] ratio = new int[taskCount];
-			for(int i = 0; i < taskCount; i++){
-				ratio[i] = Integer.parseInt(remainingArgs[6+i]);
-			}
+			int segPerDim = Integer.parseInt(remainingArgs[3]);
+			int iterations = Integer.parseInt(remainingArgs[4]);
+			int taskCount = Integer.parseInt(remainingArgs[5]);
+			int convergenceDelta = Integer.parseInt(remainingArgs[6]);
+			int taskStart = Integer.parseInt(remainingArgs[7]);
+			int diffratio = Integer.parseInt(remainingArgs[8]);
+			boolean isLinear = Integer.parseInt(remainingArgs[9]) == 1;
 			
 			conf.setInt("KM.maxiterations", iterations);		
 			conf.setInt("KM.k", k);
@@ -95,7 +84,9 @@ public class MKMDriver {
 			DistributedCache.createSymlink(conf);
 			DistributedCache.addCacheFile(uri, conf);
 			
-			MKMUtils.prepareInput(count, k, dimension, taskCount, conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, ratio);
+			MKMUtils.prepareAstroPhyInput(count, k, dimension, segPerDim, 1000, taskCount, 
+					conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, taskStart, diffratio, isLinear);
+//			MKMUtils.prepareInput(count, k, dimension, taskCount, conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, ratio);
 			long start = System.nanoTime();
 			driver.kmeans(iterations, convergenceDelta);
 			long end = System.nanoTime();

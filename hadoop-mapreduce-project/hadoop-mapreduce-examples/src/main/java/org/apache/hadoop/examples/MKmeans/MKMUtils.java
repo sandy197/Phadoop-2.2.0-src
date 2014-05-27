@@ -21,6 +21,7 @@ import org.apache.hadoop.examples.MKmeans.MKMTypes.VectorType;
 public class MKMUtils {
 
 	private static final boolean DEBUG = true;
+	private static final long RAND_SEED = 1000;
 
 	public static int getDistance(Value point, Value centroid) {
 		int distance = 0;
