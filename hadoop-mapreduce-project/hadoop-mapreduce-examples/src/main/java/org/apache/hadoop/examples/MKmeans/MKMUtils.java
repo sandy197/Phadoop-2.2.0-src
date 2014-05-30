@@ -197,6 +197,17 @@ public class MKMUtils {
 				e.printStackTrace();
 			}
 		}
+		try{
+			if (fs.exists(center))
+				fs.delete(center, true);
+			final SequenceFile.Writer centerWriter = SequenceFile.createWriter(fs,
+			        conf, center, Key.class, Values.class,
+			        CompressionType.NONE);
+			centerWriter.append(new Key(1, VectorType.CENTROID),centers);
+			centerWriter.close();
+		} catch( IOException ioe){
+			ioe.printStackTrace();
+		}
 	}
 	
 	private static void initSpace(SubSpace[] space, int start, int diffratio, boolean isLinear) {
