@@ -164,6 +164,14 @@ public class MKMUtils {
 		
 		initSpace(space, taskStart, diffratio, isLinear);
 		
+		
+		try{
+			if (fs.exists(center))
+				fs.delete(center, true);
+			final SequenceFile.Writer centerWriter = SequenceFile.createWriter(fs,
+			        conf, center, Key.class, Values.class,
+			        CompressionType.NONE);
+			
 		while(!isSpaceFull(space)){
 			int[] arr = new int[dimension];
 			for (int d = 0; d < dimension; d++) {
@@ -174,7 +182,9 @@ public class MKMUtils {
 			int idx = assignSubSpace(vector, segLength, segPerDim, dimension);
 			if(space[idx].offer(vector) && k < ki){
 				vector.setCentroidIdx(ki++);
+				if(DEBUG) System.out.println("Adding center number: "+ centerArray.size() );
 				centerArray.add(vector);
+				centerWriter.append(new Key(1, VectorType.CENTROID),vector);
 			}
 		}
 		
@@ -191,19 +201,12 @@ public class MKMUtils {
 					values.addValues(space[j].getVectors());
 				}
 				dataWriter.append(new Key(i, VectorType.REGULAR), values);
-				dataWriter.append(new Key(1, VectorType.CENTROID),centers);
+				dataWriter.append(new Key(i, VectorType.CENTROID),centers);
 				dataWriter.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		try{
-			if (fs.exists(center))
-				fs.delete(center, true);
-			final SequenceFile.Writer centerWriter = SequenceFile.createWriter(fs,
-			        conf, center, Key.class, Values.class,
-			        CompressionType.NONE);
-			centerWriter.append(new Key(1, VectorType.CENTROID),centers);
 			centerWriter.close();
 		} catch( IOException ioe){
 			ioe.printStackTrace();
