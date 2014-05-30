@@ -169,7 +169,7 @@ public class MKMUtils {
 		if (fs.exists(center))
 			fs.delete(center, true);
 		final SequenceFile.Writer centerWriter = SequenceFile.createWriter(fs,
-		        conf, center, Key.class, Value.class,
+		        conf, center, Key.class, Values.class,
 		        CompressionType.NONE);
 			
 		while(!isSpaceFull(space)){
@@ -184,7 +184,7 @@ public class MKMUtils {
 				vector.setCentroidIdx(ki++);
 				if(DEBUG) System.out.println("Adding center number: "+ centerArray.size() );
 				centerArray.add(vector);
-				centerWriter.append(new Key(1, VectorType.CENTROID),vector);
+//				centerWriter.append(new Key(1, VectorType.CENTROID),vector);
 			}
 		}
 		
@@ -205,6 +205,7 @@ public class MKMUtils {
 			dataWriter.close();
 			
 		}
+		centerWriter.append(new Key(1, VectorType.CENTROID),centers);
 		centerWriter.close();
 		
 	}
