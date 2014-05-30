@@ -153,7 +153,7 @@ public class MKMUtils {
 	 */
 	public static void prepareAstroPhyInput(int k, int dimension, int segPerDim, 
 			int maxNum, int taskCount, Configuration conf, Path[] in, Path center, FileSystem fs, 
-			int taskStart, int diffratio, boolean isLinear){
+			int taskStart, int diffratio, boolean isLinear) throws IOException{
 		int ki = 0;
 		int spaceCount = (int) Math.pow(segPerDim, dimension);
 		int segLength = maxNum/segPerDim;
@@ -165,12 +165,12 @@ public class MKMUtils {
 		initSpace(space, taskStart, diffratio, isLinear);
 		
 		
-		try{
-			if (fs.exists(center))
-				fs.delete(center, true);
-			final SequenceFile.Writer centerWriter = SequenceFile.createWriter(fs,
-			        conf, center, Key.class, Values.class,
-			        CompressionType.NONE);
+		
+		if (fs.exists(center))
+			fs.delete(center, true);
+		final SequenceFile.Writer centerWriter = SequenceFile.createWriter(fs,
+		        conf, center, Key.class, Value.class,
+		        CompressionType.NONE);
 			
 		while(!isSpaceFull(space)){
 			int[] arr = new int[dimension];
@@ -191,26 +191,22 @@ public class MKMUtils {
 		//write vectors from each of the subspace and the centers to files
 		int chunkSize = spaceCount / taskCount;
 		for(int i = 0; i < in.length; i ++){
-			try {
-				SequenceFile.Writer dataWriter = SequenceFile.createWriter(fs, conf,
-				    in[i], Key.class, Values.class, CompressionType.NONE);
-				//Write subspace chunks to files
-				int delta = chunkSize > (spaceCount - i*chunkSize) ? (spaceCount - i*chunkSize) : chunkSize;
-				Values values = new Values();
-				for(int j = i * chunkSize; j < (i * chunkSize) + delta; j++){
-					values.addValues(space[j].getVectors());
-				}
-				dataWriter.append(new Key(i, VectorType.REGULAR), values);
-				dataWriter.append(new Key(i, VectorType.CENTROID),centers);
-				dataWriter.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+			
+			SequenceFile.Writer dataWriter = SequenceFile.createWriter(fs, conf,
+			    in[i], Key.class, Values.class, CompressionType.NONE);
+			//Write subspace chunks to files
+			int delta = chunkSize > (spaceCount - i*chunkSize) ? (spaceCount - i*chunkSize) : chunkSize;
+			Values values = new Values();
+			for(int j = i * chunkSize; j < (i * chunkSize) + delta; j++){
+				values.addValues(space[j].getVectors());
 			}
+			dataWriter.append(new Key(i, VectorType.REGULAR), values);
+			dataWriter.append(new Key(i, VectorType.CENTROID),centers);
+			dataWriter.close();
+			
 		}
-			centerWriter.close();
-		} catch( IOException ioe){
-			ioe.printStackTrace();
-		}
+		centerWriter.close();
+		
 	}
 	
 	private static void initSpace(SubSpace[] space, int start, int diffratio, boolean isLinear) {
