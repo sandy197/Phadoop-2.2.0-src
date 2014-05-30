@@ -180,7 +180,7 @@ public class MKMUtils {
 			Value vector = new Value(dimension);
 			vector.setCoordinates(arr);
 			int idx = assignSubSpace(vector, segLength, segPerDim, dimension);
-			if(space[idx].offer(vector) && k < ki){
+			if(space[idx].offer(vector) && k > ki){
 				vector.setCentroidIdx(ki++);
 				if(DEBUG) System.out.println("Adding center number: "+ centerArray.size() );
 				centerArray.add(vector);
