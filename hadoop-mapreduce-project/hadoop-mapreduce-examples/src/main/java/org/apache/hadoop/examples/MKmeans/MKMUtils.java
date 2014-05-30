@@ -151,7 +151,7 @@ public class MKMUtils {
 	 * @param fs
 	 * @param ratio // <start> <offset> <linear/exponential> instead of ratio
 	 */
-	public static void prepareAstroPhyInput(int count, int k, int dimension, int segPerDim, 
+	public static void prepareAstroPhyInput(int k, int dimension, int segPerDim, 
 			int maxNum, int taskCount, Configuration conf, Path[] in, Path center, FileSystem fs, 
 			int taskStart, int diffratio, boolean isLinear){
 		int ki = 0;
@@ -202,7 +202,7 @@ public class MKMUtils {
 	private static void initSpace(SubSpace[] space, int start, int diffratio, boolean isLinear) {
 		int idSeq = 0;
 		int capacity = start;
-		for(SubSpace sspace : space){
+		for(int i = 0; i < space.length; i++){
 			if(idSeq != 0){
 				if(isLinear){
 					capacity += diffratio;
@@ -212,7 +212,7 @@ public class MKMUtils {
 					capacity *= diffratio;
 				}
 			}
-			sspace = new SubSpace(idSeq++, capacity);
+			space[i] = new SubSpace(idSeq++, capacity);
 		}
 	}
 

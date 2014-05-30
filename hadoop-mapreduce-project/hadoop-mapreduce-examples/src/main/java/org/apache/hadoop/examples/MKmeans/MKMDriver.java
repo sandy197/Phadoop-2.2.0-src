@@ -84,7 +84,7 @@ public class MKMDriver {
 			DistributedCache.createSymlink(conf);
 			DistributedCache.addCacheFile(uri, conf);
 			
-			MKMUtils.prepareAstroPhyInput(count, k, dimension, segPerDim, 1000, taskCount, 
+			MKMUtils.prepareAstroPhyInput(k, dimension, segPerDim, 1000, taskCount, 
 					conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, taskStart, diffratio, isLinear);
 //			MKMUtils.prepareInput(count, k, dimension, taskCount, conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, ratio);
 			long start = System.nanoTime();
