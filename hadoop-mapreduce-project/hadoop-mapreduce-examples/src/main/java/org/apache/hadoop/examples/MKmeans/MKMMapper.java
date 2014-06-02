@@ -57,6 +57,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 
 	public void map(Key key, Values values, Context context)
 			throws IOException, InterruptedException {
+		long start2 =System.nanoTime();
 		PartialCentroid[] partialCentroids = null;
 		if(key.getType() == org.apache.hadoop.examples.MKmeans.MKMTypes.VectorType.CENTROID && !isCbuilt){
 			centroids = buildCentroids(values);
@@ -80,15 +81,17 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			try{
 				if(DEBUG) System.out.println("Classifying " + vectors.size() + " vectors among " + centroids.size() + " clusters" );
 				System.out.println("$$VectorCount:"+"\t"+vectors.size());
-				long start =System.nanoTime();
+				long start1 =System.nanoTime();
 				partialCentroids = (PartialCentroid[]) classify(vectors, centroids);
+				long end1 =System.nanoTime();
+				System.out.println("$$ClassifyTime:"+"\t" + (end1-start1));
 				for(PartialCentroid pcent : partialCentroids){
 					IntWritable newKey = new IntWritable(pcent.getCentroidIdx());
 					context.write(newKey, pcent);
 					if(DEBUG) printMapOutput(newKey, pcent);
 				}
-				long end =System.nanoTime();
-				System.out.println("$$ClassifyTime:"+"\t" + (end-start));
+				long end2 =System.nanoTime();
+				System.out.println("MapTime:"+"\t" + (end2-start2));
 			}
 			catch(Exception ex){
 				ex.printStackTrace();
