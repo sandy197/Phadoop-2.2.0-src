@@ -400,6 +400,13 @@ public class TaskAttemptListenerImpl extends CompositeService
     // call but not the next record range information.
     throw new IOException("Not yet implemented.");
   }
+  
+  @Override
+	public void reportExecTimeRAPL(TaskAttemptID taskId, String testString)
+			throws IOException {
+	  System.out.println("This a remote invocation from task :"+ taskId.getId() +", Aaakasam erraga undi ?");
+	  System.out.println(testString);
+	}
 
   @Override
   public JvmTask getTask(JvmContext context) throws IOException {
