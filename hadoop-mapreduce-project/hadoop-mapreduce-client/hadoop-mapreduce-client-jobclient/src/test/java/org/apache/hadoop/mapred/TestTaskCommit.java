@@ -168,6 +168,13 @@ public class TestTaskCommit extends HadoopTestCase {
         long clientVersion, int clientMethodsHash) throws IOException {
       return null;
     }
+
+	@Override
+	public void reportExecTimeRAPL(TaskAttemptID taskId, String testString)
+			throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
   }
   
   /**

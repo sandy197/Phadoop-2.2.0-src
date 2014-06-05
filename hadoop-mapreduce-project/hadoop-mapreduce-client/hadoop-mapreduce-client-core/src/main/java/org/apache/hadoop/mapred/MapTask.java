@@ -761,6 +761,10 @@ public class MapTask extends Task {
     try {
       input.initialize(split, mapperContext);
       mapper.run(mapperContext);
+      
+      //TODO : replace the string with a serializable object
+      umbilical.reportExecTimeRAPL(getTaskID(), "Adi desha drohula raktam valla ochina erupu !!");
+      
       mapPhase.complete();
       setPhase(TaskStatus.Phase.SORT);
       statusUpdate(umbilical);

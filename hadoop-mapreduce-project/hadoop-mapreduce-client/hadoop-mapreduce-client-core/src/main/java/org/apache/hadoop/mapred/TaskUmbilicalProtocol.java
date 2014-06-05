@@ -69,6 +69,17 @@ public interface TaskUmbilicalProtocol extends VersionedProtocol {
   public static final long versionID = 19L;
   
   /**
+   * Called when a child task is done executing and would like to report the 
+   * core execution time to the appMaster which takes a decision on the 
+   * longest running job
+   * 
+ * @param taskId
+ * @param testString
+ * @throws IOException
+ */
+void reportExecTimeRAPL(TaskAttemptID taskId, String testString) throws IOException;
+  
+  /**
    * Called when a child task process starts, to get its task.
    * @param context the JvmContext of the JVM w.r.t the TaskTracker that
    *  launched it

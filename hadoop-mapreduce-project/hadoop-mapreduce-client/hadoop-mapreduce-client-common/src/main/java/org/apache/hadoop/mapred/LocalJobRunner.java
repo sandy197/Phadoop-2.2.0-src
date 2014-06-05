@@ -605,6 +605,13 @@ public class LocalJobRunner implements ClientProtocol {
       return new MapTaskCompletionEventsUpdate(
         org.apache.hadoop.mapred.TaskCompletionEvent.EMPTY_ARRAY, false);
     }
+
+	@Override
+	public void reportExecTimeRAPL(TaskAttemptID taskId, String testString)
+			throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
     
   }
 
