@@ -21,6 +21,7 @@ public class RAPLRecord implements Writable {
 	
 	public RAPLRecord(long exectime){
 		// TODO remove this
+		this();
 		this.exectime = exectime;
 	}
 	
