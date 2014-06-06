@@ -24,6 +24,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configuration.IntegerRanges;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.RawComparator;
+import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.JobID;
@@ -36,7 +37,6 @@ import org.apache.hadoop.mapreduce.ReduceContext;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.security.Credentials;
-
 import org.apache.hadoop.ipc.GenericMatrix;
 /**
  * A simple wrapper class that delegates most of its functionality to the
@@ -67,6 +67,17 @@ public GenericMatrix<?> getMatrix() {
 @Override
 public void setMatrix(GenericMatrix<?> gm) {
 	// TODO Auto-generated method stub
+	
+}
+
+private RAPLRecord raplRecord;
+@Override
+public RAPLRecord getRAPLRecord() {
+	return raplRecord;
+}
+@Override
+public void setRAPLRecord(RAPLRecord record) {
+	this.raplRecord = record;
 	
 }
 

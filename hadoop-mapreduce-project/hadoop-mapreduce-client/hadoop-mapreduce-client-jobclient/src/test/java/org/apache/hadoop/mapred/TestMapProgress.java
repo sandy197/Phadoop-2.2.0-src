@@ -147,7 +147,7 @@ public class TestMapProgress extends TestCase {
     }
 
 	@Override
-	public void reportExecTimeRAPL(TaskAttemptID taskId, String testString)
+	public void reportExecTimeRAPL(TaskAttemptID taskId, RAPLRecord testString)
 			throws IOException {
 		// TODO Auto-generated method stub
 		

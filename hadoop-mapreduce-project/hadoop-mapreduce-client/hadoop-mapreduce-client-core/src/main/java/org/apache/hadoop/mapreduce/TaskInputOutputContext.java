@@ -23,6 +23,7 @@ import java.io.IOException;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.ipc.GenericMatrix;
+import org.apache.hadoop.mapred.RAPLRecord;
 
 /**
  * A context object that allows input and output from the task. It is only
@@ -40,6 +41,10 @@ public interface TaskInputOutputContext<KEYIN,VALUEIN,KEYOUT,VALUEOUT>
 	public GenericMatrix<?> getMatrix();
 	
 	public void setMatrix(GenericMatrix<?> matrix);
+	
+	public RAPLRecord getRAPLRecord();
+	
+	public void setRAPLRecord(RAPLRecord record);
   /**
    * Advance to the next key, value pair, returning null if at end.
    * @return the key object that was read into, or null if no more

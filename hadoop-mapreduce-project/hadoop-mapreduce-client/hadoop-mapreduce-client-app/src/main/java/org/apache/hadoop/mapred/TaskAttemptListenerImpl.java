@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.ipc.ProtocolSignature;
 import org.apache.hadoop.ipc.RPC;
 import org.apache.hadoop.ipc.Server;
@@ -37,16 +38,21 @@ import org.apache.hadoop.mapred.SortedRanges.Range;
 import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.mapreduce.TypeConverter;
 import org.apache.hadoop.mapreduce.security.token.JobTokenSecretManager;
+import org.apache.hadoop.mapreduce.v2.api.records.TaskAttemptId;
+import org.apache.hadoop.mapreduce.v2.api.records.TaskType;
 import org.apache.hadoop.mapreduce.v2.app.AppContext;
+import org.apache.hadoop.mapreduce.v2.app.MRAppMaster.RunningAppContext;
 import org.apache.hadoop.mapreduce.v2.app.TaskAttemptListener;
 import org.apache.hadoop.mapreduce.v2.app.TaskHeartbeatHandler;
 import org.apache.hadoop.mapreduce.v2.app.job.Job;
 import org.apache.hadoop.mapreduce.v2.app.job.Task;
+import org.apache.hadoop.mapreduce.v2.app.job.TaskAttempt;
 import org.apache.hadoop.mapreduce.v2.app.job.event.TaskAttemptDiagnosticsUpdateEvent;
 import org.apache.hadoop.mapreduce.v2.app.job.event.TaskAttemptEvent;
 import org.apache.hadoop.mapreduce.v2.app.job.event.TaskAttemptEventType;
 import org.apache.hadoop.mapreduce.v2.app.job.event.TaskAttemptStatusUpdateEvent;
 import org.apache.hadoop.mapreduce.v2.app.job.event.TaskAttemptStatusUpdateEvent.TaskAttemptStatus;
+import org.apache.hadoop.mapreduce.v2.app.job.impl.TaskAttemptImpl;
 import org.apache.hadoop.mapreduce.v2.app.rm.RMHeartbeatHandler;
 import org.apache.hadoop.mapreduce.v2.app.security.authorize.MRAMPolicyProvider;
 import org.apache.hadoop.net.NetUtils;
@@ -402,10 +408,25 @@ public class TaskAttemptListenerImpl extends CompositeService
   }
   
   @Override
-	public void reportExecTimeRAPL(TaskAttemptID taskId, String testString)
+	public void reportExecTimeRAPL(TaskAttemptID taskID, RAPLRecord raplRecord)
 			throws IOException {
+	  TaskAttemptId taskId = TypeConverter.toYarn(taskID);
 	  System.out.println("This a remote invocation from task :"+ taskId.getId() +", Aaakasam erraga undi ?");
-	  System.out.println(testString);
+//	  System.out.println(testString);
+	  Job job = context.getJob(taskId.getTaskId().getJobId());
+      Task task = job.getTask(taskId.getTaskId());
+      TaskAttempt attempt = task.getAttempt(taskId);
+      System.out.println("TaskAttemptState:" + attempt.getState());
+      
+      ((RunningAppContext)context).addRAPLRecord(taskId, raplRecord);
+      
+      if(((RunningAppContext)context).isRecordReady(taskId))
+      	context.getEventHandler().handle(new TaskAttemptEvent(taskId, TaskAttemptEventType.TA_RECORD_RAPL));
+	  //wait till all the map/reduce tasks pass their execution time information to the app master
+//      if(context.isRecordReady()){
+//    	  //TODO : write all the data to a file on HDFS
+//    	  FileSystem fs = FileSystem.get(((TaskAttemptImpl)attempt).getNodeId());
+//      }
 	}
 
   @Override

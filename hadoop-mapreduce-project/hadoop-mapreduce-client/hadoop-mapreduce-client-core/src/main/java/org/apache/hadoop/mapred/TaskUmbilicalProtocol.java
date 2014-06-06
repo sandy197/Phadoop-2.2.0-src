@@ -77,7 +77,7 @@ public interface TaskUmbilicalProtocol extends VersionedProtocol {
  * @param testString
  * @throws IOException
  */
-void reportExecTimeRAPL(TaskAttemptID taskId, String testString) throws IOException;
+void reportExecTimeRAPL(TaskAttemptID taskId, RAPLRecord testString) throws IOException;
   
   /**
    * Called when a child task process starts, to get its task.

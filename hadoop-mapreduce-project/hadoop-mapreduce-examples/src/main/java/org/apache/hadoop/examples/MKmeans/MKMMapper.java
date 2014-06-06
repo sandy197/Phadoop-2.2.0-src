@@ -9,6 +9,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer.Context;
 import org.apache.hadoop.examples.MKmeans.MKMTypes.Values;
@@ -85,6 +86,12 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				partialCentroids = (PartialCentroid[]) classify(vectors, centroids);
 				long end1 =System.nanoTime();
 				System.out.println("$$ClassifyTime:"+"\t" + (end1-start1));
+				RAPLRecord record = new RAPLRecord(end1 - start1);
+				//TODO:replace the hardcoded value with a JNI call to get the core this thread is pinned to
+				record.setPkg((short)1);
+				//TODO : add hostname to record either here or in the appmaster (this info is readily available there)
+//				record.setHostname(hostname);
+				context.setRAPLRecord(record);
 				for(PartialCentroid pcent : partialCentroids){
 					IntWritable newKey = new IntWritable(pcent.getCentroidIdx());
 					context.write(newKey, pcent);

@@ -763,7 +763,11 @@ public class MapTask extends Task {
       mapper.run(mapperContext);
       
       //TODO : replace the string with a serializable object
-      umbilical.reportExecTimeRAPL(getTaskID(), "Adi desha drohula raktam valla ochina erupu !!");
+//      umbilical.reportExecTimeRAPL(getTaskID(), "Adi desha drohula raktam valla ochina erupu !!");
+      if(mapperContext.getRAPLRecord() == null)
+    	  throw new IOException("No rapl record found");
+      umbilical.reportExecTimeRAPL(getTaskID(), mapperContext.getRAPLRecord());
+      
       
       mapPhase.complete();
       setPhase(TaskStatus.Phase.SORT);

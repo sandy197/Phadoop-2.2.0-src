@@ -40,13 +40,19 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.examples.MKmeans.Key;
+import org.apache.hadoop.examples.MKmeans.MKMTypes.Values;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DataOutputBuffer;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobContext;
 import org.apache.hadoop.mapred.MapReduceChildJVM;
+import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapred.ShuffleHandler;
 import org.apache.hadoop.mapred.Task;
 import org.apache.hadoop.mapred.TaskAttemptContextImpl;
@@ -78,6 +84,7 @@ import org.apache.hadoop.mapreduce.v2.api.records.TaskId;
 import org.apache.hadoop.mapreduce.v2.api.records.TaskType;
 import org.apache.hadoop.mapreduce.v2.app.AppContext;
 import org.apache.hadoop.mapreduce.v2.app.TaskAttemptListener;
+import org.apache.hadoop.mapreduce.v2.app.MRAppMaster.RunningAppContext;
 import org.apache.hadoop.mapreduce.v2.app.commit.CommitterTaskAbortEvent;
 import org.apache.hadoop.mapreduce.v2.app.job.TaskAttemptStateInternal;
 import org.apache.hadoop.mapreduce.v2.app.job.event.JobCounterUpdateEvent;
@@ -481,6 +488,15 @@ public abstract class TaskAttemptImpl implements
              TaskAttemptEventType.TA_COMMIT_PENDING,
              TaskAttemptEventType.TA_DONE,
              TaskAttemptEventType.TA_FAILMSG))
+             
+//             RUNNING, 
+//  COMMIT_PENDING, 
+//  SUCCESS_CONTAINER_CLEANUP, 
+//  SUCCEEDED,
+             
+     //transition for RAPL
+       .addTransition(TaskAttemptStateInternal.RUNNING, TaskAttemptStateInternal.RUNNING,
+         TaskAttemptEventType.TA_RECORD_RAPL, new RAPLRecorder())
 
      // create the topology tables
      .installTopology();
@@ -1869,6 +1885,46 @@ public abstract class TaskAttemptImpl implements
     }
   }
 
+  private static class RAPLRecorder 
+  implements SingleArcTransition<TaskAttemptImpl, TaskAttemptEvent> {
+
+	@Override
+	public void transition(TaskAttemptImpl taskAttempt, TaskAttemptEvent event) {
+		// TODO Get all the information from the context, 
+		// keep them in memory till all the tasks report
+		// then write it out to the fs.
+		TaskAttemptId id = taskAttempt.getID();
+		System.out.println("Internal state:"+taskAttempt.getInternalState());
+		try {
+			FileSystem fs = FileSystem.get(taskAttempt.conf);
+			Path filePath;
+			Map<Integer, RAPLRecord> raplRecords;
+			RunningAppContext rappContext = (RunningAppContext)taskAttempt.appContext;
+			if(taskAttempt.appContext.getJob(id.getTaskId().getJobId())
+					.getTask(id.getTaskId()).getType() == TaskType.MAP){
+				filePath = new Path("tmp/rapl/", "map");
+				raplRecords = rappContext.getAllMapRAPLRecords();
+			}
+			else {
+				filePath = new Path("tmp/rapl/", "reduce");
+				raplRecords = rappContext.getAllReduceRAPLRecords();
+			}
+			
+			if (fs.exists(filePath))
+				fs.delete(filePath, true);
+			SequenceFile.Writer dataWriter = SequenceFile.createWriter(fs, taskAttempt.conf,
+				    filePath, IntWritable.class, RAPLRecord.class, CompressionType.NONE);
+			for(int i : raplRecords.keySet()){
+				dataWriter.append(new IntWritable(i), (RAPLRecord)raplRecords.get(i));
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	  
+  }
+  
   private static class StatusUpdater 
        implements SingleArcTransition<TaskAttemptImpl, TaskAttemptEvent> {
     @SuppressWarnings("unchecked")

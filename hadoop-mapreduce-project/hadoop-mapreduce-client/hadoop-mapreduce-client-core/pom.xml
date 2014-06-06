@@ -42,12 +42,12 @@
       <artifactId>hadoop-hdfs</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
+<!--    <dependency>
       <groupId>org.ncsu.sys</groupId>
       <artifactId>threadpin</artifactId>
       <version>1.0-SNAPSHOT</version>
       <scope>compile</scope>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>

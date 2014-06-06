@@ -27,6 +27,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configuration.IntegerRanges;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.RawComparator;
+import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.JobID;
@@ -81,6 +82,17 @@ public class WrappedReducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
     public void setMatrix(GenericMatrix<?> matrix){
     	Configuration conf = reduceContext.getConfiguration();
     	conf.setMatrix(matrix);
+    }
+    
+    private RAPLRecord raplRecord;
+    @Override
+    public RAPLRecord getRAPLRecord() {
+    	return raplRecord;
+    }
+    @Override
+    public void setRAPLRecord(RAPLRecord record) {
+    	this.raplRecord = record;
+    	
     }
 
     @Override

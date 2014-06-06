@@ -27,6 +27,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configuration.IntegerRanges;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.RawComparator;
+import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -39,7 +40,6 @@ import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.security.Credentials;
-
 import org.apache.hadoop.ipc.GenericMatrix;
 
 /**
@@ -80,6 +80,16 @@ Configuration conf = mapContext.getConfiguration();
 public void setMatrix(GenericMatrix<?> gm) {
 	Configuration conf = mapContext.getConfiguration();
 	conf.setMatrix(gm);
+}
+private RAPLRecord raplRecord;
+@Override
+public RAPLRecord getRAPLRecord() {
+	return raplRecord;
+}
+@Override
+public void setRAPLRecord(RAPLRecord record) {
+	this.raplRecord = record;
+	
 }
     /**
      * Get the input split for this map.

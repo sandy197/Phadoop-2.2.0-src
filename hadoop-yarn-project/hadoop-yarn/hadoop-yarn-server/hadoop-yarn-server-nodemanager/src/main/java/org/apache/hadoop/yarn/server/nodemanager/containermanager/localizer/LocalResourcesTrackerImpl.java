@@ -116,6 +116,7 @@ class LocalResourcesTrackerImpl implements LocalResourcesTracker {
       }
       break;
     case REQUEST:
+    	//srkandul:no changes just a marker
       if (rsrc != null && (!isResourcePresent(rsrc))) {
         LOG.info("Resource " + rsrc.getLocalPath()
             + " is missing, localizing it again");

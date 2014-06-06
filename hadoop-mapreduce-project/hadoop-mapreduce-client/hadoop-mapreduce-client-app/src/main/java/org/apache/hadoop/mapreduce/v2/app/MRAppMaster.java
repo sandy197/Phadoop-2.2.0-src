@@ -44,6 +44,7 @@ import org.apache.hadoop.http.HttpConfig;
 import org.apache.hadoop.mapred.FileOutputCommitter;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.LocalContainerLauncher;
+import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapred.TaskAttemptListenerImpl;
 import org.apache.hadoop.mapred.TaskUmbilicalProtocol;
 import org.apache.hadoop.mapreduce.MRJobConfig;
@@ -70,6 +71,7 @@ import org.apache.hadoop.mapreduce.v2.api.records.AMInfo;
 import org.apache.hadoop.mapreduce.v2.api.records.JobId;
 import org.apache.hadoop.mapreduce.v2.api.records.JobReport;
 import org.apache.hadoop.mapreduce.v2.api.records.JobState;
+import org.apache.hadoop.mapreduce.v2.api.records.TaskAttemptId;
 import org.apache.hadoop.mapreduce.v2.api.records.TaskId;
 import org.apache.hadoop.mapreduce.v2.api.records.TaskState;
 import org.apache.hadoop.mapreduce.v2.api.records.TaskType;
@@ -908,12 +910,16 @@ public class MRAppMaster extends CompositeService {
     private final Configuration conf;
     private final ClusterInfo clusterInfo = new ClusterInfo();
     private final ClientToAMTokenSecretManager clientToAMTokenSecretManager;
-
+	private final Map<Integer, RAPLRecord> mapRAPLRecords = new ConcurrentHashMap<Integer, RAPLRecord>();
+	private final Map<Integer, RAPLRecord> reduceRAPLRecords = new ConcurrentHashMap<Integer, RAPLRecord>();
+	
     public RunningAppContext(Configuration config) {
       this.conf = config;
       this.clientToAMTokenSecretManager =
           new ClientToAMTokenSecretManager(appAttemptID, null);
     }
+    
+    
 
     @Override
     public ApplicationAttemptId getApplicationAttemptId() {
@@ -992,6 +998,52 @@ public class MRAppMaster extends CompositeService {
     public void computeIsLastAMRetry() {
       isLastAMRetry = appAttemptID.getAttemptId() >= maxAppAttempts;
     }
+    
+    public Map<Integer, RAPLRecord> getAllMapRAPLRecords() {
+		return mapRAPLRecords;		
+	}
+
+	public void addRAPLRecord(TaskAttemptId taskId, RAPLRecord raplRecord) throws IOException{
+		Job job = context.getJob(taskId.getTaskId().getJobId());
+		if(job.getTask(taskId.getTaskId()).getType() == TaskType.MAP) {
+			if(mapRAPLRecords.containsKey(taskId.getId())){
+				throw new IOException("RAPL record is being added again!");
+			}
+			mapRAPLRecords.put(taskId.getId(), raplRecord);
+		}
+		else {
+			if(reduceRAPLRecords.containsKey(taskId.getId())){
+				throw new IOException("RAPL record is being added again");
+			}
+			reduceRAPLRecords.put(taskId.getId(), raplRecord);
+		}
+	}
+	
+	public boolean isMapRecordReady(JobId jobId){
+		Job job = context.getJob(jobId);
+		return job.getTotalMaps() == mapRAPLRecords.size();
+	}
+	
+	public Map<Integer, RAPLRecord> getAllReduceRAPLRecords() {
+		return reduceRAPLRecords;		
+	}
+	
+	public boolean isReduceRecordReady(){
+		Job job = context.getJob(jobId);
+		return job.getTotalReduces() == reduceRAPLRecords.size();
+	}
+
+	public boolean isRecordReady(TaskAttemptId taskId) {
+		boolean isReady;
+		Job job = context.getJob(taskId.getTaskId().getJobId());
+		if(job.getTask(taskId.getTaskId()).getType() == TaskType.MAP) {
+			isReady = job.getTotalMaps() == mapRAPLRecords.size();
+		}
+		else {
+			isReady = job.getTotalReduces() == reduceRAPLRecords.size();
+		}
+		return isReady;
+	}
   }
 
   @SuppressWarnings("unchecked")

@@ -23,6 +23,7 @@ import java.io.IOException;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.MapContext;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -48,6 +49,7 @@ public class MapContextImpl<KEYIN,VALUEIN,KEYOUT,VALUEOUT>
     implements MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
   private RecordReader<KEYIN,VALUEIN> reader;
   private InputSplit split;
+  
 
   public MapContextImpl(Configuration conf, TaskAttemptID taskid,
                         RecordReader<KEYIN,VALUEIN> reader,
@@ -70,7 +72,18 @@ public GenericMatrix<?> getMatrix() {
 
 @Override
 public void setMatrix(GenericMatrix<?> matrix) {
-	conf.setMatrix(matrix);	
+	conf.setMatrix(matrix);
+}
+
+private RAPLRecord raplRecord;
+@Override
+public RAPLRecord getRAPLRecord() {
+	return raplRecord;
+}
+@Override
+public void setRAPLRecord(RAPLRecord record) {
+	this.raplRecord = record;
+	
 }
   /**
    * Get the input split for this map.
@@ -93,6 +106,5 @@ public void setMatrix(GenericMatrix<?> matrix) {
   public boolean nextKeyValue() throws IOException, InterruptedException {
     return reader.nextKeyValue();
   }
-
 }
      

@@ -34,6 +34,7 @@ import org.apache.hadoop.io.serializer.Deserializer;
 import org.apache.hadoop.io.serializer.SerializationFactory;
 import org.apache.hadoop.io.serializer.Serializer;
 import org.apache.hadoop.mapred.BackupStore;
+import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapred.RawKeyValueIterator;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.Counter;
@@ -140,6 +141,17 @@ public GenericMatrix<?> getMatrix() {
 @Override
 public void setMatrix(GenericMatrix<?> matrix) {
 	conf.setMatrix(matrix);
+	
+}
+
+private RAPLRecord raplRecord;
+@Override
+public RAPLRecord getRAPLRecord() {
+	return raplRecord;
+}
+@Override
+public void setRAPLRecord(RAPLRecord record) {
+	this.raplRecord = record;
 	
 }
 
