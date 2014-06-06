@@ -1006,16 +1006,16 @@ public class MRAppMaster extends CompositeService {
 	public void addRAPLRecord(TaskAttemptId taskId, RAPLRecord raplRecord) throws IOException{
 		Job job = context.getJob(taskId.getTaskId().getJobId());
 		if(job.getTask(taskId.getTaskId()).getType() == TaskType.MAP) {
-			if(mapRAPLRecords.containsKey(taskId.getId())){
+			if(mapRAPLRecords.containsKey(taskId.getTaskId().getId())){
 				throw new IOException("RAPL record is being added again!");
 			}
-			mapRAPLRecords.put(taskId.getId(), raplRecord);
+			mapRAPLRecords.put(taskId.getTaskId().getId(), raplRecord);
 		}
 		else {
-			if(reduceRAPLRecords.containsKey(taskId.getId())){
+			if(reduceRAPLRecords.containsKey(taskId.getTaskId().getId())){
 				throw new IOException("RAPL record is being added again");
 			}
-			reduceRAPLRecords.put(taskId.getId(), raplRecord);
+			reduceRAPLRecords.put(taskId.getTaskId().getId(), raplRecord);
 		}
 	}
 	

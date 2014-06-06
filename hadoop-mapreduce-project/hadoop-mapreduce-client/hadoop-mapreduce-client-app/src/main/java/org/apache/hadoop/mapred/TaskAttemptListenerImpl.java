@@ -411,7 +411,7 @@ public class TaskAttemptListenerImpl extends CompositeService
 	public void reportExecTimeRAPL(TaskAttemptID taskID, RAPLRecord raplRecord)
 			throws IOException {
 	  TaskAttemptId taskId = TypeConverter.toYarn(taskID);
-	  System.out.println("This a remote invocation from task :"+ taskId.getId() +", Aaakasam erraga undi ?");
+	  System.out.println("This a remote invocation from task :"+ taskId.getTaskId().getId() +", Aaakasam erraga undi ?");
 //	  System.out.println(testString);
 	  Job job = context.getJob(taskId.getTaskId().getJobId());
       Task task = job.getTask(taskId.getTaskId());
