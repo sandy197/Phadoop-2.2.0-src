@@ -41,6 +41,9 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.http.HttpConfig;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.mapred.FileOutputCommitter;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.LocalContainerLauncher;
@@ -917,6 +920,43 @@ public class MRAppMaster extends CompositeService {
       this.conf = config;
       this.clientToAMTokenSecretManager =
           new ClientToAMTokenSecretManager(appAttemptID, null);
+      
+      //TODO Read and initialize the mapRAPLRecords and the reduceRAPLRecords
+      try {
+		FileSystem fs = FileSystem.get(conf);
+		Reader mapreader = new SequenceFile.Reader(fs, new Path("tmp/rapl/", "map"), conf);
+		IntWritable key;
+		try {
+			key = mapreader.getKeyClass().asSubclass(IntWritable.class).newInstance();
+		} catch (InstantiationException e) { // Should not be possible
+			throw new IllegalStateException(e);
+		} catch (IllegalAccessException e) {
+				throw new IllegalStateException(e);
+		}
+		RAPLRecord value = new RAPLRecord();
+		while (mapreader.next(key, value)) {
+			mapRAPLRecords.put(key.get(), value);
+			value = new RAPLRecord();
+		}
+		//TODO : run the decision algo here to calculate the target exectime for each of the tasks
+		
+		Reader reducereader = new SequenceFile.Reader(fs, new Path("tmp/rapl/", "reduce"), conf);
+		try {
+			key = reducereader.getKeyClass().asSubclass(IntWritable.class).newInstance();
+		} catch (InstantiationException e) { // Should not be possible
+			throw new IllegalStateException(e);
+		} catch (IllegalAccessException e) {
+				throw new IllegalStateException(e);
+		}
+		value = new RAPLRecord();
+		while (reducereader.next(key, value)) {
+			reduceRAPLRecords.put(key.get(), value);
+			value = new RAPLRecord();
+		}
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
+      
     }
     
     
