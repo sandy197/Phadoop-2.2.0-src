@@ -175,6 +175,12 @@ public class TestTaskCommit extends HadoopTestCase {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public RAPLRecord getTaskTargetTime(TaskAttemptID taskId) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
   }
   
   /**

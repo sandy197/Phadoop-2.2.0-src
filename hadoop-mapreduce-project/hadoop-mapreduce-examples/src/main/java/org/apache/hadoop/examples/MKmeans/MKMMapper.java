@@ -23,10 +23,19 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 	private int R1;
 	private boolean isCbuilt, isVbuilt;
 	private List<Value> centroids, vectors;
+	private RAPLRecord record;
 	
 	public void setup (Context context) {
 		init(context);
 		Configuration conf = context.getConfiguration();
+		record = context.getRAPLRecord();
+		//TODO : JNI call to set the power cap based on the target task time and
+	    // the previous execution time.
+		//TODO : Decide if this has to be done in setup or the mapTask 
+		//since the rapl record has the information about the package already
+		// 
+	    ThreadPinning rapl = new ThreadPinning(record);
+	    rapl.adjustPower(record);
 		//read centroids
 		//Change this section for Phadoop version
 //		FileSystem fs;
@@ -86,7 +95,11 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				partialCentroids = (PartialCentroid[]) classify(vectors, centroids);
 				long end1 =System.nanoTime();
 				System.out.println("$$ClassifyTime:"+"\t" + (end1-start1));
-				RAPLRecord record = new RAPLRecord(end1 - start1);
+				if(record == null){
+					//NOTE : this doesn't work if the classify is done more than once per map task
+					record = new RAPLRecord();
+				}
+				record.setExectime(end1 - start1);
 				//TODO:replace the hardcoded value with a JNI call to get the core this thread is pinned to
 				record.setPkg((short)1);
 				//TODO : add hostname to record either here or in the appmaster (this info is readily available there)

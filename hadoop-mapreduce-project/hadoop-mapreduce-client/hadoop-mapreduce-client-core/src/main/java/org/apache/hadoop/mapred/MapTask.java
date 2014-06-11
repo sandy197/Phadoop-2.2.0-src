@@ -757,15 +757,18 @@ public class MapTask extends Task {
         mapperContext = 
           new WrappedMapper<INKEY, INVALUE, OUTKEY, OUTVALUE>().getMapContext(
               mapContext);
-
+    //Get the target exectime from the appmaster and adjust the power cap
+    RAPLRecord record = umbilical.getTaskTargetTime(getTaskID());
+    mapperContext.setRAPLRecord(record);
+    
     try {
       input.initialize(split, mapperContext);
       mapper.run(mapperContext);
       
-      //TODO : replace the string with a serializable object
+      
 //      umbilical.reportExecTimeRAPL(getTaskID(), "Adi desha drohula raktam valla ochina erupu !!");
       if(mapperContext.getRAPLRecord() == null)
-    	  throw new IOException("No rapl record found");
+    	  throw new IOException("No rapl record from the map task found");
       umbilical.reportExecTimeRAPL(getTaskID(), mapperContext.getRAPLRecord());
       
       

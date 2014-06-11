@@ -906,6 +906,26 @@ public class MRAppMaster extends CompositeService {
       super.serviceStop();
     }
   }
+  
+  private static class Cluster{
+	  String hostName;
+	  short pkgId;
+	  List<RAPLRecord> records;
+	  
+	  public Cluster(String hostName, short pkgId){
+		  this.hostName = hostName;
+		  this.pkgId = pkgId;
+		  this.records = new ArrayList<RAPLRecord>();
+	  }
+	  
+	  public void addIfBelongs(RAPLRecord rec){
+		  if(rec != null && rec.getHostname() != null 
+				  && rec.getHostname().equals(hostName) && rec.getPkg() == pkgId){
+			  records.add(rec);
+		  }	  
+	  }
+	  
+  }
 
   public class RunningAppContext implements AppContext {
 
@@ -953,6 +973,11 @@ public class MRAppMaster extends CompositeService {
 			reduceRAPLRecords.put(key.get(), value);
 			value = new RAPLRecord();
 		}
+		
+		//TODO : decide
+		computeTargetExecTimes(mapRAPLRecords);
+		computeTargetExecTimes(reduceRAPLRecords);
+		
 	} catch (IOException e) {
 		e.printStackTrace();
 	}
@@ -961,7 +986,85 @@ public class MRAppMaster extends CompositeService {
     
     
 
-    @Override
+    /**
+     * Compute the target execution times of map/reduce tasks supplied
+     * And set the times in the corresponding RAPL records
+     * 
+     * 
+     * Cluster the tasks belonging to the same physical package of a node and assign
+     * the target time to just one of the tasks of the cluster.
+     * Assign the target time to tasks in all the clusters other than cluster with 
+     * highest execTime. In each of the other clusters assign the target time only 
+     * to the one with highest exectime among them.
+     * 
+     * Algo :
+     * Get the highest execution time of all the tasks.
+     * Assign a key to each task
+     * 
+     * @param raplRecords
+     */
+    private void computeTargetExecTimes(Map<Integer, RAPLRecord> raplRecords) {
+		if(raplRecords != null){
+			int taskCount  = raplRecords.size();
+			Map<Integer, RAPLRecord> reasgndRecs = new HashMap<Integer, RAPLRecord>();
+			// plain max of all task exectimes
+			int maxTaskIdx = getMaxExecTimeIndx(raplRecords, null);
+			//TODO : set this max time for all tasks which are not in the same package.
+			//Not simple there is a problem with this implementation as well
+			List<Cluster> clusters = new ArrayList<Cluster>();
+			//cluster all the records
+			for(Integer i : raplRecords.keySet()){
+				RAPLRecord rec = raplRecords.get(i);
+				Cluster cluster = getCluster(rec.getHostname(), rec.getPkg(), clusters);
+				if(cluster == null){
+					cluster = new Cluster(rec.getHostname(), rec.getPkg());
+					clusters.add(cluster);
+				}
+				cluster.addIfBelongs(rec);
+			}
+			//TODO : set the target times for each cluster.
+		}
+		else
+			System.out.println("RAPL records supplied are null");
+	}
+    
+    private boolean isClusterPresent(String hostName, short pkgId, List<Cluster> clusters){
+    	for(Cluster cluster : clusters){
+    		if(hostName.equals(cluster.hostName) && pkgId == cluster.pkgId)
+    			return true;
+    	}
+    	return false;
+    }
+    
+    private Cluster getCluster(String hostName, short pkgId, List<Cluster> clusters){
+    	for(Cluster cluster : clusters){
+    		if(hostName.equals(cluster.hostName) && pkgId == cluster.pkgId)
+    			return cluster;
+    	}
+    	return null;
+    }
+    
+    private int getMaxExecTimeIndx(Map<Integer, RAPLRecord> raplRecords, String hostName){
+    	int maxTaskIdx = -1;
+		long maxExecTime = Long.MIN_VALUE;
+    	for(Integer i : raplRecords.keySet()){
+			RAPLRecord rec = raplRecords.get(i);
+			if(hostName != null && hostName.equals(rec.getHostname())
+					&& rec.getExectime() > maxExecTime){
+				maxTaskIdx = i;
+				maxExecTime = rec.getExectime();
+			}
+			else if(hostName == null && rec.getExectime() > maxExecTime){
+				maxTaskIdx = i;
+				maxExecTime = rec.getExectime();
+			}
+		}
+    	return maxTaskIdx;
+    }
+
+
+
+	@Override
     public ApplicationAttemptId getApplicationAttemptId() {
       return appAttemptID;
     }

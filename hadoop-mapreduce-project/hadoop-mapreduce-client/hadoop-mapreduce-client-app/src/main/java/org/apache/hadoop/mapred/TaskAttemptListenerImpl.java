@@ -428,6 +428,23 @@ public class TaskAttemptListenerImpl extends CompositeService
 //    	  FileSystem fs = FileSystem.get(((TaskAttemptImpl)attempt).getNodeId());
 //      }
 	}
+  
+  @Override
+  public RAPLRecord getTaskTargetTime(TaskAttemptID taskID) throws IOException {
+  	// TODO get the target time for the task computed during the decision phase 
+	  // and stored in the runningAppContext
+	  RAPLRecord record = null;
+	  TaskAttemptId taskId = TypeConverter.toYarn(taskID);
+	  RunningAppContext rcontext = (RunningAppContext)context;
+	  if(taskId.getTaskId().getTaskType() == TaskType.MAP)
+		  record = rcontext.getAllMapRAPLRecords().get(taskId.getTaskId().getId());
+	  else
+		  record = rcontext.getAllReduceRAPLRecords().get(taskId.getTaskId().getId());
+//	  if(record == null){
+//		  throw new IOException("No record exists for the task");
+//	  }
+	  return record;
+  }
 
   @Override
   public JvmTask getTask(JvmContext context) throws IOException {

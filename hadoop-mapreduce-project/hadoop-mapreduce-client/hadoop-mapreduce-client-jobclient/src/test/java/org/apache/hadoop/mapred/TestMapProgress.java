@@ -152,6 +152,11 @@ public class TestMapProgress extends TestCase {
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public RAPLRecord getTaskTargetTime(TaskAttemptID taskId) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
   }
   
   private FileSystem fs = null;

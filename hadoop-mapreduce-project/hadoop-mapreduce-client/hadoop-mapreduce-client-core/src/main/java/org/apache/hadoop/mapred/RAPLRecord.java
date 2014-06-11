@@ -12,7 +12,8 @@ public class RAPLRecord implements Writable {
 	private long exectime;
 	private String hostname;
 	private short pkg;
-	
+	private long targetTime;
+
 	public RAPLRecord(){
 		// TODO Remove this later
 		jobtoken = 197775;
@@ -23,6 +24,14 @@ public class RAPLRecord implements Writable {
 		// TODO remove this
 		this();
 		this.exectime = exectime;
+	}
+	
+	public long getTargetTime() {
+		return targetTime;
+	}
+
+	public void setTargetTime(long targetTime) {
+		this.targetTime = targetTime;
 	}
 	
 	public int getJobtoken() {
@@ -49,7 +58,7 @@ public class RAPLRecord implements Writable {
 		this.hostname = hostname;
 	}
 
-	public int getPkg() {
+	public short getPkg() {
 		return pkg;
 	}
 
