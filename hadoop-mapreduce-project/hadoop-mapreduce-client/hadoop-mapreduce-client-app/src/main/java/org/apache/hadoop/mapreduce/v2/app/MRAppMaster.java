@@ -908,7 +908,8 @@ public class MRAppMaster extends CompositeService {
   }
   
   private static class Cluster{
-	  String hostName;
+	  private static final boolean DEBUG = true;
+	String hostName;
 	  short pkgId;
 	  List<RAPLRecord> records;
 	  
@@ -924,7 +925,43 @@ public class MRAppMaster extends CompositeService {
 			  records.add(rec);
 		  }	  
 	  }
-	  
+
+	public void setTargetTime(long targetTime, Cluster maxCluster) throws IOException {
+		if(this.equals(maxCluster)){
+			//Set the target time same as the exec time
+			for(RAPLRecord rec : maxCluster.records){
+				rec.setTargetTime(rec.getExectime());
+			}
+		}
+		else {
+			//set the target time only for the task with max exectime
+			RAPLRecord maxRec = null;
+			long maxExecTime = Long.MIN_VALUE;
+			for(RAPLRecord rec : maxCluster.records){
+				if(rec.getExectime() > maxExecTime){
+					maxExecTime = rec.getExectime();
+					maxRec = rec;
+				}
+				rec.setTargetTime(rec.getExectime());
+			}
+			if(maxRec != null){
+				if(DEBUG) System.out.println("Setting the target time for a task on Host:"
+												+ maxRec.getHostname() + ",Package:" + maxRec.getPkg());
+				maxRec.setTargetTime(targetTime);
+			}
+			else
+				throw new IOException("Max record can not be null");
+			
+		}
+	}
+	
+	public boolean isEqual(Cluster cluster){
+		boolean isEqual = false;
+		if(cluster != null && hostName != null && hostName.length() != 0)
+			isEqual = this.hostName.equals(cluster.hostName) 
+					&& this.pkgId == cluster.pkgId;
+		return isEqual;
+	}
   }
 
   public class RunningAppContext implements AppContext {
@@ -1002,8 +1039,9 @@ public class MRAppMaster extends CompositeService {
      * Assign a key to each task
      * 
      * @param raplRecords
+     * @throws IOException 
      */
-    private void computeTargetExecTimes(Map<Integer, RAPLRecord> raplRecords) {
+    private void computeTargetExecTimes(Map<Integer, RAPLRecord> raplRecords) throws IOException {
 		if(raplRecords != null){
 			int taskCount  = raplRecords.size();
 			Map<Integer, RAPLRecord> reasgndRecs = new HashMap<Integer, RAPLRecord>();
@@ -1023,6 +1061,12 @@ public class MRAppMaster extends CompositeService {
 				cluster.addIfBelongs(rec);
 			}
 			//TODO : set the target times for each cluster.
+			long targetTime = raplRecords.get(maxTaskIdx).getExectime();
+			RAPLRecord maxRec = raplRecords.get(maxTaskIdx);
+			Cluster maxCluster = getCluster(maxRec.getHostname(), maxRec.getPkg(), clusters);
+			for(Cluster cluster : clusters){
+				cluster.setTargetTime(targetTime, maxCluster);
+			}
 		}
 		else
 			System.out.println("RAPL records supplied are null");
