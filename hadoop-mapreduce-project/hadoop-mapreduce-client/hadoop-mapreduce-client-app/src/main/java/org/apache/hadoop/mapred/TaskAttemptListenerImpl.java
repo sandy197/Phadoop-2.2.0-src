@@ -417,6 +417,9 @@ public class TaskAttemptListenerImpl extends CompositeService
       Task task = job.getTask(taskId.getTaskId());
       TaskAttempt attempt = task.getAttempt(taskId);
       System.out.println("TaskAttemptState:" + attempt.getState());
+      //NOTE : Setting the hostname here. No need to set it in the maptask.
+      raplRecord.setHostname(attempt.getNodeHttpAddress());
+      System.out.println("Setting the host name in the RAPLRecord to:"+ attempt.getNodeHttpAddress());
       
       ((RunningAppContext)context).addRAPLRecord(taskId, raplRecord);
       

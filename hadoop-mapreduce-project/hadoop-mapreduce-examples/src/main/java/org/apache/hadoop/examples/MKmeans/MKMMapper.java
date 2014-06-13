@@ -17,6 +17,8 @@ import org.apache.hadoop.examples.MKmeans.MKMTypes.VectorType;
 
 public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid> {
 	
+	public static int CORES_PER_PKG = 8;
+	
 	private static final boolean DEBUG = true;
 	private int dimension;
 	private int k;
@@ -24,6 +26,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 	private boolean isCbuilt, isVbuilt;
 	private List<Value> centroids, vectors;
 	private RAPLRecord record;
+	private ThreadPinning rapl;
 	
 	public void setup (Context context) {
 		init(context);
@@ -31,11 +34,13 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		record = context.getRAPLRecord();
 		//TODO : JNI call to set the power cap based on the target task time and
 	    // the previous execution time.
+		// record contains prev exec time & the target execution time.
 		//TODO : Decide if this has to be done in setup or the mapTask 
 		//since the rapl record has the information about the package already
 		// 
-	    ThreadPinning rapl = new ThreadPinning(record);
+		rapl = new ThreadPinning();
 	    rapl.adjustPower(record);
+	    rapl.adjustPower(record.getExectime(), record.getTargetTime());
 		//read centroids
 		//Change this section for Phadoop version
 //		FileSystem fs;
@@ -101,7 +106,8 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				}
 				record.setExectime(end1 - start1);
 				//TODO:replace the hardcoded value with a JNI call to get the core this thread is pinned to
-				record.setPkg((short)1);
+				int pkgIdx = rapl.get_affinity() / CORES_PER_PKG;
+				record.setPkg((short)pkgIdx);
 				//TODO : add hostname to record either here or in the appmaster (this info is readily available there)
 //				record.setHostname(hostname);
 				context.setRAPLRecord(record);

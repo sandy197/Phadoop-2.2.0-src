@@ -1047,7 +1047,7 @@ public class MRAppMaster extends CompositeService {
 			Map<Integer, RAPLRecord> reasgndRecs = new HashMap<Integer, RAPLRecord>();
 			// plain max of all task exectimes
 			int maxTaskIdx = getMaxExecTimeIndx(raplRecords, null);
-			//TODO : set this max time for all tasks which are not in the same package.
+			//set this max time for all tasks which are not in the same package.
 			//Not simple there is a problem with this implementation as well
 			List<Cluster> clusters = new ArrayList<Cluster>();
 			//cluster all the records
@@ -1060,7 +1060,7 @@ public class MRAppMaster extends CompositeService {
 				}
 				cluster.addIfBelongs(rec);
 			}
-			//TODO : set the target times for each cluster.
+			//set the target times for each cluster.
 			long targetTime = raplRecords.get(maxTaskIdx).getExectime();
 			RAPLRecord maxRec = raplRecords.get(maxTaskIdx);
 			Cluster maxCluster = getCluster(maxRec.getHostname(), maxRec.getPkg(), clusters);
