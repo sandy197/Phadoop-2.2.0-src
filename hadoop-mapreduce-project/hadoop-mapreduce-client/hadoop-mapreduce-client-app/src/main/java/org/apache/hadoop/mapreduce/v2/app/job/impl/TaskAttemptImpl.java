@@ -1891,6 +1891,7 @@ public abstract class TaskAttemptImpl implements
 		// TODO Get all the information from the context, 
 		// keep them in memory till all the tasks report
 		// then write it out to the fs.
+		SequenceFile.Writer dataWriter = null;
 		TaskAttemptId id = taskAttempt.getID();
 		System.out.println("Internal state:"+taskAttempt.getInternalState());
 		try {
@@ -1907,10 +1908,11 @@ public abstract class TaskAttemptImpl implements
 				filePath = new Path("tmp/rapl/", "reduce");
 				raplRecords = rappContext.getAllReduceRAPLRecords();
 			}
+			System.out.println("About to write to " + filePath.toString());
 			
 			if (fs.exists(filePath))
 				fs.delete(filePath, true);
-			SequenceFile.Writer dataWriter = SequenceFile.createWriter(fs, taskAttempt.conf,
+			dataWriter = SequenceFile.createWriter(fs, taskAttempt.conf,
 				    filePath, IntWritable.class, RAPLRecord.class, CompressionType.NONE);
 			for(int i : raplRecords.keySet()){
 				dataWriter.append(new IntWritable(i), (RAPLRecord)raplRecords.get(i));
@@ -1918,6 +1920,15 @@ public abstract class TaskAttemptImpl implements
 			
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+		finally{
+			if(dataWriter != null){
+				try {
+					dataWriter.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 	  

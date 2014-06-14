@@ -14,6 +14,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer.Context;
 import org.apache.hadoop.examples.MKmeans.MKMTypes.Values;
 import org.apache.hadoop.examples.MKmeans.MKMTypes.VectorType;
+import org.ncsu.sys.*;
 
 public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid> {
 	

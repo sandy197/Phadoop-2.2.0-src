@@ -995,7 +995,7 @@ public class MRAppMaster extends CompositeService {
 			mapRAPLRecords.put(key.get(), value);
 			value = new RAPLRecord();
 		}
-		//TODO : run the decision algo here to calculate the target exectime for each of the tasks
+		//run the decision algo here to calculate the target exectime for each of the tasks
 		
 		Reader reducereader = new SequenceFile.Reader(fs, new Path("tmp/rapl/", "reduce"), conf);
 		try {
@@ -1010,8 +1010,9 @@ public class MRAppMaster extends CompositeService {
 			reduceRAPLRecords.put(key.get(), value);
 			value = new RAPLRecord();
 		}
-		
-		//TODO : decide
+		if(mapRAPLRecords != null || reduceRAPLRecords != null)
+			System.out.println("AppMaster Done reading RAPL records");
+		//decide
 		computeTargetExecTimes(mapRAPLRecords);
 		computeTargetExecTimes(reduceRAPLRecords);
 		
@@ -1067,6 +1068,7 @@ public class MRAppMaster extends CompositeService {
 			for(Cluster cluster : clusters){
 				cluster.setTargetTime(targetTime, maxCluster);
 			}
+			System.out.println("Done computing the target times for all the tasks");
 		}
 		else
 			System.out.println("RAPL records supplied are null");
@@ -1197,12 +1199,14 @@ public class MRAppMaster extends CompositeService {
 				throw new IOException("RAPL record is being added again!");
 			}
 			mapRAPLRecords.put(taskId.getTaskId().getId(), raplRecord);
+			System.out.println("Adding rapl record for map task : "+ taskId.getTaskId().getId());
 		}
 		else {
 			if(reduceRAPLRecords.containsKey(taskId.getTaskId().getId())){
 				throw new IOException("RAPL record is being added again");
 			}
 			reduceRAPLRecords.put(taskId.getTaskId().getId(), raplRecord);
+			System.out.println("Adding rapl record for reduce task : "+ taskId.getTaskId().getId());
 		}
 	}
 	

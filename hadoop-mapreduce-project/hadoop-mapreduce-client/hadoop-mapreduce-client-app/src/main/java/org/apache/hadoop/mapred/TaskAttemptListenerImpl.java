@@ -423,8 +423,10 @@ public class TaskAttemptListenerImpl extends CompositeService
       
       ((RunningAppContext)context).addRAPLRecord(taskId, raplRecord);
       
-      if(((RunningAppContext)context).isRecordReady(taskId))
+      if(((RunningAppContext)context).isRecordReady(taskId)){
+    	  System.out.println("All tasks have reported the execution times, time to write them to the fs");
       	context.getEventHandler().handle(new TaskAttemptEvent(taskId, TaskAttemptEventType.TA_RECORD_RAPL));
+      }
 	  //wait till all the map/reduce tasks pass their execution time information to the app master
 //      if(context.isRecordReady()){
 //    	  //TODO : write all the data to a file on HDFS
