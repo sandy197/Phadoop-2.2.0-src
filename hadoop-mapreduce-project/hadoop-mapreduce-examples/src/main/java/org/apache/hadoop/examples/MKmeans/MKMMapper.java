@@ -40,7 +40,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		//since the rapl record has the information about the package already
 		// 
 		rapl = new ThreadPinning();
-	    rapl.adjustPower(record);
+//	    rapl.adjustPower(record);
 	    rapl.adjustPower(record.getExectime(), record.getTargetTime());
 		//read centroids
 		//Change this section for Phadoop version
