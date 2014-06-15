@@ -996,6 +996,7 @@ public class MRAppMaster extends CompositeService {
 			value = new RAPLRecord();
 		}
 		//run the decision algo here to calculate the target exectime for each of the tasks
+		computeTargetExecTimes(mapRAPLRecords);
 		
 		Reader reducereader = new SequenceFile.Reader(fs, new Path("tmp/rapl/", "reduce"), conf);
 		try {
@@ -1013,7 +1014,6 @@ public class MRAppMaster extends CompositeService {
 		if(mapRAPLRecords != null || reduceRAPLRecords != null)
 			System.out.println("AppMaster Done reading RAPL records");
 		//decide
-		computeTargetExecTimes(mapRAPLRecords);
 		computeTargetExecTimes(reduceRAPLRecords);
 		
 	} catch (IOException e) {
