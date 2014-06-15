@@ -81,5 +81,17 @@ public class RAPLRecord implements Writable {
 		this.hostname = in.readUTF();
 		this.pkg = in.readShort();
 	}
+	
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("***RAPL Record***"+"\n");
+		sb.append("Hostname:"+this.hostname+"\n")
+			.append("PkgIdx:"+this.pkg+"\n")
+				.append("ExecTime:"+this.exectime+"\n")
+					.append("targetTime:"+this.targetTime+"\n");
+		sb.append("*****************");
+		
+		return sb.toString();
+	}
 
 }

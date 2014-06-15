@@ -41,7 +41,9 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		// 
 		rapl = new ThreadPinning();
 //	    rapl.adjustPower(record);
-	    rapl.adjustPower(record.getExectime(), record.getTargetTime());
+		if(record != null){
+			rapl.adjustPower(record.getExectime(), record.getTargetTime());
+		}
 		//read centroids
 		//Change this section for Phadoop version
 //		FileSystem fs;

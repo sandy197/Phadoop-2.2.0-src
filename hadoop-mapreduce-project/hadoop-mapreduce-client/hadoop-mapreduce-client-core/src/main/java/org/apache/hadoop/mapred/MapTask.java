@@ -759,6 +759,12 @@ public class MapTask extends Task {
               mapContext);
     //Get the target exectime from the appmaster and adjust the power cap
     RAPLRecord record = umbilical.getTaskTargetTime(getTaskID());
+    if(record == null){
+    	System.out.println("Record is null");
+    }
+    else{
+    	System.out.println(record);
+    }
     mapperContext.setRAPLRecord(record);
     
     try {
