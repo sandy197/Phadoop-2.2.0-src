@@ -72,6 +72,7 @@ public class RAPLRecord implements Writable {
 		out.writeLong(exectime);
 		out.writeUTF(hostname);
 		out.writeShort(pkg);
+		out.writeLong(targetTime);
 	}
 
 	@Override
@@ -80,6 +81,7 @@ public class RAPLRecord implements Writable {
 		this.exectime = in.readLong();
 		this.hostname = in.readUTF();
 		this.pkg = in.readShort();
+		this.targetTime = in.readLong();
 	}
 	
 	public String toString(){
