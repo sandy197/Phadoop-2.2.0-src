@@ -448,6 +448,7 @@ public class TaskAttemptListenerImpl extends CompositeService
 //	  if(record == null){
 //		  throw new IOException("No record exists for the task");
 //	  }
+	  System.out.println("Returning record :"+ "/n" + record);
 	  return record;
   }
 
