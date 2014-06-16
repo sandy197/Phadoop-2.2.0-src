@@ -907,7 +907,7 @@ public class MRAppMaster extends CompositeService {
     }
   }
   
-  private static class Cluster{
+  public static class Cluster{
 	  private static final boolean DEBUG = true;
 	String hostName;
 	  short pkgId;
@@ -997,6 +997,11 @@ public class MRAppMaster extends CompositeService {
 		}
 		//run the decision algo here to calculate the target exectime for each of the tasks
 		computeTargetExecTimes(mapRAPLRecords);
+		System.out.println("******After computing target times**********");
+		for(Integer i : mapRAPLRecords.keySet()){
+			System.out.println(mapRAPLRecords.get(i));
+		}
+		
 		
 		Reader reducereader = new SequenceFile.Reader(fs, new Path("tmp/rapl/", "reduce"), conf);
 		try {
