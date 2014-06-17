@@ -89,6 +89,10 @@ public class KMDriver {
 		URI uri = new URI("hdfs://localhost/libraries/libpapi.so.1#libpapi.so");
 		DistributedCache.createSymlink(conf);
 		DistributedCache.addCacheFile(uri, conf);
+		
+		uri = new URI("hdfs://localhost/libraries/librapl.so.1#librapl.so");
+		DistributedCache.createSymlink(conf);
+		DistributedCache.addCacheFile(uri, conf);
 		//write input data and centers to the file paths accordingly
 		// NOTE: Make sure centers have a cluster identifier with it.
 		KMUtils.prepareInput(count, k, dimension, taskCount, conf, new Path(KM_DATA_INPUT_PATH), new Path(KM_CENTER_INPUT_PATH), fs, ratio);

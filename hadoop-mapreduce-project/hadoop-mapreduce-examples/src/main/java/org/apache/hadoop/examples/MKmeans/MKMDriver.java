@@ -84,6 +84,10 @@ public class MKMDriver {
 			DistributedCache.createSymlink(conf);
 			DistributedCache.addCacheFile(uri, conf);
 			
+			uri = new URI("hdfs://localhost/libraries/librapl.so.1#librapl.so");
+			DistributedCache.createSymlink(conf);
+			DistributedCache.addCacheFile(uri, conf);
+			
 			MKMUtils.prepareAstroPhyInput(k, dimension, segPerDim, 1000, taskCount, 
 					conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, taskStart, diffratio, isLinear);
 //			MKMUtils.prepareInput(count, k, dimension, taskCount, conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, ratio);
