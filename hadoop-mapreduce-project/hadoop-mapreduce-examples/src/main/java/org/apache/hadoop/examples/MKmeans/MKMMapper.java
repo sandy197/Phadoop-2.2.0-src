@@ -9,6 +9,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.ipc.RAPLCalibration;
 import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer.Context;
@@ -42,8 +43,9 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		rapl = new ThreadPinning();
 //	    rapl.adjustPower(record);
 		if(record != null){
-			//TODO : Do this only if the iteration count is more than 4
+			//TODO : Do this only if the iteration count is more than 4 and a flag to use this feature is set.
 			rapl.adjustPower(record.getExectime(), record.getTargetTime());
+			//TODO : implement a method to make a decision based on the cap2ExecTime Map<integer, long>
 		}
 		//read centroids
 		//Change this section for Phadoop version
@@ -115,6 +117,14 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				//TODO : add hostname to record either here or in the appmaster (this info is readily available there)
 //				record.setHostname(hostname);
 				context.setRAPLRecord(record);
+				/******** Calibration *********/
+				//TODO : done for the initial iterations only
+				//if(currentIteration < 4){
+				RAPLCalibration calibration = calibrate(vectors, centroids);
+				if(calibration != null)
+					((MKMRowListMatrix) context.getMatrix()).addCalibration(calibration);
+				
+				
 				for(PartialCentroid pcent : partialCentroids){
 					IntWritable newKey = new IntWritable(pcent.getCentroidIdx());
 					context.write(newKey, pcent);
@@ -130,6 +140,38 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		
 	}
 	
+	/**
+	 * This method is invoked on the core of the map/reduce task's execution
+	 * And taskes the arguments for this core as its arguments
+	 * For kmeans, "classify" is the core.
+	 * 
+	 * TODO : Check to see if a method can be passed as an argument so that
+	 * the calibration method can be reused.
+	 * @param vectors2
+	 * @param centroids2
+	 * @return
+	 */
+	private RAPLCalibration calibrate(List<Value> vectors2,
+			List<Value> centroids2) {
+		PartialCentroid[] partialCentroids = null;
+		RAPLCalibration calibration = new RAPLCalibration();
+		UseRAPL urapl = new UseRAPL();
+		urapl.initRAPL("maptask");
+		for(int powerCap = 110; powerCap > 10; powerCap -= 5){
+			//TODO : set power cap
+			urapl.setPowerLimit(rapl.get_affinity(), powerCap);
+			//wait 2 seconds for the power cap to kick in
+			Thread.sleep(2000);
+			//execute the core
+			long start =System.nanoTime();
+			partialCentroids = (PartialCentroid[]) classify(vectors, centroids);
+			long end =System.nanoTime();
+			//set the execution time in the calibration
+			calibration.addRAPLExecTime(powerCap, end - start);
+			if(DEBUG) System.out.println(partialCentroids + ":" + powerCap +":" + (end - start));
+		}
+	}
+
 	private void printMapOutput(IntWritable newKey, PartialCentroid pcent) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("##### Map output: (" + newKey.get() + ") (" 

@@ -21,6 +21,7 @@ public class MKMRowListMatrix implements GenericMatrix<List<Value>> {
 		this.isMatrixSet = true;
 	}
 	
+	@Override
 	public RAPLCalibration getCalibration() {
 		return calibration;
 	}
@@ -29,6 +30,7 @@ public class MKMRowListMatrix implements GenericMatrix<List<Value>> {
 //		this.calibration = calibration;
 //	}
 //	
+	@Override
 	public void addCalibration(RAPLCalibration calibration){
 		this.calibration.add(calibration);
 	}
