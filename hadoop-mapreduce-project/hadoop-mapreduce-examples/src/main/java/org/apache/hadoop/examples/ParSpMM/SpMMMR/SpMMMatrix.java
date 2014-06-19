@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.apache.hadoop.examples.ParSpMM.SpMM.SpDCSC;
 import org.apache.hadoop.ipc.GenericMatrix;
+import org.apache.hadoop.ipc.RAPLCalibration;
 
 public class SpMMMatrix implements GenericMatrix<SpDCSC> {
 
@@ -53,5 +54,17 @@ public class SpMMMatrix implements GenericMatrix<SpDCSC> {
 	
 	public Set<Integer> getnzcIndices(){
 		return spMat.getnzcIndices();
+	}
+
+	@Override
+	public RAPLCalibration getCalibration() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void addCalibration(RAPLCalibration calibration) {
+		// TODO Auto-generated method stub
+		
 	}
 }

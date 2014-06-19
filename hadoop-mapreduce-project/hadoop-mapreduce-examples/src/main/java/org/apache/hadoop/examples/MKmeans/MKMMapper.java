@@ -42,6 +42,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		rapl = new ThreadPinning();
 //	    rapl.adjustPower(record);
 		if(record != null){
+			//TODO : Do this only if the iteration count is more than 4
 			rapl.adjustPower(record.getExectime(), record.getTargetTime());
 		}
 		//read centroids

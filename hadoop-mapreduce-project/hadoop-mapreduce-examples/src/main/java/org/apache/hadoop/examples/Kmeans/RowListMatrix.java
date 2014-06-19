@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.hadoop.examples.Kmeans.KMTypes.Value;
 import org.apache.hadoop.ipc.GenericMatrix;
+import org.apache.hadoop.ipc.RAPLCalibration;
 
 public class RowListMatrix implements GenericMatrix<List<Value>> {
 	
@@ -43,6 +44,18 @@ public class RowListMatrix implements GenericMatrix<List<Value>> {
 	@Override
 	public float getMatrixDensity() {
 		return -1;
+	}
+
+	@Override
+	public RAPLCalibration getCalibration() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void addCalibration(RAPLCalibration calibration) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

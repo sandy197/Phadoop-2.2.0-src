@@ -1,6 +1,7 @@
 package org.apache.hadoop.examples.ParSpMM.SpMMMR;
 
 import org.apache.hadoop.ipc.GenericMatrix;
+import org.apache.hadoop.ipc.RAPLCalibration;
 
 public class RegMatrix implements GenericMatrix<int[][]> {
 
@@ -48,5 +49,19 @@ public class RegMatrix implements GenericMatrix<int[][]> {
 				}
 			}
 		return (float)count/(matrix.length * matrix[0].length);
+	}
+
+
+	@Override
+	public RAPLCalibration getCalibration() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public void addCalibration(RAPLCalibration calibration) {
+		// TODO Auto-generated method stub
+		
 	}
 }

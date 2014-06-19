@@ -13,7 +13,8 @@ public interface GenericMatrix<MATRIX_TYPE> {
 	
 //	private int[][] matrix;
 //	private boolean isMatrixSet;
-	
+	public RAPLCalibration getCalibration();
+	public void addCalibration(RAPLCalibration calibration);
 	public MATRIX_TYPE getMatrix();
 	public void setMatrix(MATRIX_TYPE matrix);
 	public boolean isMatrixSet();
