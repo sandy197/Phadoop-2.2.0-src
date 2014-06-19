@@ -169,7 +169,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			long end =System.nanoTime();
 			//set the execution time in the calibration
 			calibration.addRAPLExecTime(powerCap, end - start);
-			if(DEBUG) System.out.println(partialCentroids + ":" + powerCap +":" + (end - start));
+			if(DEBUG) System.out.println(partialCentroids + ":"+ pkg+ ":" + powerCap +":" + (end - start));
 		}
 		return calibration;
 	}
