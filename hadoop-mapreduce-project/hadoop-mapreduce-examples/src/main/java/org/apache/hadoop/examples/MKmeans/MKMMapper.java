@@ -159,7 +159,8 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		urapl.initRAPL("maptask");
 		for(int powerCap = 110; powerCap > 10; powerCap -= 5){
 			//TODO : set power cap
-			urapl.setPowerLimit(rapl.get_affinity(), powerCap);
+			int pkg = rapl.get_affinity()/8;
+			urapl.setPowerLimit(pkg, powerCap);
 			//wait 2 seconds for the power cap to kick in
 			Thread.sleep(2000);
 			//execute the core

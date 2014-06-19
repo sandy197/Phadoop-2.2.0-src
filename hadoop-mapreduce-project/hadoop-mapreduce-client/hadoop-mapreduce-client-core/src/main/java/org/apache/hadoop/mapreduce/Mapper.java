@@ -26,6 +26,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.mapreduce.task.MapContextImpl;
+import org.ncsu.sys.*;
 
 /** 
  * Maps input key/value pairs to a set of intermediate key/value pairs.  
@@ -139,6 +140,8 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
    * @throws IOException
    */
   public void run(Context context) throws IOException, InterruptedException {
+	  ThreadPinning tp = new ThreadPinning();
+	    tp.set_thread_affinity((context.getTaskAttemptID().getTaskID().getId() + 8)%16);
     setup(context);
     try {
       while (context.nextKeyValue()) {
