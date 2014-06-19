@@ -152,7 +152,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 	 * @return
 	 */
 	private RAPLCalibration calibrate(List<Value> vectors2,
-			List<Value> centroids2) {
+			List<Value> centroids2) throws Exception{
 		PartialCentroid[] partialCentroids = null;
 		RAPLCalibration calibration = new RAPLCalibration();
 		UseRAPL urapl = new UseRAPL();
@@ -170,6 +170,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			calibration.addRAPLExecTime(powerCap, end - start);
 			if(DEBUG) System.out.println(partialCentroids + ":" + powerCap +":" + (end - start));
 		}
+		return calibration;
 	}
 
 	private void printMapOutput(IntWritable newKey, PartialCentroid pcent) {
