@@ -59,10 +59,13 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			//rapl.adjustPower(record.getExectime(), record.getTargetTime());
 			//get the power cap and set it
 			int powerCap = getPowerCap(record.getTargetTime(), cap2time);
-			UseRAPL urapl = new UseRAPL();
-			urapl.initRAPL("maptask");
-			int pkg = rapl.get_thread_affinity()/8;
-			urapl.setPowerLimit(pkg, powerCap);
+			if(powerCap!=0){
+				UseRAPL urapl = new UseRAPL();
+				urapl.initRAPL("maptask");
+				int pkg = rapl.get_thread_affinity()/8;
+				System.out.println("Setting power cap of pkg:"+pkg+", to:"+powerCap+" watts");
+				urapl.setPowerLimit(pkg, powerCap);
+			}
 			
 			if(record.isDoCalibration() && iterationCount != 0 && iterationCount < 3){
 				doCalibrate = true;
@@ -95,7 +98,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 	 * @return
 	 */
 	private int getPowerCap(long targetTime, Map<Integer, Long> cap2time) {
-		int powerCap;
+		int powerCap = 0;
 		long min_diff = Long.MAX_VALUE;
 		for(int i : cap2time.keySet()){
 			if(Math.abs(cap2time.get(i) - targetTime) < min_diff){
