@@ -142,7 +142,6 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				ex.printStackTrace();
 			}
 		}
-		
 	}
 	
 	/**
@@ -162,7 +161,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		RAPLCalibration calibration = new RAPLCalibration();
 		UseRAPL urapl = new UseRAPL();
 		urapl.initRAPL("maptask");
-		for(int powerCap = 110; powerCap > 10; powerCap -= 5){
+		for(int powerCap = 50; powerCap > 5; powerCap -= 2){
 			//TODO : set power cap
 			int pkg = rapl.get_affinity()/8;
 			urapl.setPowerLimit(pkg, powerCap);
