@@ -31,7 +31,9 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 	private List<Value> centroids, vectors;
 	private RAPLRecord record;
 	private ThreadPinning rapl;
+	private UseRAPL urapl;
 	private int iterationCount;
+	private int jobToken;
 	
 	public void setup (Context context) {
 		init(context);
@@ -44,6 +46,8 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		//since the rapl record has the information about the package already
 		// 
 		rapl = new ThreadPinning();
+		urapl = new UseRAPL();
+		urapl.initRAPL("maptask");
 //	    rapl.adjustPower(record);
 		if(record != null){
 			//TODO : Do this only if the iteration count is more than 4 and a flag to use this feature is set.
@@ -60,8 +64,6 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			//get the power cap and set it
 			int powerCap = getPowerCap(record.getTargetTime(), cap2time);
 			if(powerCap!=0){
-				UseRAPL urapl = new UseRAPL();
-				urapl.initRAPL("maptask");
 				int pkg = rapl.get_thread_affinity()/8;
 				System.out.println("Setting power cap of pkg:"+pkg+", to:"+powerCap+" watts");
 				urapl.setPowerLimit(pkg, powerCap);
@@ -71,6 +73,13 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				doCalibrate = true;
 			}
 			//TODO : implement a method to make a decision based on the cap2ExecTime Map<integer, long>
+		}
+		else if(iterationCount == 1){
+			//Set the power cap to default.i.e. the highest. Can get this from the config file
+			int defPowerCap = 115;//watts
+			int pkg = rapl.get_thread_affinity()/8;
+			System.out.println("Setting default power cap of pkg:"+pkg+", to:"+defPowerCap+" watts");
+			urapl.setPowerLimit(pkg, defPowerCap);
 		}
 		//read centroids
 		//Change this section for Phadoop version
@@ -115,6 +124,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		k = conf.getInt("KM.k", 6);
 		R1 = conf.getInt("KM.R1", 6);
 		iterationCount = conf.getInt("KM.iterationCount", 0);
+		jobToken = conf.getInt("KM.jobToken", -1);
 //		centroids = new ArrayList<Value>();
 //		vectors = new ArrayList<Value>();
 		isCbuilt = isVbuilt = false;
@@ -155,6 +165,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 					//NOTE : this doesn't work if the classify is done more than once per map task
 					record = new RAPLRecord();
 				}
+				record.setJobtoken(jobToken);
 				record.setExectime(end1 - start1);
 				//TODO:replace the hardcoded value with a JNI call to get the core this thread is pinned to
 				int pkgIdx = rapl.get_thread_affinity() / CORES_PER_PKG;
@@ -164,7 +175,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				context.setRAPLRecord(record);
 				/******** Calibration *********/
 				//TODO : done for the initial iterations only
-				//if(currentIteration < 4){
+				//if(currentIteration < 3){
 				if(doCalibrate){
 					RAPLCalibration calibration = calibrate(vectors, centroids);
 //					doCalibrate = false;
@@ -235,7 +246,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 	private List<Value> buildCentroids(Values values) {
 		List<Value> centroidsLoc = new ArrayList<Value>();
 		for(Value val : values.getValues()){
-			if(DEBUG) System.out.println("Adding value :" + val);
+//			if(DEBUG) System.out.println("Adding value :" + val);
 			Value valCopy = VectorFactory.getInstance(VectorType.REGULAR);
 			valCopy.copy(val);
 			centroidsLoc.add(valCopy);

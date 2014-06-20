@@ -3,6 +3,7 @@ package org.apache.hadoop.examples.MKmeans;
 import java.net.URI;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -52,7 +53,9 @@ public class MKMDriver {
 			int taskStart = Integer.parseInt(remainingArgs[7]);
 			int diffratio = Integer.parseInt(remainingArgs[8]);
 			boolean isLinear = Integer.parseInt(remainingArgs[9]) == 1;
+			Random rand = new Random(); 
 			
+			conf.setInt("KM.jobToken", rand.nextInt());
 			conf.setInt("KM.maxiterations", iterations);		
 			conf.setInt("KM.k", k);
 			conf.setInt("KM.dimension", dimension);

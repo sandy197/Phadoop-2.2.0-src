@@ -614,7 +614,7 @@ public class LocalJobRunner implements ClientProtocol {
 	}
 	
 	@Override
-	public RAPLRecord getTaskTargetTime(TaskAttemptID taskId) throws IOException {
+	public RAPLRecord getTaskTargetTime(TaskAttemptID taskId, int jobToken) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}

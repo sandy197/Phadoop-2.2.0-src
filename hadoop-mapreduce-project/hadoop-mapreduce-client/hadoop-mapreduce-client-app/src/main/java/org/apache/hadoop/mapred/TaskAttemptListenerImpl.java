@@ -435,7 +435,7 @@ public class TaskAttemptListenerImpl extends CompositeService
 	}
   
   @Override
-  public RAPLRecord getTaskTargetTime(TaskAttemptID taskID) throws IOException {
+  public RAPLRecord getTaskTargetTime(TaskAttemptID taskID, int jobToken) throws IOException {
   	// TODO get the target time for the task computed during the decision phase 
 	  // and stored in the runningAppContext
 	  RAPLRecord record = null;
@@ -445,10 +445,11 @@ public class TaskAttemptListenerImpl extends CompositeService
 		  record = rcontext.getAllMapRAPLRecords().remove(taskId.getTaskId().getId());
 	  else
 		  record = rcontext.getAllReduceRAPLRecords().remove(taskId.getTaskId().getId());
-//	  if(record == null){
-//		  throw new IOException("No record exists for the task");
-//	  }
-	  System.out.println("Returning record :"+ "/n" + record);
+//	  System.out.println("Returning record :"+ "/n" + record);
+	  // Check if the data is stale (belongs to other applications)
+	  if(record != null && record.getJobtoken() != jobToken){
+			  record = null;
+	  }
 	  return record;
   }
 
