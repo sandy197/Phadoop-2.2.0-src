@@ -937,7 +937,7 @@ public class MRAppMaster extends CompositeService {
 			//set the target time only for the task with max exectime
 			RAPLRecord maxRec = null;
 			long maxExecTime = Long.MIN_VALUE;
-			for(RAPLRecord rec : maxCluster.records){
+			for(RAPLRecord rec : this.records){
 				if(rec.getExectime() > maxExecTime){
 					maxExecTime = rec.getExectime();
 					maxRec = rec;
