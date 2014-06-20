@@ -23,6 +23,7 @@ import java.io.IOException;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.ipc.ProtocolSignature;
 import org.apache.hadoop.mapred.SortedRanges.Range;
@@ -177,7 +178,7 @@ public class TestTaskCommit extends HadoopTestCase {
 	}
 	
 	@Override
-	public RAPLRecord getTaskTargetTime(TaskAttemptID taskId,int jobToken) throws IOException {
+	public RAPLRecord getTaskTargetTime(TaskAttemptID taskId,IntWritable jobToken) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}

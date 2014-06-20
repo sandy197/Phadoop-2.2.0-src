@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.ipc.ProtocolSignature;
 import org.apache.hadoop.ipc.RPC;
 import org.apache.hadoop.ipc.Server;
@@ -435,8 +436,11 @@ public class TaskAttemptListenerImpl extends CompositeService
 	}
   
   @Override
-  public RAPLRecord getTaskTargetTime(TaskAttemptID taskID, int jobToken) throws IOException {
-  	// TODO get the target time for the task computed during the decision phase 
+  public RAPLRecord getTaskTargetTime(TaskAttemptID taskID, IntWritable jobToken) throws IOException {
+	  if(jobToken.get() == -1){
+		  throw new IOException("Invalid job token");
+	  }
+  	// Get the target time for the task computed during the decision phase 
 	  // and stored in the runningAppContext
 	  RAPLRecord record = null;
 	  TaskAttemptId taskId = TypeConverter.toYarn(taskID);
@@ -447,7 +451,7 @@ public class TaskAttemptListenerImpl extends CompositeService
 		  record = rcontext.getAllReduceRAPLRecords().remove(taskId.getTaskId().getId());
 //	  System.out.println("Returning record :"+ "/n" + record);
 	  // Check if the data is stale (belongs to other applications)
-	  if(record != null && record.getJobtoken() != jobToken){
+	  if(record != null && record.getJobtoken() != jobToken.get()){
 			  record = null;
 	  }
 	  return record;

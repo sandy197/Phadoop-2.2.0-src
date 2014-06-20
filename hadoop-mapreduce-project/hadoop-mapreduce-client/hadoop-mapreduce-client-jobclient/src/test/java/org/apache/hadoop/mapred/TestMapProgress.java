@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.ipc.ProtocolSignature;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -153,7 +154,7 @@ public class TestMapProgress extends TestCase {
 		
 	}
 	@Override
-	public RAPLRecord getTaskTargetTime(TaskAttemptID taskId, int jobToken) throws IOException {
+	public RAPLRecord getTaskTargetTime(TaskAttemptID taskId, IntWritable jobToken) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}

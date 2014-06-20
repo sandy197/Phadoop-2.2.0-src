@@ -43,6 +43,7 @@ import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.ipc.ProtocolSignature;
 import org.apache.hadoop.mapreduce.Cluster.JobTrackerStatus;
@@ -614,7 +615,7 @@ public class LocalJobRunner implements ClientProtocol {
 	}
 	
 	@Override
-	public RAPLRecord getTaskTargetTime(TaskAttemptID taskId, int jobToken) throws IOException {
+	public RAPLRecord getTaskTargetTime(TaskAttemptID taskId, IntWritable jobToken) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}

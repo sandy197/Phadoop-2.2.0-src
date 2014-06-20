@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.ipc.VersionedProtocol;
 import org.apache.hadoop.mapred.JvmTask;
 import org.apache.hadoop.mapreduce.security.token.JobTokenSelector;
@@ -79,7 +80,7 @@ public interface TaskUmbilicalProtocol extends VersionedProtocol {
  */
 void reportExecTimeRAPL(TaskAttemptID taskId, RAPLRecord testString) throws IOException;
 
-RAPLRecord getTaskTargetTime(TaskAttemptID taskId, int jobToken) throws IOException;
+RAPLRecord getTaskTargetTime(TaskAttemptID taskId, IntWritable jobToken) throws IOException;
   
   /**
    * Called when a child task process starts, to get its task.
