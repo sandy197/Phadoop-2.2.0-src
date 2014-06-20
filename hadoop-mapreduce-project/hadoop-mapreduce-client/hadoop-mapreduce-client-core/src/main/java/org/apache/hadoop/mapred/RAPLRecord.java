@@ -13,11 +13,15 @@ public class RAPLRecord implements Writable {
 	private String hostname;
 	private short pkg;
 	private long targetTime;
+	private boolean doCalibration;
+	private boolean doPowerMeasurement;
 
 	public RAPLRecord(){
 		// TODO Remove this later
 		jobtoken = 197775;
 		hostname = "localhost";
+		doCalibration = false;
+		doPowerMeasurement = false;
 	}
 	
 	public RAPLRecord(long exectime){
@@ -73,6 +77,8 @@ public class RAPLRecord implements Writable {
 		out.writeUTF(hostname);
 		out.writeShort(pkg);
 		out.writeLong(targetTime);
+		out.writeBoolean(doCalibration);
+		out.writeBoolean(doPowerMeasurement);
 	}
 
 	@Override
@@ -82,8 +88,26 @@ public class RAPLRecord implements Writable {
 		this.hostname = in.readUTF();
 		this.pkg = in.readShort();
 		this.targetTime = in.readLong();
+		this.doCalibration = in.readBoolean();
+		this.doPowerMeasurement = in.readBoolean();
 	}
 	
+	public boolean isDoCalibration() {
+		return doCalibration;
+	}
+
+	public void setDoCalibration(boolean doCalibration) {
+		this.doCalibration = doCalibration;
+	}
+
+	public boolean isDoPowerMeasurement() {
+		return doPowerMeasurement;
+	}
+
+	public void setDoPowerMeasurement(boolean doPowerMeasurement) {
+		this.doPowerMeasurement = doPowerMeasurement;
+	}
+
 	public String toString(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("***RAPL Record***"+"\n");

@@ -121,6 +121,7 @@ public class MKMDriver {
 						else{
 							oldCenters = MKMUtils.getCentroidsFromFile(dataIn, false);
 						}
+						conf.setInt("KM.iterationCount", iteration);
 						this.kmeansJob(centersIn, centersOut, iteration);
 						List<Value> newCenters = MKMUtils.getCentroidsFromFile(dataIn, false);
 						converged = isConverged(oldCenters, newCenters, convergenceDelta);

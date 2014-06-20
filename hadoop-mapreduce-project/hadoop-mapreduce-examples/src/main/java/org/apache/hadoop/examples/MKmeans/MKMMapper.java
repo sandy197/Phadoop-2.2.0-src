@@ -2,8 +2,10 @@ package org.apache.hadoop.examples.MKmeans;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -29,6 +31,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 	private List<Value> centroids, vectors;
 	private RAPLRecord record;
 	private ThreadPinning rapl;
+	private int iterationCount;
 	
 	public void setup (Context context) {
 		init(context);
@@ -44,8 +47,24 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 //	    rapl.adjustPower(record);
 		if(record != null){
 			//TODO : Do this only if the iteration count is more than 4 and a flag to use this feature is set.
-			rapl.adjustPower(record.getExectime(), record.getTargetTime());
-			if(record.getExectime() != record.getTargetTime()){
+			String testVar = conf.get("conftest");
+			if("test".equals(testVar)){
+				System.out.println("Able to read data from conf files");
+			}
+			RAPLCalibration calibration = ((MKMRowListMatrix) context.getMatrix()).getCalibration();
+			Map<Integer, Long> cap2time = new HashMap<Integer, Long>();
+			for(Integer i : calibration.getCapToExecTimeMap().keySet()){
+				cap2time.put(i, calibration.getCapToExecTimeMap().get(i).getExecTime());
+			}
+			//rapl.adjustPower(record.getExectime(), record.getTargetTime());
+			//get the power cap and set it
+			int powerCap = getPowerCap(record.getTargetTime(), cap2time);
+			UseRAPL urapl = new UseRAPL();
+			urapl.initRAPL("maptask");
+			int pkg = rapl.get_thread_affinity()/8;
+			urapl.setPowerLimit(pkg, powerCap);
+			
+			if(record.isDoCalibration() && iterationCount != 0 && iterationCount < 3){
 				doCalibrate = true;
 			}
 			//TODO : implement a method to make a decision based on the cap2ExecTime Map<integer, long>
@@ -69,11 +88,30 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 //		}
 	}
 	
+	/**
+	 * Can be reused.
+	 * @param targetTime
+	 * @param cap2time
+	 * @return
+	 */
+	private int getPowerCap(long targetTime, Map<Integer, Long> cap2time) {
+		int powerCap;
+		long min_diff = Long.MAX_VALUE;
+		for(int i : cap2time.keySet()){
+			if(Math.abs(cap2time.get(i) - targetTime) < min_diff){
+				min_diff = Math.abs(cap2time.get(i) - targetTime);
+				powerCap = i;
+			}
+		}
+		return powerCap;
+	}
+
 	private void init(Context context) {
 		Configuration conf = context.getConfiguration();
 		dimension = conf.getInt("KM.dimension", 2);
 		k = conf.getInt("KM.k", 6);
 		R1 = conf.getInt("KM.R1", 6);
+		iterationCount = conf.getInt("KM.iterationCount", 0);
 //		centroids = new ArrayList<Value>();
 //		vectors = new ArrayList<Value>();
 		isCbuilt = isVbuilt = false;
@@ -126,6 +164,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				//if(currentIteration < 4){
 				if(doCalibrate){
 					RAPLCalibration calibration = calibrate(vectors, centroids);
+//					doCalibrate = false;
 					if(calibration != null)
 						((MKMRowListMatrix) context.getMatrix()).addCalibration(calibration);
 				}
@@ -135,6 +174,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 					context.write(newKey, pcent);
 					if(DEBUG) printMapOutput(newKey, pcent);
 				}
+				
 				long end2 =System.nanoTime();
 				System.out.println("MapTime:"+"\t" + (end2-start2));
 			}
@@ -163,7 +203,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		urapl.initRAPL("maptask");
 		for(int powerCap = 50; powerCap > 5; powerCap -= 2){
 			//TODO : set power cap
-			int pkg = rapl.get_affinity()/8;
+			int pkg = rapl.get_thread_affinity()/8;
 			urapl.setPowerLimit(pkg, powerCap);
 			//wait 2 seconds for the power cap to kick in
 			Thread.sleep(2000);

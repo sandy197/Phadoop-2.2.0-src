@@ -955,6 +955,24 @@ public class MRAppMaster extends CompositeService {
 		}
 	}
 	
+	public void setCalibrationTask() throws IOException {
+		RAPLRecord maxRec = null;
+		long maxExecTime = Long.MIN_VALUE;
+		for(RAPLRecord rec : this.records){
+			if(rec.getExectime() > maxExecTime){
+				maxExecTime = rec.getExectime();
+				maxRec = rec;
+			}
+		}
+		if(maxRec != null){
+			if(DEBUG) System.out.println("Setting the calibration task on a Host package:"
+											+ maxRec.getHostname() + ",Package:" + maxRec.getPkg());
+			maxRec.setDoCalibration(true);
+		}
+		else
+			throw new IOException("Max record can not be null");
+	}
+	
 	public boolean isEqual(Cluster cluster){
 		boolean isEqual = false;
 		if(cluster != null && hostName != null && hostName.length() != 0)
@@ -1072,6 +1090,7 @@ public class MRAppMaster extends CompositeService {
 			Cluster maxCluster = getCluster(maxRec.getHostname(), maxRec.getPkg(), clusters);
 			for(Cluster cluster : clusters){
 				cluster.setTargetTime(targetTime, maxCluster);
+				cluster.setCalibrationTask();
 			}
 			System.out.println("Done computing the target times for all the tasks");
 		}
