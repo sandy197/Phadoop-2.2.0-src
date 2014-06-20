@@ -25,7 +25,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 	private int dimension;
 	private int k;
 	private int R1;
-	private boolean isCbuilt, isVbuilt;
+	private boolean isCbuilt, isVbuilt, doCalibrate;
 	private List<Value> centroids, vectors;
 	private RAPLRecord record;
 	private ThreadPinning rapl;
@@ -45,6 +45,9 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		if(record != null){
 			//TODO : Do this only if the iteration count is more than 4 and a flag to use this feature is set.
 			rapl.adjustPower(record.getExectime(), record.getTargetTime());
+			if(record.getExectime() != record.getTargetTime()){
+				doCalibrate = true;
+			}
 			//TODO : implement a method to make a decision based on the cap2ExecTime Map<integer, long>
 		}
 		//read centroids
@@ -74,6 +77,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 //		centroids = new ArrayList<Value>();
 //		vectors = new ArrayList<Value>();
 		isCbuilt = isVbuilt = false;
+		doCalibrate = false;
 	}
 
 	public void map(Key key, Values values, Context context)
@@ -112,7 +116,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				}
 				record.setExectime(end1 - start1);
 				//TODO:replace the hardcoded value with a JNI call to get the core this thread is pinned to
-				int pkgIdx = rapl.get_affinity() / CORES_PER_PKG;
+				int pkgIdx = rapl.get_thread_affinity() / CORES_PER_PKG;
 				record.setPkg((short)pkgIdx);
 				//TODO : add hostname to record either here or in the appmaster (this info is readily available there)
 //				record.setHostname(hostname);
@@ -120,10 +124,11 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				/******** Calibration *********/
 				//TODO : done for the initial iterations only
 				//if(currentIteration < 4){
-				RAPLCalibration calibration = calibrate(vectors, centroids);
-				if(calibration != null)
-					((MKMRowListMatrix) context.getMatrix()).addCalibration(calibration);
-				
+				if(doCalibrate){
+					RAPLCalibration calibration = calibrate(vectors, centroids);
+					if(calibration != null)
+						((MKMRowListMatrix) context.getMatrix()).addCalibration(calibration);
+				}
 				
 				for(PartialCentroid pcent : partialCentroids){
 					IntWritable newKey = new IntWritable(pcent.getCentroidIdx());

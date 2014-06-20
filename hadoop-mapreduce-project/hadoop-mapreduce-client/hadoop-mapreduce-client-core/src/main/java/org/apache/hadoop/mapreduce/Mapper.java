@@ -141,7 +141,9 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
    */
   public void run(Context context) throws IOException, InterruptedException {
 	  ThreadPinning tp = new ThreadPinning();
-	    tp.set_thread_affinity((context.getTaskAttemptID().getTaskID().getId() + 8)%16);
+	  int taskId = context.getTaskAttemptID().getTaskID().getId();
+	  int coreId = (taskId + ((taskId % 2) * 8))%16;
+	    tp.set_thread_affinity(coreId);
     setup(context);
     try {
       while (context.nextKeyValue()) {
