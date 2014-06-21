@@ -27,7 +27,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 	private int dimension;
 	private int k;
 	private int R1;
-	private boolean isCbuilt, isVbuilt, doCalibrate;
+	private boolean isCbuilt, isVbuilt, doCalibrate, useRAPL;
 	private List<Value> centroids, vectors;
 	private RAPLRecord record;
 	private ThreadPinning rapl;
@@ -38,48 +38,49 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 	public void setup (Context context) {
 		init(context);
 		Configuration conf = context.getConfiguration();
-		record = context.getRAPLRecord();
-		//TODO : JNI call to set the power cap based on the target task time and
-	    // the previous execution time.
-		// record contains prev exec time & the target execution time.
-		//TODO : Decide if this has to be done in setup or the mapTask 
-		//since the rapl record has the information about the package already
-		// 
 		rapl = new ThreadPinning();
-		urapl = new UseRAPL();
-		urapl.initRAPL("maptask");
-//	    rapl.adjustPower(record);
-		if(record != null){
-			//TODO : Do this only if the iteration count is more than 4 and a flag to use this feature is set.
-			String testVar = conf.get("conftest");
-			if("test".equals(testVar)){
-				System.out.println("Able to read data from conf files");
+		if(useRAPL){
+			record = context.getRAPLRecord();
+			//JNI call to set the power cap based on the target task time and
+		    // the previous execution time.
+			// record contains prev exec time & the target execution time.
+			//TODO : Decide if this has to be done in setup or the mapTask 
+			//since the rapl record has the information about the package already
+			urapl = new UseRAPL();
+			urapl.initRAPL("maptask");
+	//	    rapl.adjustPower(record);
+			if(record != null){
+				//TODO : Do this only if the iteration count is more than 4 and a flag to use this feature is set.
+				String testVar = conf.get("conftest");
+				if("test".equals(testVar)){
+					System.out.println("Able to read data from conf files");
+				}
+				RAPLCalibration calibration = ((MKMRowListMatrix) context.getMatrix()).getCalibration();
+				Map<Integer, Long> cap2time = new HashMap<Integer, Long>();
+				for(Integer i : calibration.getCapToExecTimeMap().keySet()){
+					cap2time.put(i, calibration.getCapToExecTimeMap().get(i).getExecTime());
+				}
+				//rapl.adjustPower(record.getExectime(), record.getTargetTime());
+				//get the power cap and set it
+				int powerCap = getPowerCap(record.getTargetTime(), cap2time);
+				if(powerCap!=0){
+					int pkg = rapl.get_thread_affinity()/8;
+					System.out.println("Setting power cap of pkg:"+pkg+", to:"+powerCap+" watts");
+					urapl.setPowerLimit(pkg, powerCap);
+				}
+				
+				if(record.isDoCalibration() && iterationCount != 0 && iterationCount < 3){
+					System.out.println("Setting doCalib to true:"+record.isDoCalibration()+":"+iterationCount);
+					doCalibrate = true;
+				}
 			}
-			RAPLCalibration calibration = ((MKMRowListMatrix) context.getMatrix()).getCalibration();
-			Map<Integer, Long> cap2time = new HashMap<Integer, Long>();
-			for(Integer i : calibration.getCapToExecTimeMap().keySet()){
-				cap2time.put(i, calibration.getCapToExecTimeMap().get(i).getExecTime());
-			}
-			//rapl.adjustPower(record.getExectime(), record.getTargetTime());
-			//get the power cap and set it
-			int powerCap = getPowerCap(record.getTargetTime(), cap2time);
-			if(powerCap!=0){
+			else if(iterationCount == 1){
+				//Set the power cap to default.i.e. the highest. Can get this from the config file
+				int defPowerCap = 115;//watts
 				int pkg = rapl.get_thread_affinity()/8;
-				System.out.println("Setting power cap of pkg:"+pkg+", to:"+powerCap+" watts");
-				urapl.setPowerLimit(pkg, powerCap);
+				System.out.println("Setting default power cap of pkg:"+pkg+", to:"+defPowerCap+" watts");
+				urapl.setPowerLimit(pkg, defPowerCap);
 			}
-			
-			if(record.isDoCalibration() && iterationCount != 0 && iterationCount < 3){
-				doCalibrate = true;
-			}
-			//TODO : implement a method to make a decision based on the cap2ExecTime Map<integer, long>
-		}
-		else if(iterationCount == 1){
-			//Set the power cap to default.i.e. the highest. Can get this from the config file
-			int defPowerCap = 115;//watts
-			int pkg = rapl.get_thread_affinity()/8;
-			System.out.println("Setting default power cap of pkg:"+pkg+", to:"+defPowerCap+" watts");
-			urapl.setPowerLimit(pkg, defPowerCap);
 		}
 		//read centroids
 		//Change this section for Phadoop version
@@ -129,6 +130,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 //		vectors = new ArrayList<Value>();
 		isCbuilt = isVbuilt = false;
 		doCalibrate = false;
+		useRAPL = conf.getBoolean("RAPL.enable", false);
 	}
 
 	public void map(Key key, Values values, Context context)
@@ -215,9 +217,10 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		RAPLCalibration calibration = new RAPLCalibration();
 		UseRAPL urapl = new UseRAPL();
 		urapl.initRAPL("maptask");
+		int pkg = rapl.get_thread_affinity()/8;
+		int origLimit = urapl.getPowerLimit(pkg);
 		for(int powerCap = 50; powerCap > 5; powerCap -= 2){
-			//TODO : set power cap
-			int pkg = rapl.get_thread_affinity()/8;
+			//set power cap
 			urapl.setPowerLimit(pkg, powerCap);
 			//wait 2 seconds for the power cap to kick in
 			Thread.sleep(2000);
@@ -229,6 +232,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			calibration.addRAPLExecTime(powerCap, end - start);
 			if(DEBUG) System.out.println(partialCentroids + ":"+ pkg+ ":" + powerCap +":" + (end - start));
 		}
+		urapl.setPowerLimit(pkg, origLimit);
 		return calibration;
 	}
 

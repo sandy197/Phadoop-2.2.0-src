@@ -1,6 +1,7 @@
 package org.apache.hadoop.examples.MKmeans;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
@@ -29,6 +30,14 @@ public class MKMDriver {
 		
 		private static FileSystem fs;
 		private static JobConf conf = new JobConf();
+		private UseRAPL librapl;
+		private List<PowerStatus<Double>> powerStatus;
+		
+		public MKMDriver(){
+			librapl = new UseRAPL();
+            powerStatus = new ArrayList<PowerStatus<Double>>();
+        	librapl.initRAPL("mmPower");
+		}
 
 		public static void main(String[] args) throws Exception {
 			GenericOptionsParser goParser = new GenericOptionsParser(conf, args);
@@ -98,7 +107,53 @@ public class MKMDriver {
 			driver.kmeans(iterations, convergenceDelta);
 			long end = System.nanoTime();
 			System.out.println("Job completed successfully. Time taken: " + (end -start));
+			printAvgPowerConsumption(driver.powerStatus);
 		}
+		
+		private static void printAvgPowerConsumption(
+				List<PowerStatus<Double>> powerStatus2) {int count = 0;
+		        Double avgPow_0 = 0.0, avgPow_1 = 0.0;
+		        for(PowerStatus<Double> ps : powerStatus2){
+		        	avgPow_0 += ps.pkgPower.get(0);
+		        	avgPow_1 += ps.pkgPower.get(1);
+		        	count++;
+		        }
+		        avgPow_0 /= count;
+		        avgPow_1 /= count;
+		        System.out.println("From power calculator thread");
+		        System.out.println("pkg_0:\t"+ avgPow_0 + "\n" + "pkg_1:\t" + avgPow_1);
+		}
+
+		private class PowerStatus<POWER_TYPE>{
+        	List<POWER_TYPE> pkgPower;
+        	public PowerStatus(int arrayLen){
+        		pkgPower = new ArrayList<POWER_TYPE>(arrayLen);
+        	}
+        }
+		
+		public Thread powerCalculator = new Thread(
+				new Runnable() {
+					
+					@Override
+					public void run() {
+						PowerStatus<Double> ps;
+						while(!Thread.currentThread().isInterrupted()){
+							try {
+								double power_0 = librapl.getPowerStatus(0);
+								double power_1 = librapl.getPowerStatus(1);
+								ps = new PowerStatus<Double>(2);
+								ps.pkgPower.add(power_0);
+								ps.pkgPower.add(power_1);
+								powerStatus.add(ps);
+								Thread.sleep(500);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+								break;
+							}
+						}
+					}
+				}
+			);
 		
 		public void kmeans(int maxIterations, int convergenceDelta){
 			boolean converged = false;
@@ -115,8 +170,12 @@ public class MKMDriver {
 				List<Value> oldCenters = null;
 				//get any of the datapath
 				Path dataIn = new Path(conf.get("KM.inputDataPath"), ""+0);
+				boolean isCalcStarted = false;
 				while(!converged && iteration <= maxIterations){
-					
+						if(!isCalcStarted && iteration == 3){
+							this.powerCalculator.start();
+							isCalcStarted = true;
+						}
 						Path centersOut = fs.makeQualified(new Path(KM_CENTER_OUTPUT_PATH, "iteration-" + iteration));
 						fs.delete(centersOut, true);
 						if(oldCenters == null)
@@ -137,6 +196,10 @@ public class MKMDriver {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+			}
+			finally{
+				if(this.powerCalculator.isAlive())
+					this.powerCalculator.interrupt();
 			}
 		}
 		
