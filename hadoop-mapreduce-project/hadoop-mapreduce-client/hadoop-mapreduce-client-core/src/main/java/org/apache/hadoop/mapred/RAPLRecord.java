@@ -15,6 +15,7 @@ public class RAPLRecord implements Writable {
 	private long targetTime;
 	private boolean doCalibration;
 	private boolean doPowerMeasurement;
+	private int iterationCount;
 
 	public RAPLRecord(){
 		// TODO Remove this later
@@ -69,6 +70,14 @@ public class RAPLRecord implements Writable {
 	public void setPkg(short pkg) {
 		this.pkg = pkg;
 	}
+	
+	public int getInterationCount() {
+		return iterationCount;
+	}
+
+	public void setInterationCount(int interationCount) {
+		this.iterationCount = interationCount;
+	}
 
 	@Override
 	public void write(DataOutput out) throws IOException {
@@ -79,6 +88,7 @@ public class RAPLRecord implements Writable {
 		out.writeLong(targetTime);
 		out.writeBoolean(doCalibration);
 		out.writeBoolean(doPowerMeasurement);
+		out.writeInt(iterationCount);
 	}
 
 	@Override
@@ -90,6 +100,7 @@ public class RAPLRecord implements Writable {
 		this.targetTime = in.readLong();
 		this.doCalibration = in.readBoolean();
 		this.doPowerMeasurement = in.readBoolean();
+		this.iterationCount = in.readInt();
 	}
 	
 	public boolean isDoCalibration() {
@@ -114,7 +125,8 @@ public class RAPLRecord implements Writable {
 		sb.append("Hostname:"+this.hostname+"\n")
 			.append("PkgIdx:"+this.pkg+"\n")
 				.append("ExecTime:"+this.exectime+"\n")
-					.append("targetTime:"+this.targetTime+"\n");
+					.append("targetTime:"+this.targetTime+"\n")
+						.append("iterationCount" + this.iterationCount);
 		sb.append("*****************");
 		
 		return sb.toString();

@@ -39,6 +39,8 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		init(context);
 		Configuration conf = context.getConfiguration();
 		rapl = new ThreadPinning();
+		urapl = new UseRAPL();
+		urapl.initRAPL("maptask");
 		if(useRAPL){
 			record = context.getRAPLRecord();
 			//JNI call to set the power cap based on the target task time and
@@ -46,32 +48,33 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			// record contains prev exec time & the target execution time.
 			//TODO : Decide if this has to be done in setup or the mapTask 
 			//since the rapl record has the information about the package already
-			urapl = new UseRAPL();
-			urapl.initRAPL("maptask");
+			
 	//	    rapl.adjustPower(record);
 			if(record != null){
+				iterationCount = 1 + record.getInterationCount();
 				//TODO : Do this only if the iteration count is more than 4 and a flag to use this feature is set.
-				String testVar = conf.get("conftest");
-				if("test".equals(testVar)){
-					System.out.println("Able to read data from conf files");
-				}
+//				String testVar = conf.get("conftest");
+//				if("test".equals(testVar)){
+//					System.out.println("Able to read data from conf files");
+//				}
 				RAPLCalibration calibration = ((MKMRowListMatrix) context.getMatrix()).getCalibration();
 				Map<Integer, Long> cap2time = new HashMap<Integer, Long>();
 				for(Integer i : calibration.getCapToExecTimeMap().keySet()){
 					cap2time.put(i, calibration.getCapToExecTimeMap().get(i).getExecTime());
 				}
-				//rapl.adjustPower(record.getExectime(), record.getTargetTime());
-				//get the power cap and set it
-				int powerCap = getPowerCap(record.getTargetTime(), cap2time);
-				if(powerCap!=0){
-					int pkg = rapl.get_thread_affinity()/8;
-					System.out.println("Setting power cap of pkg:"+pkg+", to:"+powerCap+" watts");
-					urapl.setPowerLimit(pkg, powerCap);
-				}
 				
 				if(record.isDoCalibration() && iterationCount != 0 && iterationCount < 3){
 					System.out.println("Setting doCalib to true:"+record.isDoCalibration()+":"+iterationCount);
 					doCalibrate = true;
+				}
+				
+				//rapl.adjustPower(record.getExectime(), record.getTargetTime());
+				//get the power cap and set it only if this isn't a calibration round
+				int powerCap = getPowerCap(record.getTargetTime(), cap2time);
+				if(powerCap!=0 && !doCalibrate){
+					int pkg = rapl.get_thread_affinity()/8;
+					System.out.println("Setting power cap of pkg:"+pkg+", to:"+powerCap+" watts");
+					urapl.setPowerLimit(pkg, powerCap);
 				}
 			}
 			else if(iterationCount == 1){
@@ -81,6 +84,13 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				System.out.println("Setting default power cap of pkg:"+pkg+", to:"+defPowerCap+" watts");
 				urapl.setPowerLimit(pkg, defPowerCap);
 			}
+		}
+		else{
+			//just to make sure defaults are set
+			int defPowerCap = 115;//watts
+			int pkg = rapl.get_thread_affinity()/8;
+			System.out.println("Setting default power cap of pkg:"+pkg+", to:"+defPowerCap+" watts");
+			urapl.setPowerLimit(pkg, defPowerCap);
 		}
 		//read centroids
 		//Change this section for Phadoop version
@@ -124,6 +134,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		dimension = conf.getInt("KM.dimension", 2);
 		k = conf.getInt("KM.k", 6);
 		R1 = conf.getInt("KM.R1", 6);
+		//this is always 1 when we reuse the tasks.
 		iterationCount = conf.getInt("KM.iterationCount", 0);
 		jobToken = conf.getInt("KM.jobToken", -1);
 //		centroids = new ArrayList<Value>();
@@ -172,6 +183,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				//TODO:replace the hardcoded value with a JNI call to get the core this thread is pinned to
 				int pkgIdx = rapl.get_thread_affinity() / CORES_PER_PKG;
 				record.setPkg((short)pkgIdx);
+				record.setInterationCount(iterationCount);
 				//TODO : add hostname to record either here or in the appmaster (this info is readily available there)
 //				record.setHostname(hostname);
 				context.setRAPLRecord(record);
@@ -180,7 +192,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				//if(currentIteration < 3){
 				if(doCalibrate){
 					RAPLCalibration calibration = calibrate(vectors, centroids);
-//					doCalibrate = false;
+					doCalibrate = false;
 					if(calibration != null)
 						((MKMRowListMatrix) context.getMatrix()).addCalibration(calibration);
 				}
@@ -197,6 +209,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			catch(Exception ex){
 				ex.printStackTrace();
 			}
+//			iterationCount++;
 		}
 	}
 	
@@ -219,7 +232,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		urapl.initRAPL("maptask");
 		int pkg = rapl.get_thread_affinity()/8;
 		long origLimit = urapl.getPowerLimit(pkg);
-		for(int powerCap = 50; powerCap > 5; powerCap -= 2){
+		for(int powerCap = 50; powerCap > 5; powerCap -= 5){
 			//set power cap
 			urapl.setPowerLimit(pkg, powerCap);
 			//wait 2 seconds for the power cap to kick in
