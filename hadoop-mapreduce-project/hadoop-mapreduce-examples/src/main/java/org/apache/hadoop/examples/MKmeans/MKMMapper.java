@@ -218,7 +218,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		UseRAPL urapl = new UseRAPL();
 		urapl.initRAPL("maptask");
 		int pkg = rapl.get_thread_affinity()/8;
-		int origLimit = urapl.getPowerLimit(pkg);
+		long origLimit = urapl.getPowerLimit(pkg);
 		for(int powerCap = 50; powerCap > 5; powerCap -= 2){
 			//set power cap
 			urapl.setPowerLimit(pkg, powerCap);
