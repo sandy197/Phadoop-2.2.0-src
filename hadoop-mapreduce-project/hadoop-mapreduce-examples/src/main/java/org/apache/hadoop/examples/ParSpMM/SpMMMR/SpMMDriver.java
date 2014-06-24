@@ -406,9 +406,9 @@ public class SpMMDriver {
 	
 	private static void buildBlockedMatrix(int [][]A, int rows, int cols, int brows, int bcols, int nzc, int nzr, boolean isRowMajor, boolean isUniform){
 		HashSet<Integer> rhset, chset;
-		Random randNum = new Random(666);
-		Random colIndx = new Random(666);	
-		Random rowIndx = new Random(666);
+		Random randNum = new Random(100);
+		Random colIndx = new Random(100);	
+		Random rowIndx = new Random(100);
 		for(int i = 0; i < rows; i++){
 			for(int j = 0; j < cols; j++){
 				A[i][j] = 0;

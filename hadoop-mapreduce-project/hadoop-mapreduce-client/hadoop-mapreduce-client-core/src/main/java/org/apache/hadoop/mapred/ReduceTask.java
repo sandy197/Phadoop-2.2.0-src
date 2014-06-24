@@ -642,7 +642,7 @@ public class ReduceTask extends Task {
                                                committer,
                                                reporter, comparator, keyClass,
                                                valueClass);
-    RAPLRecord record = umbilical.getTaskTargetTime(getTaskID(), new IntWritable(job.getInt("KM.jobToken", -1)));
+    RAPLRecord record = umbilical.getTaskTargetTime(getTaskID(), new IntWritable(job.getInt("SpMM.jobToken", -1)));
     if(record == null){
     	System.out.println("Record is null");
     }
