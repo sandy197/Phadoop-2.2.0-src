@@ -38,6 +38,7 @@ import org.apache.hadoop.fs.FileSystem.Statistics;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DataInputBuffer;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.RawComparator;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
@@ -641,8 +642,21 @@ public class ReduceTask extends Task {
                                                committer,
                                                reporter, comparator, keyClass,
                                                valueClass);
+    RAPLRecord record = umbilical.getTaskTargetTime(getTaskID(), new IntWritable(job.getInt("KM.jobToken", -1)));
+    if(record == null){
+    	System.out.println("Record is null");
+    }
+    else{
+    	System.out.println(record);
+    }
+    reducerContext.setRAPLRecord(record);
     try {
       reducer.run(reducerContext);
+//    umbilical.reportExecTimeRAPL(getTaskID(), "Adi desha drohula raktam valla ochina erupu !!");
+    if(reducerContext.getRAPLRecord() == null){
+  	  throw new IOException("No rapl record from the map task found");
+    }
+    umbilical.reportExecTimeRAPL(getTaskID(), reducerContext.getRAPLRecord());
     } finally {
       trackedRW.close(reducerContext);
     }

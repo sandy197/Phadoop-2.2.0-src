@@ -996,48 +996,56 @@ public class MRAppMaster extends CompositeService {
       this.clientToAMTokenSecretManager =
           new ClientToAMTokenSecretManager(appAttemptID, null);
       
-      //TODO Read and initialize the mapRAPLRecords and the reduceRAPLRecords
+      //Read and initialize the mapRAPLRecords and the reduceRAPLRecords
       try {
 		FileSystem fs = FileSystem.get(conf);
-		Reader mapreader = new SequenceFile.Reader(fs, new Path("tmp/rapl/", "map"), conf);
-		IntWritable key;
-		try {
-			key = mapreader.getKeyClass().asSubclass(IntWritable.class).newInstance();
-		} catch (InstantiationException e) { // Should not be possible
-			throw new IllegalStateException(e);
-		} catch (IllegalAccessException e) {
+		
+		if(conf.getBoolean("RAPL.enableMapReuse", false)){
+			Reader mapreader = new SequenceFile.Reader(fs, new Path("tmp/rapl/", "map"), conf);
+			IntWritable key;
+			try {
+				key = mapreader.getKeyClass().asSubclass(IntWritable.class).newInstance();
+			} catch (InstantiationException e) { // Should not be possible
 				throw new IllegalStateException(e);
-		}
-		RAPLRecord value = new RAPLRecord();
-		while (mapreader.next(key, value)) {
-			mapRAPLRecords.put(key.get(), value);
-			value = new RAPLRecord();
-		}
-		//run the decision algo here to calculate the target exectime for each of the tasks
-		computeTargetExecTimes(mapRAPLRecords);
-		System.out.println("******After computing target times**********");
-		for(Integer i : mapRAPLRecords.keySet()){
-			System.out.println(mapRAPLRecords.get(i));
+			} catch (IllegalAccessException e) {
+					throw new IllegalStateException(e);
+			}
+			RAPLRecord value = new RAPLRecord();
+			while (mapreader.next(key, value)) {
+				mapRAPLRecords.put(key.get(), value);
+				value = new RAPLRecord();
+			}
+			//run the decision algo here to calculate the target exectime for each of the tasks
+			computeTargetExecTimes(mapRAPLRecords);
+			System.out.println("******After computing target times**********");
+			for(Integer i : mapRAPLRecords.keySet()){
+				System.out.println(mapRAPLRecords.get(i));
+			}
 		}
 		
-		
-		Reader reducereader = new SequenceFile.Reader(fs, new Path("tmp/rapl/", "reduce"), conf);
-		try {
-			key = reducereader.getKeyClass().asSubclass(IntWritable.class).newInstance();
-		} catch (InstantiationException e) { // Should not be possible
-			throw new IllegalStateException(e);
-		} catch (IllegalAccessException e) {
+		if(conf.getBoolean("RAPL.enableReduceReuse", false)){
+			Reader reducereader = new SequenceFile.Reader(fs, new Path("tmp/rapl/", "reduce"), conf);
+			try {
+				key = reducereader.getKeyClass().asSubclass(IntWritable.class).newInstance();
+			} catch (InstantiationException e) { // Should not be possible
 				throw new IllegalStateException(e);
-		}
-		value = new RAPLRecord();
-		while (reducereader.next(key, value)) {
-			reduceRAPLRecords.put(key.get(), value);
+			} catch (IllegalAccessException e) {
+					throw new IllegalStateException(e);
+			}
 			value = new RAPLRecord();
+			while (reducereader.next(key, value)) {
+				reduceRAPLRecords.put(key.get(), value);
+				value = new RAPLRecord();
+			}
+			//decide
+			computeTargetExecTimes(reduceRAPLRecords);
+			System.out.println("******After computing target times**********");
+			for(Integer i : reduceRAPLRecords.keySet()){
+				System.out.println(reduceRAPLRecords.get(i));
+			}
 		}
 		if(mapRAPLRecords != null || reduceRAPLRecords != null)
 			System.out.println("AppMaster Done reading RAPL records");
-		//decide
-		computeTargetExecTimes(reduceRAPLRecords);
 		
 	} catch (IOException e) {
 		e.printStackTrace();

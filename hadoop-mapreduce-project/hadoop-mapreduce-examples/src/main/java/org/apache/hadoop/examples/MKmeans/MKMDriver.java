@@ -172,8 +172,9 @@ public class MKMDriver {
 				//get any of the datapath
 				Path dataIn = new Path(conf.get("KM.inputDataPath"), ""+0);
 				boolean isCalcStarted = false;
+				int calcStartIter = conf.getInt("RAPL.calibrationIterationCount", 4) + 1;
 				while(!converged && iteration <= maxIterations){
-						if(!isCalcStarted && iteration == 3){
+						if(!isCalcStarted && iteration == calcStartIter){
 							this.powerCalculator.start();
 							isCalcStarted = true;
 						}

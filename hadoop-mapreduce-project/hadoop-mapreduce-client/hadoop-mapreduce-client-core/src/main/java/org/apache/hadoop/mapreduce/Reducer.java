@@ -170,8 +170,10 @@ public class Reducer<KEYIN,VALUEIN,KEYOUT,VALUEOUT> {
 //srkandul
 		long start = System.nanoTime();	
 		boolean isFirst = true;
-    ThreadPinning tp = new ThreadPinning();
-    tp.set_thread_affinity((context.getTaskAttemptID().getTaskID().getId() + 8)%16);
+		ThreadPinning tp = new ThreadPinning();
+		  int taskId = context.getTaskAttemptID().getTaskID().getId();
+		  int coreId = (taskId + ((taskId % 2) * 8))%16;
+		    tp.set_thread_affinity(coreId);
     setup(context);
     try {
     //srkandul

@@ -1,10 +1,13 @@
 package org.apache.hadoop.examples.ParSpMM.SpMMMR;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.ResettableIterator;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.examples.MKmeans.PartialCentroid;
 import org.apache.hadoop.examples.ParSpMM.SpMM.SpDCSC;
 import org.apache.hadoop.examples.ParSpMM.SpMM.SpUtils;
 import org.apache.hadoop.examples.ParSpMM.SpMM.StackEntry;
@@ -16,14 +19,17 @@ import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Value;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.ipc.GenericMatrix;
+import org.apache.hadoop.ipc.RAPLCalibration;
+import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.join.ResetableIterator;
 import org.apache.zookeeper.KeeperException;
-import org.ncsu.sys.ThreadPinning;
+import org.ncsu.sys.*;
 
 
 public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
+	public static int CORES_PER_PKG = 8;
 	
 	private GenericMatrix<?> A, B;
 	private Key indexPair;
@@ -61,8 +67,14 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 	private static int lastJBlockSize;
 	
 	private int sib, skb, sjb;
-	private boolean isABuilt, isBBuilt;
+	private boolean isABuilt, isBBuilt, doCalibrate, useRAPL;
 	private int multiplyCount = 0;
+	private RAPLRecord record;
+	private ThreadPinning rapl;
+	private UseRAPL urapl;
+	private int iterationCount;
+	private int jobToken;
+
 
 	public void reduce(SpMMTypes.Key key, Iterable<SpMMTypes.Value> values, Context context)	
 			throws IOException, InterruptedException {
@@ -110,7 +122,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
         	  ThreadPinning tp = new ThreadPinning();
         	  tp.start_counters();
         	  long start = System.nanoTime();
-        	  long multiplyTime = multiplyAndEmit(context, ib, jb);
+        	  long multiplyTime = multiplyAndEmit(context, ib, jb, false);
 //        	  Barrier b = new Barrier(ZK_ADDRESS, "/b1", 6);
 //              try{
 //                  boolean flag = b.enter();
@@ -138,6 +150,28 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
       						((float)((SpMMMatrix)B).getMatrixDensity())+"\t"+((SpMMMatrix)B).getMatrix().jc.size()+"\t"+
       						(x*y*intersectCount)+"\t"+intersectCount+"\t"+multiplyTime+"\t"+(end - start)+"\t");
         	  }
+        	  if(record == null){
+					//NOTE : this doesn't work if the classify is done more than once per map task
+					record = new RAPLRecord();
+				}
+				record.setJobtoken(jobToken);
+				record.setExectime(multiplyTime);
+				//TODO:replace the hardcoded value with a JNI call to get the core this thread is pinned to
+				int pkgIdx = rapl.get_thread_affinity() / CORES_PER_PKG;
+				record.setPkg((short)pkgIdx);
+				record.setInterationCount(iterationCount);
+				//TODO : add hostname to record either here or in the appmaster (this info is readily available there)
+//				record.setHostname(hostname);
+				context.setRAPLRecord(record);
+				/******** Calibration *********/
+				//TODO : done for the initial iterations only
+				//if(currentIteration < 3){
+				if(doCalibrate){
+					RAPLCalibration calibration = calibrate(context, ib, jb);
+					doCalibrate = false;
+					if(calibration != null)
+						((SpMMMatrix) context.getMatrix()).addCalibration(calibration);
+				}
         	  //sb.append(multiplyCount +"\t");
         	  for(int i = 0; i < counterValues.length; i++){
                   //System.out.println("Counter Values");
@@ -147,8 +181,33 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
           }
 	}
 
+	private RAPLCalibration calibrate(Context context, int ib2,
+			int jb2) throws InterruptedException{
+		long multiplyTime;
+		RAPLCalibration calibration = new RAPLCalibration();
+		UseRAPL urapl = new UseRAPL();
+		urapl.initRAPL("maptask");
+		int pkg = rapl.get_thread_affinity()/8;
+		long origLimit = urapl.getPowerLimit(pkg);
+		for(int powerCap = 50; powerCap > 5; powerCap -= 5){
+			//set power cap
+			urapl.setPowerLimit(pkg, powerCap);
+			//wait 2 seconds for the power cap to kick in
+			Thread.sleep(2000);
+			//execute the core
+			long start =System.nanoTime();
+			multiplyTime = multiplyAndEmit(context, ib2, jb2, true);
+			long end =System.nanoTime();
+			//set the execution time in the calibration
+			calibration.addRAPLExecTime(powerCap, end - start);
+			if(DEBUG) System.out.println("Lorg:" + multiplyTime + ":"+ pkg+ ":" + powerCap +":" + (end - start));
+		}
+		urapl.setPowerLimit(pkg, origLimit);
+		return calibration;
+	}
+
 	private long multiplyAndEmit(Context context, int ib2,
-			int jb2) {
+			int jb2, boolean isCalibration) {
 		if(isSparseMM){
 			SpDCSC a, b;
 			a = (SpDCSC) A.getMatrix();
@@ -158,21 +217,23 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 			long start = System.nanoTime();
 			List<StackEntry> multStack = a.SpMatMultiply(b);
 			long end = System.nanoTime();
-			for(StackEntry se : multStack){
-				if(se.value != 0){
-					indexPair = new Key();
-					indexPair.index1 = ib2*IB + se.key.first;
-					indexPair.index2 = -1;
-					indexPair.index3 = jb2*JB + se.key.second;
-					el.set(se.value);
-					try {
-						context.write(indexPair, el);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+			if(!isCalibration){
+				for(StackEntry se : multStack){
+					if(se.value != 0){
+						indexPair = new Key();
+						indexPair.index1 = ib2*IB + se.key.first;
+						indexPair.index2 = -1;
+						indexPair.index3 = jb2*JB + se.key.second;
+						el.set(se.value);
+						try {
+							context.write(indexPair, el);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
 			}
@@ -204,7 +265,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 					long end_m = System.nanoTime();
 					multiplyTime += end_m - start_m;
 					long start = System.nanoTime();
-					if (sum != 0) {
+					if (!isCalibration && sum != 0) {
 						indexPair = new Key();
 						indexPair.index1 = ibase + i;
 						indexPair.index2 = -1;
@@ -263,6 +324,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 
 	public void setup (Context context) {
 		init(context);
+		Configuration conf = context.getConfiguration();
 		System.loadLibrary("papi");
 		if (DEBUG) {
 			System.out.println("##### Reduce setup");
@@ -280,8 +342,79 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 		skb = -1;
 		sjb = -1;
 		
-		isABuilt = false;
-		isBBuilt = false;
+		rapl = new ThreadPinning();
+		urapl = new UseRAPL();
+		urapl.initRAPL("maptask");
+		
+		if(useRAPL){
+			record = context.getRAPLRecord();
+			//JNI call to set the power cap based on the target task time and
+		    // the previous execution time.
+			// record contains prev exec time & the target execution time.
+			//TODO : Decide if this has to be done in setup or the mapTask 
+			//since the rapl record has the information about the package already
+			
+	//	    rapl.adjustPower(record);
+			if(record != null){
+				iterationCount = 1 + record.getInterationCount();
+				//TODO : Do this only if the iteration count is more than 4 and a flag to use this feature is set.
+//				String testVar = conf.get("conftest");
+//				if("test".equals(testVar)){
+//					System.out.println("Able to read data from conf files");
+//				}
+				RAPLCalibration calibration = ((SpMMMatrix) context.getMatrix()).getCalibration();
+				Map<Integer, Long> cap2time = new HashMap<Integer, Long>();
+				for(Integer i : calibration.getCapToExecTimeMap().keySet()){
+					cap2time.put(i, calibration.getCapToExecTimeMap().get(i).getExecTime());
+				}
+				int calibIterCount = conf.getInt("RAPL.calibrationCount", 5);
+				if(record.isDoCalibration() && iterationCount != 0 && iterationCount < calibIterCount){
+					System.out.println("Setting doCalib to true:"+record.isDoCalibration()+":"+iterationCount);
+					doCalibrate = true;
+				}
+				
+				//rapl.adjustPower(record.getExectime(), record.getTargetTime());
+				//get the power cap and set it only if this isn't a calibration round
+				int powerCap = getPowerCap(record.getTargetTime(), cap2time);
+				if(powerCap!=0 && !doCalibrate){
+					int pkg = rapl.get_thread_affinity()/8;
+					System.out.println("Setting power cap of pkg:"+pkg+", to:"+powerCap+" watts");
+					urapl.setPowerLimit(pkg, powerCap);
+				}
+			}
+			else if(iterationCount == 1){
+				//Set the power cap to default.i.e. the highest. Can get this from the config file
+				int defPowerCap = 115;//watts
+				int pkg = rapl.get_thread_affinity()/8;
+				System.out.println("Setting default power cap of pkg:"+pkg+", to:"+defPowerCap+" watts");
+				urapl.setPowerLimit(pkg, defPowerCap);
+			}
+		}
+		else{
+			//just to make sure defaults are set
+			int defPowerCap = 115;//watts
+			int pkg = rapl.get_thread_affinity()/8;
+			System.out.println("Setting default power cap of pkg:"+pkg+", to:"+defPowerCap+" watts");
+			urapl.setPowerLimit(pkg, defPowerCap);
+		}
+	}
+	
+	/**
+	 * Can be reused.
+	 * @param targetTime
+	 * @param cap2time
+	 * @return
+	 */
+	private int getPowerCap(long targetTime, Map<Integer, Long> cap2time) {
+		int powerCap = 0;
+		long min_diff = Long.MAX_VALUE;
+		for(int i : cap2time.keySet()){
+			if(Math.abs(cap2time.get(i) - targetTime) < min_diff){
+				min_diff = Math.abs(cap2time.get(i) - targetTime);
+				powerCap = i;
+			}
+		}
+		return powerCap;
 	}
 	
 	private void init(JobContext context) {
@@ -300,6 +433,9 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 		IB = conf.getInt("SpMM.IB", 0);
 		KB = conf.getInt("SpMM.KB", 0);
 		JB = conf.getInt("SpMM.JB", 0);
+		iterationCount = conf.getInt("SpMM.iteration", 0);
+		jobToken = conf.getInt("SpMM.jobToken", -1);
+		useRAPL = conf.getBoolean("RAPL.enable", false);
 		NIB = (I-1)/IB + 1;
 		NKB = (K-1)/KB + 1;
 		NJB = (J-1)/JB + 1;
@@ -309,6 +445,9 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 		lastKBlockSize = K - lastKBlockNum*KB;
 		lastJBlockNum = NJB-1;
 		lastJBlockSize = J - lastJBlockNum*JB;
+		isABuilt = false;
+		isBBuilt = false;
+		doCalibrate = false;
 	}
 	      
   private void printReduceInputKey (SpMMTypes.Key key) {

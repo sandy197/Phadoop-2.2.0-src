@@ -62,8 +62,8 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				for(Integer i : calibration.getCapToExecTimeMap().keySet()){
 					cap2time.put(i, calibration.getCapToExecTimeMap().get(i).getExecTime());
 				}
-				
-				if(record.isDoCalibration() && iterationCount != 0 && iterationCount < 3){
+				int calibIterCount = conf.getInt("RAPL.calibrationCount", 5);
+				if(record.isDoCalibration() && iterationCount != 0 && iterationCount < calibIterCount){
 					System.out.println("Setting doCalib to true:"+record.isDoCalibration()+":"+iterationCount);
 					doCalibrate = true;
 				}
