@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<configuration>
+    <!-- Site specific YARN configuration properties -->
+    <property>
+      <name>yarn.nodemanager.aux-services</name>
+      <value>mapreduce_shuffle</value>
+    </property>
+    <property>
+      <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
+      <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    </property>
+    <property>
+      <name>yarn.nodemanager.resource.cpu-vcores</name>
+      <value>16</value>
+    </property>
+    <property>
+      <name>yarn.nodemanager.resource.memory-mb</name>
+      <value>16384</value>
+    </property>
+
+    <property>
+      <name>RAPL.enable</name>
+      <value>true</value>
+    </property>
+	<property>
+		<name>RAPL.enableReduceReuse</name>
+		<value>true</value>
+	</property>
+	<property>
+		<name>RAPL.enableMapReuse</name>
+		<value>true</value>
+	</property>
+    <property>
+      <name>RAPL.calibrationCount</name>
+      <value>5</value>
+    </property>
+    <property>
+      <name>conftest</name>
+      <value>test</value>
+    </property>
+</configuration>
