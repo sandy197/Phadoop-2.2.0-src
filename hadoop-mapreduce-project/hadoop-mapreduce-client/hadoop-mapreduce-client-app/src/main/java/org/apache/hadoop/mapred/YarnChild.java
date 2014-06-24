@@ -453,9 +453,16 @@ public void yarnChildMain(String host, int port, String taskAttemptId, int jvmId
     
   //TODO:check if we really need this. 
     // A map task from the 2nd iteration can stop the child form the previous reduce run.
-    // We cannot launch a separate process for the MAP task as we can not differentiate it. 
-    if(firstTaskid.getTaskType() == TaskType.REDUCE){
+    // We cannot launch a separate process for the MAP task as we can not differentiate it.
+    boolean reuseReduceChild = defaultConf.getBoolean("RAPL.enableReduceReuse", false);
+    if(!reuseReduceChild && firstTaskid.getTaskType() == TaskType.REDUCE){
     	LOG.info("Reduce task is set to be stopped");
+    	this.setStopChild(true);
+    }
+    
+    boolean reuseMapChild = defaultConf.getBoolean("RAPL.enableMapReuse", false);
+    if(!reuseMapChild && firstTaskid.getTaskType() == TaskType.MAP){
+    	LOG.info("Map task is set to be stopped");
     	this.setStopChild(true);
     }
 
