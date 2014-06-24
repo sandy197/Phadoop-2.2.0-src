@@ -5,7 +5,6 @@ import java.net.URI;
 import java.util.*;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.examples.MKmeans.MKMDriver.PowerStatus;
 import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Key;
 import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMTypes.Value;
 import org.apache.hadoop.fs.*;
