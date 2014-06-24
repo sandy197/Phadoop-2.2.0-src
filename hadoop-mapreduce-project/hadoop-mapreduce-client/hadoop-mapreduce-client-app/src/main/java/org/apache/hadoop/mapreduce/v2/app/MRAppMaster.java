@@ -999,10 +999,10 @@ public class MRAppMaster extends CompositeService {
       //Read and initialize the mapRAPLRecords and the reduceRAPLRecords
       try {
 		FileSystem fs = FileSystem.get(conf);
-		
+		IntWritable key;
+		RAPLRecord value;
 		if(conf.getBoolean("RAPL.enableMapReuse", false)){
 			Reader mapreader = new SequenceFile.Reader(fs, new Path("tmp/rapl/", "map"), conf);
-			IntWritable key;
 			try {
 				key = mapreader.getKeyClass().asSubclass(IntWritable.class).newInstance();
 			} catch (InstantiationException e) { // Should not be possible
@@ -1010,7 +1010,7 @@ public class MRAppMaster extends CompositeService {
 			} catch (IllegalAccessException e) {
 					throw new IllegalStateException(e);
 			}
-			RAPLRecord value = new RAPLRecord();
+			value = new RAPLRecord();
 			while (mapreader.next(key, value)) {
 				mapRAPLRecords.put(key.get(), value);
 				value = new RAPLRecord();
