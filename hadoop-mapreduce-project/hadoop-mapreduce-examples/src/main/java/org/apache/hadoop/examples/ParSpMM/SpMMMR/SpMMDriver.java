@@ -320,15 +320,16 @@ public class SpMMDriver {
 		
 		int nzc = Integer.parseInt(remainingArgs[6]);
 		int nzr = Integer.parseInt(remainingArgs[7]);
+		int diff = Integer.parseInt(remainingArgs[8]);
 		
-		boolean isAUniform = Integer.parseInt(remainingArgs[8]) == 0 ? true : false;
+		boolean isAUniform = Integer.parseInt(remainingArgs[9]) == 0 ? true : false;
 		
 		int[][] A = new int[I][K];
 		int[][] B = new int[K][J];
 		
-		buildBlockedMatrix(A, I, K, IB, KB, nzc, nzr, false, isAUniform);
+		buildBlockedMatrix(A, I, K, IB, KB, nzc, nzr, diff,false, isAUniform);
 		System.out.println("Built blocked A");
-		buildBlockedMatrix(B, K, J, KB, JB, nzc, nzr, true, !isAUniform);
+		buildBlockedMatrix(B, K, J, KB, JB, nzc, nzr, diff,true, !isAUniform);
 		System.out.println("Built blocked B");
 		
 		driver.writeMatrix(A, I, K, SPMM_INPUT_PATH_A);
@@ -411,7 +412,7 @@ public class SpMMDriver {
 		return cidx;
 	}
 	
-	private static void buildBlockedMatrix(int [][]A, int rows, int cols, int brows, int bcols, int nzc, int nzr, boolean isRowMajor, boolean isUniform){
+	private static void buildBlockedMatrix(int [][]A, int rows, int cols, int brows, int bcols, int nzc, int nzr, int diff, boolean isRowMajor, boolean isUniform){
 		HashSet<Integer> rhset, chset;
 		Random randNum = new Random(1);
 		Random colIndx = new Random(2);	
@@ -435,8 +436,8 @@ public class SpMMDriver {
 //					nzr_d = nzr + ((roffset/brows)) * NZ_INCRIMENT;
 //					nzc_d = nzc + ((roffset/brows)) * NZ_INCRIMENT;
 					if(!isUniform){
-						nzr_d = nzr + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * NZ_INCRIMENT;
-						nzc_d = nzc + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * NZ_INCRIMENT;
+						nzr_d = nzr + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * diff;
+						nzc_d = nzc + ((roffset/brows)*(cols/bcols)+(coffset/bcols)) * diff;
 					}
 					rhset = new HashSet<Integer>();
 					while(rowCount < nzr_d){
