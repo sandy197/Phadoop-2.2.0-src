@@ -36,7 +36,7 @@ public class SpMMDriver {
 	
 	// a logical 2 x 4 core grid
 	public static final int SPMM_PROC_GRID_DIMM_X = 2;
-	public static final int SPMM_PROC_GRID_DIMM_Y = 3;
+	public static final int SPMM_PROC_GRID_DIMM_Y = 4;
 	
 	public static final int NZ_INCRIMENT = 5;
 	
@@ -352,6 +352,10 @@ public class SpMMDriver {
 				
 				driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration, reduceTaskCount);
 			}
+			//remove RAPL record file
+			fs.delete(new Path("tmp/rapl/", "map"), true);
+			//fs.delete(new Path("tmp/rapl/", "reduce"), true);
+			
 			driver.librapl.setPowerLimit(0, defaultPowerCap0);
 			driver.librapl.setPowerLimit(1, defaultPowerCap1);
 		}
