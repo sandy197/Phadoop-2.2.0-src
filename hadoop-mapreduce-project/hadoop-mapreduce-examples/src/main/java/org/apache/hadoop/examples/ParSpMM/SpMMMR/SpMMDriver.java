@@ -326,7 +326,7 @@ public class SpMMDriver {
 		
 		boolean isAUniform = Integer.parseInt(remainingArgs[9]) == 0 ? true : false;
 		
-		boolean isCalibration = Integer.parseInt(remainingArgs[9]) == 1 ? true : false;
+		boolean isCalibration = Integer.parseInt(remainingArgs[10]) == 1 ? true : false;
 		
 		int[][] A = new int[I][K];
 		int[][] B = new int[K][J];
