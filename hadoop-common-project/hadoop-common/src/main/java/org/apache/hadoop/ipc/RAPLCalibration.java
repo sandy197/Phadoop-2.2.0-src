@@ -64,4 +64,17 @@ public class RAPLCalibration implements Writable {
 		}
 	}
 	
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("----XXX----").append("\n");
+		
+		for(Long l : this.capToExecTimeMap.keySet())
+			sb.append(l).append(":")
+				.append(this.capToExecTimeMap.get(l).toString())
+					.append("\n");
+		
+		sb.append("----XXX----");
+		return sb.toString();
+	}
+	
 }

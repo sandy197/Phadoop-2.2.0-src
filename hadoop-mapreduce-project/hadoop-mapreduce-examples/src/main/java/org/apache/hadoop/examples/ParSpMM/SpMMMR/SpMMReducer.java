@@ -204,6 +204,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 						dataWriter = SequenceFile.createWriter(fs, conf,
 							    filePath, IntWritable.class, RAPLCalibration.class, CompressionType.NONE);
 						for(Integer i : iCalib.getItrToCalibMap().keySet()){
+							if(DEBUG) System.out.println(i + ":\n" + iCalib.getItrToCalibMap().get(i));
 							dataWriter.append(new IntWritable(i), iCalib.getItrToCalibMap().get(i));
 						}
 						dataWriter.close();

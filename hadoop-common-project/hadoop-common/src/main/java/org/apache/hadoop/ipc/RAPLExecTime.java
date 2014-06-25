@@ -49,4 +49,10 @@ public class RAPLExecTime implements Writable {
 		this.sampleCount = in.readInt();
 	}
 	
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		sb.append(execTime).append(",").append(sampleCount);
+		return sb.toString();
+	}
+	
 }
