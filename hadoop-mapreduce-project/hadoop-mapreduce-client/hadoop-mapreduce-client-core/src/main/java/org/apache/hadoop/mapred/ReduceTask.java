@@ -642,21 +642,25 @@ public class ReduceTask extends Task {
                                                committer,
                                                reporter, comparator, keyClass,
                                                valueClass);
-    RAPLRecord record = umbilical.getTaskTargetTime(getTaskID(), new IntWritable(job.getInt("SpMM.jobToken", -1)));
-    if(record == null){
-    	System.out.println("Record is null");
+    if(job.getBoolean("RAPL.enableReduceReuse", false)){
+	    RAPLRecord record = umbilical.getTaskTargetTime(getTaskID(), new IntWritable(job.getInt("SpMM.jobToken", -1)));
+	    if(record == null){
+	    	System.out.println("Record is null");
+	    }
+	    else{
+	    	System.out.println(record);
+	    }
+	    reducerContext.setRAPLRecord(record);
     }
-    else{
-    	System.out.println(record);
-    }
-    reducerContext.setRAPLRecord(record);
     try {
       reducer.run(reducerContext);
 //    umbilical.reportExecTimeRAPL(getTaskID(), "Adi desha drohula raktam valla ochina erupu !!");
-    if(reducerContext.getRAPLRecord() == null){
-  	  throw new IOException("No rapl record from the map task found");
-    }
-    umbilical.reportExecTimeRAPL(getTaskID(), reducerContext.getRAPLRecord());
+      if(job.getBoolean("RAPL.enableReduceReuse", false)){
+	    if(reducerContext.getRAPLRecord() == null){
+	  	  throw new IOException("No rapl record from the reduce task found");
+	    }
+	    umbilical.reportExecTimeRAPL(getTaskID(), reducerContext.getRAPLRecord());
+      }
     } finally {
       trackedRW.close(reducerContext);
     }

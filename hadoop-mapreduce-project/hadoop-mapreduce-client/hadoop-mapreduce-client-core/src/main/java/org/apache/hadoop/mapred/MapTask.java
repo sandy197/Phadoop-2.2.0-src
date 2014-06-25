@@ -758,15 +758,17 @@ public class MapTask extends Task {
         mapperContext = 
           new WrappedMapper<INKEY, INVALUE, OUTKEY, OUTVALUE>().getMapContext(
               mapContext);
-    //Get the target exectime from the appmaster and adjust the power cap
-    RAPLRecord record = umbilical.getTaskTargetTime(getTaskID(), new IntWritable(job.getInt("KM.jobToken", -1)));
-    if(record == null){
-    	System.out.println("Record is null");
+    //if the map task is reused, Get the target exectime from the appmaster and adjust the power cap
+    if(job.getBoolean("RAPL.enableMapReuse", false)){
+	    RAPLRecord record = umbilical.getTaskTargetTime(getTaskID(), new IntWritable(job.getInt("SpMM.jobToken", -1)));
+	    if(record == null){
+	    	System.out.println("Record is null");
+	    }
+	    else{
+	    	System.out.println(record);
+	    }
+	    mapperContext.setRAPLRecord(record);
     }
-    else{
-    	System.out.println(record);
-    }
-    mapperContext.setRAPLRecord(record);
     
     try {
       input.initialize(split, mapperContext);
@@ -774,10 +776,12 @@ public class MapTask extends Task {
       
       
 //      umbilical.reportExecTimeRAPL(getTaskID(), "Adi desha drohula raktam valla ochina erupu !!");
-      if(mapperContext.getRAPLRecord() == null)
-    	  throw new IOException("No rapl record from the map task found");
-      umbilical.reportExecTimeRAPL(getTaskID(), mapperContext.getRAPLRecord());
-      
+      //Report only if the map task is reused
+      if(job.getBoolean("RAPL.enableMapReuse", false)){
+	      if(mapperContext.getRAPLRecord() == null)
+	    	  throw new IOException("No rapl record from the map task found");
+	      umbilical.reportExecTimeRAPL(getTaskID(), mapperContext.getRAPLRecord());   
+      }
       
       mapPhase.complete();
       setPhase(TaskStatus.Phase.SORT);
