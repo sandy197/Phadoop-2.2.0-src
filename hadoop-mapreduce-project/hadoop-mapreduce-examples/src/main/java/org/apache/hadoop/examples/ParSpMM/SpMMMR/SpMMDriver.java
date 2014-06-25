@@ -345,6 +345,7 @@ public class SpMMDriver {
 			for(int powerCap = 50; powerCap > 10; powerCap -= 10){
 				driver.librapl.setPowerLimit(0, powerCap);
 				driver.librapl.setPowerLimit(1, powerCap);
+				Thread.sleep(2000);
 				
 				driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration);
 			}
