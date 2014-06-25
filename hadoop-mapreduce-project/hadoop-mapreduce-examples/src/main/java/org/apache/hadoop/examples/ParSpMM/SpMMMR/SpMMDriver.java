@@ -87,7 +87,7 @@ public class SpMMDriver {
 	 */
 	@SuppressWarnings("deprecation")
 	public void SpMM(int strategy, int aRows, int aColsbRows, int bCols, 
-						int aRowBlk, int aColbRowBlk, int bColBlk, boolean isCalibration){
+						int aRowBlk, int aColbRowBlk, int bColBlk, boolean isCalibration, int reduceTaskCount){
 		try {
 		if (conf == null) throw new Exception("conf is null");
 		FileSystem fs;
@@ -113,7 +113,7 @@ public class SpMMDriver {
 	    conf.set("SpMM.outputDirPath", outPath);
 	    conf.set("SpMM.tempDirPath", tempDirPath);
 	    conf.setInt("SpMM.strategy", strategy);
-	    conf.setInt("SpMM.R1", 6);
+	    conf.setInt("SpMM.R1", reduceTaskCount);
 	    conf.setInt("SpMM.R2", 4);
 	    conf.setInt("SpMM.I", aRows);
 	    conf.setInt("SpMM.K", aColsbRows);
@@ -158,11 +158,13 @@ public class SpMMDriver {
 	    	long end = System.nanoTime();
 	    	System.out.println("Time taken for bcast execution:"+(end - start));
 		}
-	    //TODO:implement this
-	    long start = System.nanoTime();
-	    aggregateJob(conf, k_max);
-	    long end = System.nanoTime();
-	    System.out.println("Time taken for aggregate execution:"+(end - start));
+	    //no need to execute the aggregate job for calibration
+	    if(!isCalibration){
+		    long start = System.nanoTime();
+		    aggregateJob(conf, k_max);
+		    long end = System.nanoTime();
+		    System.out.println("Time taken for aggregate execution:"+(end - start));
+	    }
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -326,7 +328,8 @@ public class SpMMDriver {
 		
 		boolean isAUniform = Integer.parseInt(remainingArgs[9]) == 0 ? true : false;
 		
-		boolean isCalibration = Integer.parseInt(remainingArgs[10]) == 1 ? true : false;
+		int reduceTaskCount = Integer.parseInt(remainingArgs[10]);
+		boolean isCalibration = Integer.parseInt(remainingArgs[11]) == 1 ? true : false;
 		
 		int[][] A = new int[I][K];
 		int[][] B = new int[K][J];
@@ -347,7 +350,7 @@ public class SpMMDriver {
 				driver.librapl.setPowerLimit(1, powerCap);
 				Thread.sleep(2000);
 				
-				driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration);
+				driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration, reduceTaskCount);
 			}
 			driver.librapl.setPowerLimit(0, defaultPowerCap0);
 			driver.librapl.setPowerLimit(1, defaultPowerCap1);
@@ -355,7 +358,7 @@ public class SpMMDriver {
 		else {
 			long start = System.nanoTime();
 			System.out.println("I="+ I+", K="+ K+", J,"+J+" IB="+ IB+", KB="+KB+", JB="+JB);
-			driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration);
+			driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration, reduceTaskCount);
 			long end = System.nanoTime();
 			//recursive delete of data dir
 			fs.delete(new Path(SPMM_DATA_DIR), true);
