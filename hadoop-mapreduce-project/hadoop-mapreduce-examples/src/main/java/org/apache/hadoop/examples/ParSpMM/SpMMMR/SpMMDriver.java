@@ -45,6 +45,7 @@ public class SpMMDriver {
 	private static final String SPMM_TEMP_DIR_PATH = SPMM_DATA_DIR;
 	private static final String SPMM_TEMP_OUTPUT_PATH = SPMM_DATA_DIR + "/tmp/C";
 	private static final String SPMM_OUTPUT_PATH = SPMM_DATA_DIR + "/C";
+	private static final boolean DEBUG = true;
 	
 	private static FileSystem fs;
 	private static JobConf conf = new JobConf();
@@ -326,7 +327,9 @@ public class SpMMDriver {
 		int[][] B = new int[K][J];
 		
 		buildBlockedMatrix(A, I, K, IB, KB, nzc, nzr, false, isAUniform);
+		System.out.println("Built blocked A");
 		buildBlockedMatrix(B, K, J, KB, JB, nzc, nzr, true, !isAUniform);
+		System.out.println("Built blocked B");
 		
 		driver.writeMatrix(A, I, K, SPMM_INPUT_PATH_A);
 		driver.writeMatrix(B, K, J, SPMM_INPUT_PATH_B);
@@ -433,10 +436,12 @@ public class SpMMDriver {
 					}
 					rhset = new HashSet<Integer>();
 					while(rowCount < nzr_d){
+						if(DEBUG) System.out.println("loop1:"+rowCount+":"+nzr_d);
 						int ridx = roffset + calcIndex(rhset, rowIndx, 0, brows);
 						colCount = 0;
 						chset = new HashSet<Integer>();
 						while(colCount < nzc_d){
+							if(DEBUG) System.out.println("loop2:"+colCount+":"+nzc_d);
 							int cidx = coffset + calcIndex(chset, colIndx, 0, bcols);
 							A[ridx][cidx] = randNum.nextInt();
 							colCount++;
@@ -451,10 +456,12 @@ public class SpMMDriver {
 					}
 					chset = new HashSet<Integer>();
 					while(colCount < nzc_d){
+						if(DEBUG) System.out.println("loop3:"+ colCount+":"+nzc_d);
 						int cidx = coffset + calcIndex(chset, colIndx, 0, bcols);
 						rowCount = 0;
 						rhset = new HashSet<Integer>();
 						while(rowCount < nzr_d){
+							if(DEBUG) System.out.println("loop4:"+rowCount+":"+nzr_d);
 							int ridx =  roffset + calcIndex(rhset, rowIndx, 0, brows);
 							A[ridx][cidx] = randNum.nextInt();
 							rowCount++;
