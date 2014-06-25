@@ -351,10 +351,11 @@ public class SpMMDriver {
 				Thread.sleep(2000);
 				
 				driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration, reduceTaskCount);
+				//remove RAPL record file
+//				fs.delete(new Path("tmp/rapl/", "map"), true);
+				fs.delete(new Path("tmp/rapl/", "reduce"), true);
 			}
-			//remove RAPL record file
-			fs.delete(new Path("tmp/rapl/", "map"), true);
-			//fs.delete(new Path("tmp/rapl/", "reduce"), true);
+			
 			
 			driver.librapl.setPowerLimit(0, defaultPowerCap0);
 			driver.librapl.setPowerLimit(1, defaultPowerCap1);
