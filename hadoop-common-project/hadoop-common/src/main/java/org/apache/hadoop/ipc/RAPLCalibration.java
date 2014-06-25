@@ -1,12 +1,17 @@
 package org.apache.hadoop.ipc;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RAPLCalibration {
-	private Map<Integer, RAPLExecTime> capToExecTimeMap;
+import org.apache.hadoop.io.Writable;
 
-	public Map<Integer, RAPLExecTime> getCapToExecTimeMap() {
+public class RAPLCalibration implements Writable {
+	private Map<Long, RAPLExecTime> capToExecTimeMap;
+
+	public Map<Long, RAPLExecTime> getCapToExecTimeMap() {
 		return capToExecTimeMap;
 	}
 
@@ -15,19 +20,19 @@ public class RAPLCalibration {
 //	}
 	
 	public RAPLCalibration(){
-		this.capToExecTimeMap = new HashMap<Integer, RAPLExecTime>();
+		this.capToExecTimeMap = new HashMap<Long, RAPLExecTime>();
 	}
 	
 	public void add(RAPLCalibration calibration){
 		if(calibration != null){
-			Map <Integer, RAPLExecTime> calibrationMap = calibration.getCapToExecTimeMap();
-			for(Integer i : calibrationMap.keySet()){
+			Map <Long, RAPLExecTime> calibrationMap = calibration.getCapToExecTimeMap();
+			for(Long i : calibrationMap.keySet()){
 				this.addRAPLExecTime(i, calibrationMap.get(i));
 			}
 		}
 	}
 	
-	public void addRAPLExecTime(int powerCap, RAPLExecTime rExecTime){
+	public void addRAPLExecTime(Long powerCap, RAPLExecTime rExecTime){
 		if(this.capToExecTimeMap.containsKey(powerCap)){
 			this.capToExecTimeMap.get(powerCap).add(rExecTime);
 		}
@@ -35,9 +40,28 @@ public class RAPLCalibration {
 			this.capToExecTimeMap.put(powerCap, rExecTime);
 	}
 	
-	public void addRAPLExecTime(int powerCap, long execTime){
+	public void addRAPLExecTime(Long powerCap, long execTime){
 		RAPLExecTime rExecTime = new RAPLExecTime(execTime, 1);
 		addRAPLExecTime(powerCap, rExecTime);
+	}
+
+	@Override
+	public void write(DataOutput out) throws IOException {
+		out.writeInt(capToExecTimeMap.size());
+		for(Long l : capToExecTimeMap.keySet()){
+			out.writeLong(l);
+			capToExecTimeMap.get(l).write(out);
+		}
+	}
+
+	@Override
+	public void readFields(DataInput in) throws IOException {
+		int size = in.readInt();
+		for(int i = 0; i < size; i++){
+			Long l = in.readLong();
+			RAPLExecTime execTime = new RAPLExecTime(0L, 0);
+			execTime.readFields(in);
+		}
 	}
 	
 }

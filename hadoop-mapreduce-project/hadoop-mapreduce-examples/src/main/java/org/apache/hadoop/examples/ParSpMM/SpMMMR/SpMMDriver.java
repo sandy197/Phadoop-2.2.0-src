@@ -24,6 +24,7 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.reduce.IntSumReducer;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.ncsu.sys.*;
+import org.znerd.xmlenc.Library;
 
 /**
  * Driver class invokes the jobs for matrix multiply based on 
@@ -86,7 +87,7 @@ public class SpMMDriver {
 	 */
 	@SuppressWarnings("deprecation")
 	public void SpMM(int strategy, int aRows, int aColsbRows, int bCols, 
-						int aRowBlk, int aColbRowBlk, int bColBlk){
+						int aRowBlk, int aColbRowBlk, int bColBlk, boolean isCalibration){
 		try {
 		if (conf == null) throw new Exception("conf is null");
 		FileSystem fs;
@@ -101,6 +102,7 @@ public class SpMMDriver {
 	          Integer.toString(new Random().nextInt(Integer.MAX_VALUE));
 
 	    Random rand = new Random();
+	    conf.setBoolean("SpMM.isCalibration", isCalibration);
 		conf.setInt("SpMM.jobToken", rand.nextInt());
 	    //TODO:take these as command line param
 	    conf.setBoolean("SpMM.useTaskPool", true);
@@ -324,6 +326,8 @@ public class SpMMDriver {
 		
 		boolean isAUniform = Integer.parseInt(remainingArgs[9]) == 0 ? true : false;
 		
+		boolean isCalibration = Integer.parseInt(remainingArgs[9]) == 1 ? true : false;
+		
 		int[][] A = new int[I][K];
 		int[][] B = new int[K][J];
 		
@@ -334,14 +338,29 @@ public class SpMMDriver {
 		
 		driver.writeMatrix(A, I, K, SPMM_INPUT_PATH_A);
 		driver.writeMatrix(B, K, J, SPMM_INPUT_PATH_B);
-		long start = System.nanoTime();
-		System.out.println("I="+ I+", K="+ K+", J,"+J+" IB="+ IB+", KB="+KB+", JB="+JB);
-		driver.SpMM(2, I, K, J, IB, KB, JB);
-		long end = System.nanoTime();
-		//recursive delete of data dir
-		fs.delete(new Path(SPMM_DATA_DIR), true);
-		System.out.println("Time taken for total execution:" + (end - start));
-		printAvgPowerConsumption(driver.powerStatus);
+		
+		if(isCalibration){
+			long defaultPowerCap0 = driver.librapl.getPowerLimit(0);
+			long defaultPowerCap1 = driver.librapl.getPowerLimit(1);
+			for(int powerCap = 50; powerCap > 10; powerCap -= 10){
+				driver.librapl.setPowerLimit(0, powerCap);
+				driver.librapl.setPowerLimit(1, powerCap);
+				
+				driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration);
+			}
+			driver.librapl.setPowerLimit(0, defaultPowerCap0);
+			driver.librapl.setPowerLimit(1, defaultPowerCap1);
+		}
+		else {
+			long start = System.nanoTime();
+			System.out.println("I="+ I+", K="+ K+", J,"+J+" IB="+ IB+", KB="+KB+", JB="+JB);
+			driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration);
+			long end = System.nanoTime();
+			//recursive delete of data dir
+			fs.delete(new Path(SPMM_DATA_DIR), true);
+			System.out.println("Time taken for total execution:" + (end - start));
+			printAvgPowerConsumption(driver.powerStatus);
+		}
 	}
 	
 	private static void printAvgPowerConsumption(

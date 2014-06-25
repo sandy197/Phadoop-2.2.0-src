@@ -2,17 +2,22 @@ package org.apache.hadoop.examples.ParSpMM.SpMMMR;
 
 import org.apache.hadoop.ipc.GenericMatrix;
 import org.apache.hadoop.ipc.RAPLCalibration;
+import org.apache.hadoop.ipc.RAPLIterCalibration;
 
 public class RegMatrix implements GenericMatrix<int[][]> {
 
 	private int[][] matrix;
 	private boolean isMatrixSet;
+	private RAPLIterCalibration calibration = new RAPLIterCalibration();
 	
 	public RegMatrix(int[][] matrix){
 		this.matrix = matrix;
 		this.isMatrixSet = true;
 	}
 	
+	public RAPLIterCalibration getIterCalibration() {
+		return calibration;
+	}
 	
 	@Override
 	public int[][] getMatrix() {

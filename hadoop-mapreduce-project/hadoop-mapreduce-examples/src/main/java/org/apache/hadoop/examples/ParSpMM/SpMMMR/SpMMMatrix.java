@@ -5,20 +5,25 @@ import java.util.Set;
 import org.apache.hadoop.examples.ParSpMM.SpMM.SpDCSC;
 import org.apache.hadoop.ipc.GenericMatrix;
 import org.apache.hadoop.ipc.RAPLCalibration;
+import org.apache.hadoop.ipc.RAPLIterCalibration;
 
 public class SpMMMatrix implements GenericMatrix<SpDCSC> {
 
 	private SpDCSC spMat;
 	private boolean isMatrixSet = false;
-	private RAPLCalibration calibration = new RAPLCalibration();
+	private RAPLIterCalibration calibration = new RAPLIterCalibration();
 	
 	public SpMMMatrix(SpDCSC matrix){
 		spMat = matrix;
 		isMatrixSet = true;
 	}
-	
+
 	@Override
 	public RAPLCalibration getCalibration() {
+		return null;
+	}
+	
+	public RAPLIterCalibration getIterCalibration() {
 		return calibration;
 	}
 
@@ -28,7 +33,7 @@ public class SpMMMatrix implements GenericMatrix<SpDCSC> {
 //	
 	@Override
 	public void addCalibration(RAPLCalibration calibration){
-		this.calibration.add(calibration);
+//		this.calibration.add(calibration);
 	}
 	
 	@Override
