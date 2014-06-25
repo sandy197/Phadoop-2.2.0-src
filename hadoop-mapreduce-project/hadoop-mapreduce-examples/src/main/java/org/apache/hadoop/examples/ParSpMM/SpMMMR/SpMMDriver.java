@@ -398,8 +398,12 @@ public class SpMMDriver {
 	}
 	
 	private static int calcIndex(HashSet<Integer> hset, Random colIndx, int rangeStart, int rangeEnd){
-		int cidx;
+		int cidx = 0;
 		do {
+			if(DEBUG) System.out.println("Contains cidx:"+cidx);
+		if(cidx != 0){
+			cidx = (cidx + 1)% rangeEnd;
+		}
 		cidx = colIndx.nextInt(rangeEnd - rangeStart) % rangeEnd;
 		cidx = cidx < 0 ? cidx * -1:cidx;
 		} while(hset.contains(cidx));
@@ -409,9 +413,9 @@ public class SpMMDriver {
 	
 	private static void buildBlockedMatrix(int [][]A, int rows, int cols, int brows, int bcols, int nzc, int nzr, boolean isRowMajor, boolean isUniform){
 		HashSet<Integer> rhset, chset;
-		Random randNum = new Random(100);
-		Random colIndx = new Random(100);	
-		Random rowIndx = new Random(100);
+		Random randNum = new Random(1);
+		Random colIndx = new Random(2);	
+		Random rowIndx = new Random(3);
 		for(int i = 0; i < rows; i++){
 			for(int j = 0; j < cols; j++){
 				A[i][j] = 0;
