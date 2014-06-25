@@ -24,6 +24,7 @@ public class RAPLIterCalibration {
 		}
 		else {
 			this.itrToCalibMap.put(iter, calibration);
+			System.out.println("putting calib for iter:"+iter);
 		}
 	}
 	

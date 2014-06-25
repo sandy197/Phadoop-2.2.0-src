@@ -194,6 +194,9 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 						iCalib = ((RegMatrix) cachedMat).getIterCalibration();
 					System.out.println("Adding calibration value:"+calibration+"for iteration:"+iterationCount);
 					iCalib.addCalibration(iterationCount, calibration);
+					for(Integer i : iCalib.getItrToCalibMap().keySet()){
+						if(DEBUG) System.out.println(i + ":\n" + iCalib.getItrToCalibMap().get(i));
+					}
 					Configuration conf = context.getConfiguration();
 					if(iterationCount == conf.getInt("RAPL.calibrationCount", 4)){
 						//Write calibration data to file
