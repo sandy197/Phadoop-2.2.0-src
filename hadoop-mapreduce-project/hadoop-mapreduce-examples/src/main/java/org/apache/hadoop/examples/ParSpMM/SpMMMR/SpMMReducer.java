@@ -192,7 +192,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 					}
 					else
 						iCalib = ((RegMatrix) cachedMat).getIterCalibration();
-					
+					System.out.println("Adding calibration value:"+calibration+"for iteration:"+iterationCount);
 					iCalib.addCalibration(iterationCount, calibration);
 					Configuration conf = context.getConfiguration();
 					if(iterationCount == conf.getInt("RAPL.calibrationCount", 4)){
@@ -516,6 +516,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 		KB = conf.getInt("SpMM.KB", 0);
 		JB = conf.getInt("SpMM.JB", 0);
 		iterationCount = conf.getInt("SpMM.iteration", 0);
+		System.out.println("Got iteration count as :"+iterationCount + "from the conf");
 		jobToken = conf.getInt("SpMM.jobToken", -1);
 		useRAPL = conf.getBoolean("RAPL.enable", false);
 		isCalibrate = conf.getBoolean("SpMM.isCalibration", false);
