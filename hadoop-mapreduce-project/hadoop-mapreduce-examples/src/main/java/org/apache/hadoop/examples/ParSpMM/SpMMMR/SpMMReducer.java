@@ -99,6 +99,22 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 	    	  }
 	    	  el.set(sum);
 	    	  context.write(key, el);
+	    	  
+	    	  //Dummy record, just to avoid exceptions
+	    	  if(record == null){
+					//NOTE : this doesn't work if the classify is done more than once per map task
+					record = new RAPLRecord();
+				}
+				record.setJobtoken(jobToken);
+				record.setExectime(0);
+				//TODO:replace the hardcoded value with a JNI call to get the core this thread is pinned to
+				int pkgIdx = rapl.get_thread_affinity() / CORES_PER_PKG;
+				record.setPkg((short)pkgIdx);
+				record.setInterationCount(iterationCount);
+				//TODO : add hostname to record either here or in the appmaster (this info is readily available there)
+//				record.setHostname(hostname);
+				context.setRAPLRecord(record);
+				
 	    	  return;
 	      }
 	      
@@ -416,7 +432,10 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 					}
 					if(iCalibration == null || iCalibration.getItrToCalibMap().isEmpty()){
 						iCalibration = readCalibrationFile(context);
+						System.out.println("Read calibration data");
 					}
+					
+					
 					
 					RAPLCalibration calibration = iCalibration.getItrToCalibMap().get(iterationCount);
 					Map<Long, Long> cap2time = new HashMap<Long, Long>();

@@ -61,6 +61,7 @@ public class RAPLCalibration implements Writable {
 			Long l = in.readLong();
 			RAPLExecTime execTime = new RAPLExecTime(0L, 0);
 			execTime.readFields(in);
+			capToExecTimeMap.put(l, execTime);
 		}
 	}
 	
