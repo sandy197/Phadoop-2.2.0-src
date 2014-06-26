@@ -435,7 +435,9 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 						System.out.println("Read calibration data");
 					}
 					
-					
+					for(Integer i : iCalibration.getItrToCalibMap().keySet()){
+						if(DEBUG) System.out.println(i + ":\n" + iCalibration.getItrToCalibMap().get(i));
+					}
 					
 					RAPLCalibration calibration = iCalibration.getItrToCalibMap().get(iterationCount);
 					if(calibration != null){
