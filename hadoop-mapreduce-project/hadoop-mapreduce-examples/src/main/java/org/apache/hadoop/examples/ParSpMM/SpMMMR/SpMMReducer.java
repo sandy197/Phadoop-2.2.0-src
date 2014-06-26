@@ -419,7 +419,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 //				if("test".equals(testVar)){
 //					System.out.println("Able to read data from conf files");
 //				}
-				if(!isCalibrate){
+				if(!isCalibrate && record.getExectime() != record.getTargetTime()){
 					//get calibration data from the file
 					GenericMatrix<?> cachedMat = context.getMatrix();
 					if(cachedMat != null){
@@ -438,23 +438,25 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 					
 					
 					RAPLCalibration calibration = iCalibration.getItrToCalibMap().get(iterationCount);
-					Map<Long, Long> cap2time = new HashMap<Long, Long>();
-					for(Long i : calibration.getCapToExecTimeMap().keySet()){
-						cap2time.put(i, calibration.getCapToExecTimeMap().get(i).getExecTime());
-					}
-	//				int calibIterCount = conf.getInt("RAPL.calibrationCount", 5);
-	//				if(record.isDoCalibration() && iterationCount != 0 && iterationCount < calibIterCount){
-	//					System.out.println("Setting doCalib to true:"+record.isDoCalibration()+":"+iterationCount);
-	//					doCalibrate = true;
-	//				}
-					
-					//rapl.adjustPower(record.getExectime(), record.getTargetTime());
-					//get the power cap and set it only if this isn't a calibration round
-					long powerCap = getPowerCap(record.getTargetTime(), cap2time);
-					if(powerCap!=0){
-						int pkg = rapl.get_thread_affinity()/8;
-						System.out.println("Setting power cap of pkg:"+pkg+", to:"+powerCap+" watts");
-						urapl.setPowerLimit(pkg, powerCap);
+					if(calibration != null){
+						Map<Long, Long> cap2time = new HashMap<Long, Long>();
+						for(Long i : calibration.getCapToExecTimeMap().keySet()){
+							cap2time.put(i, calibration.getCapToExecTimeMap().get(i).getExecTime());
+						}
+		//				int calibIterCount = conf.getInt("RAPL.calibrationCount", 5);
+		//				if(record.isDoCalibration() && iterationCount != 0 && iterationCount < calibIterCount){
+		//					System.out.println("Setting doCalib to true:"+record.isDoCalibration()+":"+iterationCount);
+		//					doCalibrate = true;
+		//				}
+						
+						//rapl.adjustPower(record.getExectime(), record.getTargetTime());
+						//get the power cap and set it only if this isn't a calibration round
+						long powerCap = getPowerCap(record.getTargetTime(), cap2time);
+						if(powerCap!=0){
+							int pkg = rapl.get_thread_affinity()/8;
+							System.out.println("Setting power cap of pkg:"+pkg+", to:"+powerCap+" watts");
+							urapl.setPowerLimit(pkg, powerCap);
+						}
 					}
 				}
 			}
