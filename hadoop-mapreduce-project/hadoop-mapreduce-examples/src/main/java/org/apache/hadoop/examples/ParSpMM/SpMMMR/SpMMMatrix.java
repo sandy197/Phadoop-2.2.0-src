@@ -27,10 +27,10 @@ public class SpMMMatrix implements GenericMatrix<SpDCSC> {
 		return calibration;
 	}
 
-//	public void setCalibration(RAPLCalibration calibration) {
-//		this.calibration = calibration;
-//	}
-//	
+	public void setIterCalibration(RAPLIterCalibration calibration) {
+		this.calibration = calibration;
+	}
+	
 	@Override
 	public void addCalibration(RAPLCalibration calibration){
 //		this.calibration.add(calibration);

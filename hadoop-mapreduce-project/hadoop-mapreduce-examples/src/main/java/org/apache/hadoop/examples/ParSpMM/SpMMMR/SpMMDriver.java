@@ -330,6 +330,8 @@ public class SpMMDriver {
 		
 		int reduceTaskCount = Integer.parseInt(remainingArgs[10]);
 		boolean isCalibration = Integer.parseInt(remainingArgs[11]) == 1 ? true : false;
+		int powerCap;
+		
 		
 		int[][] A = new int[I][K];
 		int[][] B = new int[K][J];
@@ -343,20 +345,18 @@ public class SpMMDriver {
 		driver.writeMatrix(B, K, J, SPMM_INPUT_PATH_B);
 		
 		if(isCalibration){
+			powerCap = Integer.parseInt(remainingArgs[12]);
 			long defaultPowerCap0 = driver.librapl.getPowerLimit(0);
 			long defaultPowerCap1 = driver.librapl.getPowerLimit(1);
-			for(int powerCap = 50; powerCap > 10; powerCap -= 10){
-				driver.librapl.setPowerLimit(0, powerCap);
-				driver.librapl.setPowerLimit(1, powerCap);
-				Thread.sleep(2000);
-				
-				driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration, reduceTaskCount);
-				//remove RAPL record file
+//			for(int powerCap = 50; powerCap > 10; powerCap -= 10){
+			driver.librapl.setPowerLimit(0, powerCap);
+			driver.librapl.setPowerLimit(1, powerCap);
+			Thread.sleep(2000);
+			
+			driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration, reduceTaskCount);
+			//remove RAPL record file
 //				fs.delete(new Path("tmp/rapl/", "map"), true);
-				fs.delete(new Path("tmp/rapl/", "reduce"), true);
-			}
-			
-			
+			fs.delete(new Path("tmp/rapl/", "reduce"), true);
 			driver.librapl.setPowerLimit(0, defaultPowerCap0);
 			driver.librapl.setPowerLimit(1, defaultPowerCap1);
 		}

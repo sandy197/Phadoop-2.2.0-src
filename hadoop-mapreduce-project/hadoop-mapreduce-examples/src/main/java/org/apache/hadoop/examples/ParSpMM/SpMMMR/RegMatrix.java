@@ -19,6 +19,10 @@ public class RegMatrix implements GenericMatrix<int[][]> {
 		return calibration;
 	}
 	
+	public void setIterCalibration(RAPLIterCalibration calibration) {
+		this.calibration = calibration;
+	}
+	
 	@Override
 	public int[][] getMatrix() {
 		if(isMatrixSet)

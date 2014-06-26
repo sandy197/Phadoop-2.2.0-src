@@ -201,17 +201,26 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 					SequenceFile.Writer dataWriter = null;
 					RAPLCalibration calibration = new RAPLCalibration();
 					calibration.addRAPLExecTime(urapl.getPowerLimit(pkgIdx), multiplyTime);
-					RAPLIterCalibration iCalib;
+					//RAPLIterCalibration iCalib;
 					GenericMatrix<?> cachedMat = context.getMatrix();
-					if(cachedMat instanceof SpMMMatrix){
-						iCalib = ((SpMMMatrix) cachedMat).getIterCalibration();
+					if(iCalibration == null){
+						if(cachedMat instanceof SpMMMatrix){
+							iCalibration = ((SpMMMatrix) cachedMat).getIterCalibration();
+						}
+						else
+							iCalibration = ((RegMatrix) cachedMat).getIterCalibration();
 					}
-					else
-						iCalib = ((RegMatrix) cachedMat).getIterCalibration();
 					System.out.println("Adding calibration value:"+calibration+"for iteration:"+iterationCount);
-					iCalib.addCalibration(iterationCount, calibration);
-					for(Integer i : iCalib.getItrToCalibMap().keySet()){
-						if(DEBUG) System.out.println(i + ":\n" + iCalib.getItrToCalibMap().get(i));
+					iCalibration.addCalibration(iterationCount, calibration);
+					if(cachedMat instanceof SpMMMatrix){
+						((SpMMMatrix) cachedMat).setIterCalibration(iCalibration);
+					}
+					else{
+						((RegMatrix) cachedMat).setIterCalibration(iCalibration);
+					}
+					
+					for(Integer i : iCalibration.getItrToCalibMap().keySet()){
+						if(DEBUG) System.out.println(i + ":\n" + iCalibration.getItrToCalibMap().get(i));
 					}
 					Configuration conf = context.getConfiguration();
 					if(iterationCount == conf.getInt("RAPL.calibrationCount", 4)){
@@ -222,9 +231,9 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 						System.out.println("Writing calibration data to:"+filePath);
 						dataWriter = SequenceFile.createWriter(fs, conf,
 							    filePath, IntWritable.class, RAPLCalibration.class, CompressionType.NONE);
-						for(Integer i : iCalib.getItrToCalibMap().keySet()){
-							if(DEBUG) System.out.println(i + ":\n" + iCalib.getItrToCalibMap().get(i));
-							dataWriter.append(new IntWritable(i), iCalib.getItrToCalibMap().get(i));
+						for(Integer i : iCalibration.getItrToCalibMap().keySet()){
+							if(DEBUG) System.out.println(i + ":\n" + iCalibration.getItrToCalibMap().get(i));
+							dataWriter.append(new IntWritable(i), iCalibration.getItrToCalibMap().get(i));
 						}
 						dataWriter.close();
 					}
@@ -412,6 +421,20 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 			//TODO : Decide if this has to be done in setup or the mapTask 
 			//since the rapl record has the information about the package already
 	
+			GenericMatrix<?> cachedMat = context.getMatrix();
+			if(cachedMat != null){
+				if(cachedMat instanceof SpMMMatrix){
+					iCalibration = ((SpMMMatrix) cachedMat).getIterCalibration();
+				}
+				else {
+					iCalibration = ((RegMatrix) cachedMat).getIterCalibration();
+				}
+			}
+			if(iCalibration == null || iCalibration.getItrToCalibMap().isEmpty()){
+				iCalibration = readCalibrationFile(context);
+				System.out.println("Read calibration data");
+			}
+			
 			if(record != null){
 				iterationCount = 1 + record.getInterationCount();
 				//TODO : Do this only if the iteration count is more than 4 and a flag to use this feature is set.
@@ -419,22 +442,8 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 //				if("test".equals(testVar)){
 //					System.out.println("Able to read data from conf files");
 //				}
-				if(!isCalibrate && record.getExectime() != record.getTargetTime()){
+				if(!isCalibrate && record.getExectime() != record.getTargetTime() && iCalibration != null){
 					//get calibration data from the file
-					GenericMatrix<?> cachedMat = context.getMatrix();
-					if(cachedMat != null){
-						if(cachedMat instanceof SpMMMatrix){
-							iCalibration = ((SpMMMatrix) cachedMat).getIterCalibration();
-						}
-						else {
-							iCalibration = ((RegMatrix) cachedMat).getIterCalibration();
-						}
-					}
-					if(iCalibration == null || iCalibration.getItrToCalibMap().isEmpty()){
-						iCalibration = readCalibrationFile(context);
-						System.out.println("Read calibration data");
-					}
-					
 					for(Integer i : iCalibration.getItrToCalibMap().keySet()){
 						if(DEBUG) System.out.println(i + ":\n" + iCalibration.getItrToCalibMap().get(i));
 					}
