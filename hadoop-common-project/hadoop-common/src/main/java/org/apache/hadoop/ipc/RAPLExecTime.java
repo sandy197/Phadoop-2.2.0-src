@@ -32,7 +32,8 @@ public class RAPLExecTime implements Writable {
 	}
 	
 	public void add(RAPLExecTime rExecTime){
-		this.execTime = ((this.execTime * this.sampleCount) + (rExecTime.getExecTime() * rExecTime.getSampleCount()))/(this.sampleCount + rExecTime.getSampleCount());
+		this.execTime = ((this.execTime * this.sampleCount) 
+				+ (rExecTime.getExecTime() * rExecTime.getSampleCount()))/(this.sampleCount + rExecTime.getSampleCount());
 		this.sampleCount = this.sampleCount + rExecTime.getSampleCount();
 	}
 

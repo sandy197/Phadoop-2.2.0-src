@@ -49,7 +49,7 @@ public class MKMDriver {
 			
 			if (remainingArgs.length < 10) {
 			     System.out.println("USAGE: <COUNT> <K> <DIMENSION OF VECTORS> <SegmentsPerDimension> "
-			     		+ "<MAXITERATIONS> <num of tasks> <convgDelta> <FirstTaskInputCount> <Diff/Ratio> <isLinear(0/1)>");
+			     		+ "<MAXITERATIONS> <num of tasks> <convgDelta> <FirstTaskInputCount> <Diff/Ratio> <isLinear(0/1)> <isCalibration> <opt:powerCap>");
 			      return;
 			}
 
@@ -63,8 +63,13 @@ public class MKMDriver {
 			int taskStart = Integer.parseInt(remainingArgs[7]);
 			int diffratio = Integer.parseInt(remainingArgs[8]);
 			boolean isLinear = Integer.parseInt(remainingArgs[9]) == 1;
+			boolean isCalibration = Integer.parseInt(remainingArgs[10]) == 1;
+			int powerCap = 115;
+			if(isCalibration)
+				powerCap = Integer.parseInt(remainingArgs[11]);
 			Random rand = new Random(); 
 			
+			conf.setBoolean("KM.isCalibration", isCalibration);
 			conf.setInt("KM.jobToken", rand.nextInt());
 			conf.setInt("KM.maxiterations", iterations);		
 			conf.setInt("KM.k", k);
@@ -105,10 +110,29 @@ public class MKMDriver {
 					conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, taskStart, diffratio, isLinear);
 //			MKMUtils.prepareInput(count, k, dimension, taskCount, conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, ratio);
 			long start = System.nanoTime();
+			long defaultPowerCap0 = 115;
+			long defaultPowerCap1 = 115;
+			//Read default power cap and set the input power cap
+			if(isCalibration){
+				defaultPowerCap0 = driver.librapl.getPowerLimit(0);
+				defaultPowerCap1 = driver.librapl.getPowerLimit(1);
+				driver.librapl.setPowerLimit(0, powerCap);
+				driver.librapl.setPowerLimit(1, powerCap);
+				Thread.sleep(2000);
+			}
 			driver.kmeans(iterations, convergenceDelta);
+			//reset it back to original power cap
+			if(isCalibration){
+				driver.librapl.setPowerLimit(0, defaultPowerCap0);
+				driver.librapl.setPowerLimit(1, defaultPowerCap1);
+			}
+			
+			
 			long end = System.nanoTime();
 			System.out.println("Job completed successfully. Time taken: " + (end -start));
 			printAvgPowerConsumption(driver.powerStatus);
+			//cleanup
+			fs.delete(new Path("tmp/rapl/", "map"), true);
 		}
 		
 		private static void printAvgPowerConsumption(
@@ -158,7 +182,7 @@ public class MKMDriver {
 		
 		public void kmeans(int maxIterations, int convergenceDelta){
 			boolean converged = false;
-			int iteration = 1;
+			int iteration = 0;
 			Path centersIn = fs.makeQualified(new Path(KM_CENTER_INPUT_PATH));
 //			try {
 //				fs.delete(new Path(conf.get("KM.tempClusterDir")), true);
@@ -172,7 +196,8 @@ public class MKMDriver {
 				//get any of the datapath
 				Path dataIn = new Path(conf.get("KM.inputDataPath"), ""+0);
 				boolean isCalcStarted = false;
-				int calcStartIter = conf.getInt("RAPL.calibrationIterationCount", 4) + 1;
+				//start from the 1st iteration not the 0th iteration
+				int calcStartIter = conf.getInt("RAPL.calibrationIterationCount", 0) + 1;
 				while(!converged && iteration <= maxIterations){
 						if(!isCalcStarted && iteration == calcStartIter){
 							this.powerCalculator.start();

@@ -411,7 +411,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 		
 		rapl = new ThreadPinning();
 		urapl = new UseRAPL();
-		urapl.initRAPL("maptask");
+		urapl.initRAPL("reducetask");
 		
 		if(useRAPL){		
 			record = context.getRAPLRecord();

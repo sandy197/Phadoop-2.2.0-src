@@ -11,12 +11,19 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.SequenceFile.CompressionType;
+import org.apache.hadoop.io.SequenceFile.Reader;
+import org.apache.hadoop.ipc.GenericMatrix;
 import org.apache.hadoop.ipc.RAPLCalibration;
+import org.apache.hadoop.ipc.RAPLIterCalibration;
 import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer.Context;
 import org.apache.hadoop.examples.MKmeans.MKMTypes.Values;
 import org.apache.hadoop.examples.MKmeans.MKMTypes.VectorType;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.RegMatrix;
+import org.apache.hadoop.examples.ParSpMM.SpMMMR.SpMMMatrix;
 import org.ncsu.sys.*;
 
 public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid> {
@@ -24,16 +31,19 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 	public static int CORES_PER_PKG = 8;
 	
 	private static final boolean DEBUG = true;
+
+	private static final String MKMEANS_CALIB_DIR = "tmp/rapl/MKMeans/calib";
 	private int dimension;
 	private int k;
 	private int R1;
-	private boolean isCbuilt, isVbuilt, doCalibrate, useRAPL;
+	private boolean isCbuilt, isVbuilt, isCalibrate, useRAPL;
 	private List<Value> centroids, vectors;
 	private RAPLRecord record;
 	private ThreadPinning rapl;
 	private UseRAPL urapl;
 	private int iterationCount;
 	private int jobToken;
+	private RAPLCalibration calibration;
 	
 	public void setup (Context context) {
 		init(context);
@@ -48,33 +58,31 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			// record contains prev exec time & the target execution time.
 			//TODO : Decide if this has to be done in setup or the mapTask 
 			//since the rapl record has the information about the package already
+			GenericMatrix<?> cachedMat = context.getMatrix();
+			if(cachedMat != null){
+				calibration = cachedMat.getCalibration();
+			}
+			if(calibration == null || calibration.getCapToExecTimeMap().isEmpty()){
+				calibration = readCalibrationFile(context);
+				System.out.println("Read calibration data");
+			}
 			
-	//	    rapl.adjustPower(record);
 			if(record != null){
 				iterationCount = 1 + record.getInterationCount();
-				//TODO : Do this only if the iteration count is more than 4 and a flag to use this feature is set.
-//				String testVar = conf.get("conftest");
-//				if("test".equals(testVar)){
-//					System.out.println("Able to read data from conf files");
-//				}
-				RAPLCalibration calibration = ((MKMRowListMatrix) context.getMatrix()).getCalibration();
-				Map<Integer, Long> cap2time = new HashMap<Integer, Long>();
-				for(Integer i : calibration.getCapToExecTimeMap().keySet()){
-					cap2time.put(i, calibration.getCapToExecTimeMap().get(i).getExecTime());
-				}
-				int calibIterCount = conf.getInt("RAPL.calibrationCount", 5);
-				if(record.isDoCalibration() && iterationCount != 0 && iterationCount < calibIterCount){
-					System.out.println("Setting doCalib to true:"+record.isDoCalibration()+":"+iterationCount);
-					doCalibrate = true;
-				}
 				
-				//rapl.adjustPower(record.getExectime(), record.getTargetTime());
 				//get the power cap and set it only if this isn't a calibration round
-				int powerCap = getPowerCap(record.getTargetTime(), cap2time);
-				if(powerCap!=0 && !doCalibrate){
-					int pkg = rapl.get_thread_affinity()/8;
-					System.out.println("Setting power cap of pkg:"+pkg+", to:"+powerCap+" watts");
-					urapl.setPowerLimit(pkg, powerCap);
+				if(!isCalibrate && calibration != null && record.getExectime() != record.getTargetTime()){
+					Map<Long, Long> cap2time = new HashMap<Long, Long>();
+					for(Long i : calibration.getCapToExecTimeMap().keySet()){
+						cap2time.put(i, calibration.getCapToExecTimeMap().get(i).getExecTime());
+					}
+					
+					long powerCap = getPowerCap(record.getTargetTime(), cap2time);
+					if(powerCap!=0){
+						int pkg = rapl.get_thread_affinity()/8;
+						System.out.println("Setting power cap of pkg:"+pkg+", to:"+powerCap+" watts");
+						urapl.setPowerLimit(pkg, powerCap);
+					}
 				}
 			}
 			else if(iterationCount == 1){
@@ -92,35 +100,48 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			System.out.println("Setting default power cap of pkg:"+pkg+", to:"+defPowerCap+" watts");
 			urapl.setPowerLimit(pkg, defPowerCap);
 		}
-		//read centroids
-		//Change this section for Phadoop version
-//		FileSystem fs;
-//		try {
-//			fs = FileSystem.get(conf);
-//			Path path = new Path(conf.get("KM.inputCenterPath"));
-//			Path filePath = fs.makeQualified(path);
-//			centroids = MKMUtils.getCentroidsFromFile(filePath, false);
-//			if(centroids == null){
-//				throw new IOException("No centroids fetched from the file");
-//			}
-//			isCbuilt = true;
-//			if(DEBUG) System.out.println("************Centroids Read form file*************");
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 	
+	private RAPLCalibration readCalibrationFile(
+			org.apache.hadoop.mapreduce.Mapper.Context context) {
+		RAPLCalibration calib = new RAPLCalibration();
+		try{
+			FileSystem fs = FileSystem.get(context.getConfiguration());
+			
+			int taskId = context.getTaskAttemptID().getTaskID().getId();
+			IntWritable key;
+			RAPLCalibration value;
+			Reader calibReader = new SequenceFile.Reader(fs, new Path(MKMEANS_CALIB_DIR, taskId+""), context.getConfiguration());
+			try {
+				key = calibReader.getKeyClass().asSubclass(IntWritable.class).newInstance();
+			} catch (InstantiationException e) { // Should not be possible
+				throw new IllegalStateException(e);
+			} catch (IllegalAccessException e) {
+					throw new IllegalStateException(e);
+			}
+			value = new RAPLCalibration();
+			while (calibReader.next(key, value)) {
+				calib = value;
+				value = new RAPLCalibration();
+			}
+		}
+		catch (IOException ex){
+			ex.printStackTrace();
+		}
+		
+		return calib;
+	}
+
 	/**
 	 * Can be reused.
 	 * @param targetTime
 	 * @param cap2time
 	 * @return
 	 */
-	private int getPowerCap(long targetTime, Map<Integer, Long> cap2time) {
-		int powerCap = 0;
+	private long getPowerCap(long targetTime, Map<Long, Long> cap2time) {
+		long powerCap = 0L;
 		long min_diff = Long.MAX_VALUE;
-		for(int i : cap2time.keySet()){
+		for(long i : cap2time.keySet()){
 			if(Math.abs(cap2time.get(i) - targetTime) < min_diff){
 				min_diff = Math.abs(cap2time.get(i) - targetTime);
 				powerCap = i;
@@ -140,7 +161,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 //		centroids = new ArrayList<Value>();
 //		vectors = new ArrayList<Value>();
 		isCbuilt = isVbuilt = false;
-		doCalibrate = false;
+		isCalibrate = conf.getBoolean("KM.isCalibration", false);
 		useRAPL = conf.getBoolean("RAPL.enable", false);
 	}
 
@@ -154,7 +175,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		}
 		else{
 			//use build and set here
-			vectors = buildCentroidsAndSet(values, context);
+			vectors = buildCentroidsAndSet(values, context, calibration);
 			isVbuilt = true;
 			//buildVectors(values, vectors);
 		}
@@ -173,13 +194,14 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				long start1 =System.nanoTime();
 				partialCentroids = (PartialCentroid[]) classify(vectors, centroids);
 				long end1 =System.nanoTime();
-				System.out.println("$$ClassifyTime:"+"\t" + (end1-start1));
+				long classifyTime = end1 - start1;
+				System.out.println("$$ClassifyTime:"+"\t" + classifyTime);
 				if(record == null){
 					//NOTE : this doesn't work if the classify is done more than once per map task
 					record = new RAPLRecord();
 				}
 				record.setJobtoken(jobToken);
-				record.setExectime(end1 - start1);
+				record.setExectime(classifyTime);
 				//TODO:replace the hardcoded value with a JNI call to get the core this thread is pinned to
 				int pkgIdx = rapl.get_thread_affinity() / CORES_PER_PKG;
 				record.setPkg((short)pkgIdx);
@@ -188,13 +210,33 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 //				record.setHostname(hostname);
 				context.setRAPLRecord(record);
 				/******** Calibration *********/
-				//TODO : done for the initial iterations only
-				//if(currentIteration < 3){
-				if(doCalibrate){
-					RAPLCalibration calibration = calibrate(vectors, centroids);
-					doCalibrate = false;
-					if(calibration != null)
-						((MKMRowListMatrix) context.getMatrix()).addCalibration(calibration);
+				if(isCalibrate && iterationCount >= context.getConfiguration().getInt("RAPL.calibrationStartIteration", 0)){
+					SequenceFile.Writer dataWriter = null;		
+					GenericMatrix<?> cachedMat = context.getMatrix();
+					if(calibration == null){
+						calibration = cachedMat.getCalibration();
+					}
+					calibration.addRAPLExecTime(urapl.getPowerLimit(pkgIdx), classifyTime);
+					System.out.println("Adding exectime :"+classifyTime+"for powerlimit:"+urapl.getPowerLimit(pkgIdx));
+					//needs to be set when calibration data is first read from the file.
+					((MKMRowListMatrix)cachedMat).setCalibration(calibration);
+					
+					if(DEBUG) System.out.println(calibration);
+					
+					Configuration conf = context.getConfiguration();
+					//if(iterationCount == conf.getInt("RAPL.calibrationCount", 4)){
+					//Write calibration data to file for every iteration as there 
+					// is no sane way to determine the final iteration.
+					int filename = context.getTaskAttemptID().getTaskID().getId();
+					FileSystem fs = FileSystem.get(conf);
+					Path filePath = new Path(MKMEANS_CALIB_DIR, filename+"");
+					System.out.println("Writing calibration data to:"+filePath);
+					dataWriter = SequenceFile.createWriter(fs, conf,
+						    filePath, IntWritable.class, RAPLCalibration.class, CompressionType.NONE);
+					if(DEBUG) System.out.println(calibration);
+					dataWriter.append(new IntWritable(0), calibration);
+					dataWriter.close();				
+					//}
 				}
 				
 				for(PartialCentroid pcent : partialCentroids){
@@ -215,7 +257,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 	
 	/**
 	 * This method is invoked on the core of the map/reduce task's execution
-	 * And taskes the arguments for this core as its arguments
+	 * And takes the arguments for this core as its arguments
 	 * For kmeans, "classify" is the core.
 	 * 
 	 * TODO : Check to see if a method can be passed as an argument so that
@@ -232,7 +274,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		urapl.initRAPL("maptask");
 		int pkg = rapl.get_thread_affinity()/8;
 		long origLimit = urapl.getPowerLimit(pkg);
-		for(int powerCap = 50; powerCap > 5; powerCap -= 5){
+		for(long powerCap = 50; powerCap > 5; powerCap -= 5){
 			//set power cap
 			urapl.setPowerLimit(pkg, powerCap);
 			//wait 2 seconds for the power cap to kick in
@@ -272,9 +314,13 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		
 	}
 	
-	private List<Value> buildCentroidsAndSet(Values values, Context context) {
+	private List<Value> buildCentroidsAndSet(Values values, Context context, RAPLCalibration calibration) {
 		List<Value> centroidsLoc = buildCentroids(values);
-		context.setMatrix(new MKMRowListMatrix(centroidsLoc));
+		MKMRowListMatrix rmatrix = new MKMRowListMatrix(centroidsLoc);
+		if(calibration != null){
+			rmatrix.setCalibration(calibration);
+		}
+		context.setMatrix();
 		return centroidsLoc;
 	}
 	

@@ -26,10 +26,10 @@ public class MKMRowListMatrix implements GenericMatrix<List<Value>> {
 		return calibration;
 	}
 
-//	public void setCalibration(RAPLCalibration calibration) {
-//		this.calibration = calibration;
-//	}
-//	
+	public void setCalibration(RAPLCalibration calibration) {
+		this.calibration = calibration;
+	}
+	
 	@Override
 	public void addCalibration(RAPLCalibration calibration){
 		this.calibration.add(calibration);

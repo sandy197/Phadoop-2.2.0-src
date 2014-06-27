@@ -46,7 +46,7 @@ public class SpMMDriver {
 	private static final String SPMM_TEMP_DIR_PATH = SPMM_DATA_DIR;
 	private static final String SPMM_TEMP_OUTPUT_PATH = SPMM_DATA_DIR + "/tmp/C";
 	private static final String SPMM_OUTPUT_PATH = SPMM_DATA_DIR + "/C";
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	
 	private static FileSystem fs;
 	private static JobConf conf = new JobConf();
@@ -145,13 +145,12 @@ public class SpMMDriver {
 		DistributedCache.addCacheFile(uri, conf);
 		
 		boolean isCalcStarted = false;
-		int calcStartIter = conf.getInt("RAPL.calibrationIterationCount", 4) + 1;
+		int calcStartIter = conf.getInt("RAPL.calibrationIterationCount", 0);
 	    for(int k = 0; k < k_max; k++){
 	    	if(!isCalcStarted && k == calcStartIter){
 	    		this.powerCalculator.start();
 	    		isCalcStarted = true;
 	    	}
-	    	
 	    	conf.setInt("SpMM.iteration", k);
 	    	long start = System.nanoTime();
 	    	bCastJob(conf, strategy, k, k < 1);
@@ -341,8 +340,11 @@ public class SpMMDriver {
 		buildBlockedMatrix(B, K, J, KB, JB, nzc, nzr, diff,true, !isAUniform);
 		System.out.println("Built blocked B");
 		
-		driver.writeMatrix(A, I, K, SPMM_INPUT_PATH_A);
-		driver.writeMatrix(B, K, J, SPMM_INPUT_PATH_B);
+		
+		if(!fs.exists(new Path(SPMM_INPUT_PATH_A)))
+			driver.writeMatrix(A, I, K, SPMM_INPUT_PATH_A);
+		if(!fs.exists(new Path(SPMM_INPUT_PATH_B)))
+			driver.writeMatrix(B, K, J, SPMM_INPUT_PATH_B);
 		
 		if(isCalibration){
 			powerCap = Integer.parseInt(remainingArgs[12]);
@@ -356,7 +358,6 @@ public class SpMMDriver {
 			driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration, reduceTaskCount);
 			//remove RAPL record file
 //				fs.delete(new Path("tmp/rapl/", "map"), true);
-			fs.delete(new Path("tmp/rapl/", "reduce"), true);
 			driver.librapl.setPowerLimit(0, defaultPowerCap0);
 			driver.librapl.setPowerLimit(1, defaultPowerCap1);
 		}
@@ -370,6 +371,8 @@ public class SpMMDriver {
 			System.out.println("Time taken for total execution:" + (end - start));
 			printAvgPowerConsumption(driver.powerStatus);
 		}
+		//cleanup
+		fs.delete(new Path("tmp/rapl/", "reduce"), true);
 	}
 	
 	private static void printAvgPowerConsumption(
