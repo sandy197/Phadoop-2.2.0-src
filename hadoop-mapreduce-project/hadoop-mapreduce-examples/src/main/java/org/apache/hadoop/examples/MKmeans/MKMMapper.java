@@ -320,7 +320,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		if(calibration != null){
 			rmatrix.setCalibration(calibration);
 		}
-		context.setMatrix();
+		context.setMatrix(rmatrix);
 		return centroidsLoc;
 	}
 	
