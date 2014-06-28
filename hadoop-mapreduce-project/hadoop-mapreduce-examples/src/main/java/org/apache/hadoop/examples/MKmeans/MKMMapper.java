@@ -157,7 +157,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		R1 = conf.getInt("KM.R1", 6);
 		//this is always 1 when we reuse the tasks.
 		iterationCount = conf.getInt("KM.iterationCount", 0);
-		jobToken = conf.getInt("KM.jobToken", -1);
+		jobToken = conf.getInt(RAPLRecord.MAP_TASK_REUSE_JOBTOKEN, -1);
 //		centroids = new ArrayList<Value>();
 //		vectors = new ArrayList<Value>();
 		isCbuilt = isVbuilt = false;

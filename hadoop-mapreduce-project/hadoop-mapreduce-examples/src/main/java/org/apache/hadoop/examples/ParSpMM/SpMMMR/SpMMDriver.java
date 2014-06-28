@@ -13,6 +13,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -103,7 +104,7 @@ public class SpMMDriver {
 
 	    Random rand = new Random();
 	    conf.setBoolean("SpMM.isCalibration", isCalibration);
-		conf.setInt("SpMM.jobToken", rand.nextInt());
+		conf.setInt(RAPLRecord.REDUCE_TASK_REUSE_JOBTOKEN, rand.nextInt());
 	    //TODO:take these as command line param
 	    conf.setBoolean("SpMM.useTaskPool", true);
 	    conf.setBoolean("SpMM.isSparseMM", true);

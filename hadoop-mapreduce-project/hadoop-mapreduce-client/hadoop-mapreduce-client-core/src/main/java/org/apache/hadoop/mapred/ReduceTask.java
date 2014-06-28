@@ -643,7 +643,7 @@ public class ReduceTask extends Task {
                                                reporter, comparator, keyClass,
                                                valueClass);
     if(job.getBoolean("RAPL.enableReduceReuse", false)){
-	    RAPLRecord record = umbilical.getTaskTargetTime(getTaskID(), new IntWritable(job.getInt("SpMM.jobToken", -1)));
+	    RAPLRecord record = umbilical.getTaskTargetTime(getTaskID(), new IntWritable(job.getInt(RAPLRecord.REDUCE_TASK_REUSE_JOBTOKEN, -1)));
 	    if(record == null){
 	    	System.out.println("Record is null");
 	    }

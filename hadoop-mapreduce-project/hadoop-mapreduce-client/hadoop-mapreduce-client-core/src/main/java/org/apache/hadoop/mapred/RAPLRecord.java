@@ -8,6 +8,9 @@ import org.apache.hadoop.io.Writable;
 
 public class RAPLRecord implements Writable {
 
+	public static final String MAP_TASK_REUSE_JOBTOKEN = "MapReuse.jobToken";
+	public static final String REDUCE_TASK_REUSE_JOBTOKEN = "ReduceReuse.jobToken";
+	
 	private int jobtoken;
 	private long exectime;
 	private String hostname;

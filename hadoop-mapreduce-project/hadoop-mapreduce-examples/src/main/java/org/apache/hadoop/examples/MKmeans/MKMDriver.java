@@ -10,6 +10,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.MapTask;
+import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -70,7 +72,7 @@ public class MKMDriver {
 			Random rand = new Random(); 
 			
 			conf.setBoolean("KM.isCalibration", isCalibration);
-			conf.setInt("KM.jobToken", rand.nextInt());
+			conf.setInt(RAPLRecord.MAP_TASK_REUSE_JOBTOKEN, rand.nextInt());
 			conf.setInt("KM.maxiterations", iterations);		
 			conf.setInt("KM.k", k);
 			conf.setInt("KM.dimension", dimension);

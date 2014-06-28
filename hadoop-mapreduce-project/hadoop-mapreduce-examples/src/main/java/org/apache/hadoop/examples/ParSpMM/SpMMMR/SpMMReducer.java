@@ -553,7 +553,7 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 		JB = conf.getInt("SpMM.JB", 0);
 		iterationCount = conf.getInt("SpMM.iteration", 0);
 		System.out.println("Got iteration count as :"+iterationCount + "from the conf");
-		jobToken = conf.getInt("SpMM.jobToken", -1);
+		jobToken = conf.getInt(RAPLRecord.REDUCE_TASK_REUSE_JOBTOKEN, -1);
 		useRAPL = conf.getBoolean("RAPL.enable", false);
 		isCalibrate = conf.getBoolean("SpMM.isCalibration", false);
 		NIB = (I-1)/IB + 1;

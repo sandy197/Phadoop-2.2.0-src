@@ -760,7 +760,7 @@ public class MapTask extends Task {
               mapContext);
     //if the map task is reused, Get the target exectime from the appmaster and adjust the power cap
     if(job.getBoolean("RAPL.enableMapReuse", false)){
-	    RAPLRecord record = umbilical.getTaskTargetTime(getTaskID(), new IntWritable(job.getInt("SpMM.jobToken", -1)));
+	    RAPLRecord record = umbilical.getTaskTargetTime(getTaskID(), new IntWritable(job.getInt(RAPLRecord.MAP_TASK_REUSE_JOBTOKEN, -1)));
 	    if(record == null){
 	    	System.out.println("Record is null");
 	    }
