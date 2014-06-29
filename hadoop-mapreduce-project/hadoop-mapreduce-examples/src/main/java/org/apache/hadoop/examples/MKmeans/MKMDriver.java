@@ -59,7 +59,7 @@ public class MKMDriver {
 			int k = Integer.parseInt(remainingArgs[1]);
 			int dimension = Integer.parseInt(remainingArgs[2]);
 			int segPerDim = Integer.parseInt(remainingArgs[3]);
-			int iterations = Integer.parseInt(remainingArgs[4]);
+			int maxIterations = Integer.parseInt(remainingArgs[4]);
 			int taskCount = Integer.parseInt(remainingArgs[5]);
 			int convergenceDelta = Integer.parseInt(remainingArgs[6]);
 			int taskStart = Integer.parseInt(remainingArgs[7]);
@@ -73,7 +73,7 @@ public class MKMDriver {
 			
 			conf.setBoolean("KM.isCalibration", isCalibration);
 			conf.setInt(RAPLRecord.MAP_TASK_REUSE_JOBTOKEN, rand.nextInt());
-			conf.setInt("KM.maxiterations", iterations);		
+			conf.setInt("KM.maxiterations", maxIterations);		
 			conf.setInt("KM.k", k);
 			conf.setInt("KM.dimension", dimension);
 			conf.setInt("KM.mapTaskCount", taskCount);
@@ -122,7 +122,7 @@ public class MKMDriver {
 				driver.librapl.setPowerLimit(1, powerCap);
 				Thread.sleep(2000);
 			}
-			driver.kmeans(iterations, convergenceDelta);
+			driver.kmeans(maxIterations, convergenceDelta);
 			//reset it back to original power cap
 			if(isCalibration){
 				driver.librapl.setPowerLimit(0, defaultPowerCap0);

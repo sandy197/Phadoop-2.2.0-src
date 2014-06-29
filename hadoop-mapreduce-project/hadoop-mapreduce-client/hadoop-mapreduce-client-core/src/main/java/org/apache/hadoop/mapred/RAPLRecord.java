@@ -19,13 +19,16 @@ public class RAPLRecord implements Writable {
 	private boolean doCalibration;
 	private boolean doPowerMeasurement;
 	private int iterationCount;
+	private boolean isValid;
 
+	
 	public RAPLRecord(){
 		// TODO Remove this later
 		jobtoken = 197775;
 		hostname = "localhost";
 		doCalibration = false;
 		doPowerMeasurement = false;
+		isValid = true;
 	}
 	
 	public RAPLRecord(long exectime){
@@ -33,6 +36,15 @@ public class RAPLRecord implements Writable {
 		this();
 		this.exectime = exectime;
 	}
+	
+	public boolean isValid() {
+		return isValid;
+	}
+
+	public void setValid(boolean isValid) {
+		this.isValid = isValid;
+	}
+
 	
 	public long getTargetTime() {
 		return targetTime;
@@ -92,6 +104,7 @@ public class RAPLRecord implements Writable {
 		out.writeBoolean(doCalibration);
 		out.writeBoolean(doPowerMeasurement);
 		out.writeInt(iterationCount);
+		out.writeBoolean(isValid);
 	}
 
 	@Override
@@ -104,6 +117,7 @@ public class RAPLRecord implements Writable {
 		this.doCalibration = in.readBoolean();
 		this.doPowerMeasurement = in.readBoolean();
 		this.iterationCount = in.readInt();
+		this.isValid = in.readBoolean();
 	}
 	
 	public boolean isDoCalibration() {
@@ -129,7 +143,8 @@ public class RAPLRecord implements Writable {
 			.append("PkgIdx:"+this.pkg+"\n")
 				.append("ExecTime:"+this.exectime+"\n")
 					.append("targetTime:"+this.targetTime+"\n")
-						.append("iterationCount" + this.iterationCount);
+						.append("iterationCount" + this.iterationCount+"\n")
+							.append("isValid" + this.isValid);
 		sb.append("*****************");
 		
 		return sb.toString();

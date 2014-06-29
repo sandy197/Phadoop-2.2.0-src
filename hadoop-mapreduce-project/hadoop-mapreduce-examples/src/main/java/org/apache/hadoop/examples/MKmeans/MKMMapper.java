@@ -16,6 +16,7 @@ import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.ipc.GenericMatrix;
 import org.apache.hadoop.ipc.RAPLCalibration;
+import org.apache.hadoop.ipc.RAPLExecTime;
 import org.apache.hadoop.ipc.RAPLIterCalibration;
 import org.apache.hadoop.mapred.RAPLRecord;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -44,6 +45,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 	private int iterationCount;
 	private int jobToken;
 	private RAPLCalibration calibration;
+	private int maxIteration;
 	
 	public void setup (Context context) {
 		init(context);
@@ -71,7 +73,8 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				iterationCount = 1 + record.getInterationCount();
 				
 				//get the power cap and set it only if this isn't a calibration round
-				if(!isCalibrate && calibration != null && record.getExectime() != record.getTargetTime()){
+				// AND ONLY WHEN THE TARGET TIME IS GREATER THAN PREV EXECUTION TIME 
+				if(!isCalibrate && calibration != null && record.getExectime() < record.getTargetTime()){
 					Map<Long, Long> cap2time = new HashMap<Long, Long>();
 					for(Long i : calibration.getCapToExecTimeMap().keySet()){
 						cap2time.put(i, calibration.getCapToExecTimeMap().get(i).getExecTime());
@@ -157,6 +160,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 		R1 = conf.getInt("KM.R1", 6);
 		//this is always 1 when we reuse the tasks.
 		iterationCount = conf.getInt("KM.iterationCount", 0);
+		maxIteration = conf.getInt("KM.maxiterations", 5) - 1;
 		jobToken = conf.getInt(RAPLRecord.MAP_TASK_REUSE_JOBTOKEN, -1);
 //		centroids = new ArrayList<Value>();
 //		vectors = new ArrayList<Value>();
@@ -202,12 +206,25 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				}
 				record.setJobtoken(jobToken);
 				record.setExectime(classifyTime);
-				//TODO:replace the hardcoded value with a JNI call to get the core this thread is pinned to
 				int pkgIdx = rapl.get_thread_affinity() / CORES_PER_PKG;
 				record.setPkg((short)pkgIdx);
 				record.setInterationCount(iterationCount);
-				//TODO : add hostname to record either here or in the appmaster (this info is readily available there)
+				//add hostname to record either here or in the appmaster (this info is readily available there)
 //				record.setHostname(hostname);
+				
+				// for the non calibration round, 
+				// check if the exectime is an outlier before reporting it to the application master
+				if(!isCalibrate && calibration != null){
+					long nPowerCap = calibration.getNearestPowerCap(urapl.getPowerLimit(pkgIdx));
+					if(nPowerCap != 0){
+						RAPLExecTime eTime = calibration.getCapToExecTimeMap().get(nPowerCap);
+						if(eTime != null && eTime.isOutlier(classifyTime))
+						{
+							record.setValid(false);
+						}
+						
+					}
+				}
 				context.setRAPLRecord(record);
 				/******** Calibration *********/
 				if(isCalibrate && iterationCount >= context.getConfiguration().getInt("RAPL.calibrationStartIteration", 0)){
@@ -224,19 +241,23 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 					if(DEBUG) System.out.println(calibration);
 					
 					Configuration conf = context.getConfiguration();
-					//if(iterationCount == conf.getInt("RAPL.calibrationCount", 4)){
 					//Write calibration data to file for every iteration as there 
 					// is no sane way to determine the final iteration.
-					int filename = context.getTaskAttemptID().getTaskID().getId();
-					FileSystem fs = FileSystem.get(conf);
-					Path filePath = new Path(MKMEANS_CALIB_DIR, filename+"");
-					System.out.println("Writing calibration data to:"+filePath);
-					dataWriter = SequenceFile.createWriter(fs, conf,
-						    filePath, IntWritable.class, RAPLCalibration.class, CompressionType.NONE);
-					if(DEBUG) System.out.println(calibration);
-					dataWriter.append(new IntWritable(0), calibration);
-					dataWriter.close();				
-					//}
+					if(iterationCount == maxIteration){
+						//remove outliers before writing.
+						calibration.getCapToExecTimeMap()
+							.get(urapl.getPowerLimit(pkgIdx)).eliminateOutliers();
+						
+						int filename = context.getTaskAttemptID().getTaskID().getId();
+						FileSystem fs = FileSystem.get(conf);
+						Path filePath = new Path(MKMEANS_CALIB_DIR, filename+"");
+						System.out.println("Writing calibration data to:"+filePath);
+						dataWriter = SequenceFile.createWriter(fs, conf,
+							    filePath, IntWritable.class, RAPLCalibration.class, CompressionType.NONE);
+						if(DEBUG) System.out.println(calibration);
+						dataWriter.append(new IntWritable(0), calibration);
+						dataWriter.close();
+					}
 				}
 				
 				for(PartialCentroid pcent : partialCentroids){

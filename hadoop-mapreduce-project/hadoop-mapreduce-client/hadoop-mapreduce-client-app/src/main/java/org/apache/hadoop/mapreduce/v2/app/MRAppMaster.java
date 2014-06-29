@@ -927,7 +927,7 @@ public class MRAppMaster extends CompositeService {
 	  }
 
 	public void setTargetTime(long targetTime, Cluster maxCluster) throws IOException {
-		if(this.equals(maxCluster)){
+		if(this.isEqual(maxCluster)){
 			//Set the target time same as the exec time
 			for(RAPLRecord rec : maxCluster.records){
 				rec.setTargetTime(rec.getExectime());
@@ -938,7 +938,7 @@ public class MRAppMaster extends CompositeService {
 			RAPLRecord maxRec = null;
 			long maxExecTime = Long.MIN_VALUE;
 			for(RAPLRecord rec : this.records){
-				if(rec.getExectime() > maxExecTime){
+				if(rec.isValid() && rec.getExectime() > maxExecTime){
 					maxExecTime = rec.getExectime();
 					maxRec = rec;
 				}
@@ -947,10 +947,17 @@ public class MRAppMaster extends CompositeService {
 			if(maxRec != null){
 				if(DEBUG) System.out.println("Setting the target time for a task on Host:"
 												+ maxRec.getHostname() + ",Package:" + maxRec.getPkg());
+				//check if a targettime needs to be greater than the 
+				//exectime always in the app where power adjustment is done.
 				maxRec.setTargetTime(targetTime);
 			}
-			else
-				throw new IOException("Max record can not be null");
+			else{
+				// A cluster can turn out to have all invalid records (outliers)
+				// No need to thow an exception
+				//throw new IOException("Max record can not be null");
+				System.out.println("Alas! "+this.hostName+":"+this.pkgId
+							+", has all invalid records (outliers) no need to set any power caps");
+			}
 			
 		}
 	}

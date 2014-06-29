@@ -44,6 +44,18 @@ public class RAPLCalibration implements Writable {
 		RAPLExecTime rExecTime = new RAPLExecTime(execTime, 1);
 		addRAPLExecTime(powerCap, rExecTime);
 	}
+	
+	public long getNearestPowerCap(long powerLimit) {
+		long diff = Long.MAX_VALUE;
+		long powerCap = 0L;
+		for(long l : this.capToExecTimeMap.keySet()){
+			if(Math.abs(powerLimit - l) < diff){
+				diff = Math.abs(powerLimit - l);
+				powerCap = l;
+			}
+		}
+		return powerCap;
+	}
 
 	@Override
 	public void write(DataOutput out) throws IOException {
