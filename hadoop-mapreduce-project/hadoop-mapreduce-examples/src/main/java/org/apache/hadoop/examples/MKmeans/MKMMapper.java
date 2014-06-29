@@ -245,8 +245,10 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 					// is no sane way to determine the final iteration.
 					if(iterationCount == maxIteration){
 						//remove outliers before writing.
-						calibration.getCapToExecTimeMap()
-							.get(urapl.getPowerLimit(pkgIdx)).eliminateOutliers();
+						if(conf.getBoolean("RAPL.calibration.removeOutliers", false)){
+							calibration.getCapToExecTimeMap()
+								.get(urapl.getPowerLimit(pkgIdx)).eliminateOutliers();
+						}
 						
 						int filename = context.getTaskAttemptID().getTaskID().getId();
 						FileSystem fs = FileSystem.get(conf);

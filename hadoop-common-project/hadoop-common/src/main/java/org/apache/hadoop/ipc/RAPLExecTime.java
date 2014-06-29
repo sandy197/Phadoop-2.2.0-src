@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.hadoop.io.Writable;
@@ -34,11 +35,28 @@ public class RAPLExecTime implements Writable {
 	}
 	
 	public void eliminateOutliers(){
-		//TODO : implement
-		//TODO : print outliers from the list
+		long removedElement;
+		//Change it to a better algo.
+		Collections.sort(execTime);
+		//naive implementation : Remove the highest values depending on the size
+		int arrayLength = execTime.size();
+		if(arrayLength > 1){
+			if(arrayLength < 6){
+				//remove 1 highest value
+				removedElement = execTime.remove(arrayLength - 1);
+				System.out.println("Remove outlier:"+removedElement);
+			}
+			else{
+				//remove 2 highest values
+				removedElement = execTime.remove(arrayLength - 1);
+				System.out.println("Remove outlier:"+removedElement);
+				arrayLength = execTime.size();
+				removedElement = execTime.remove(arrayLength - 1);
+				System.out.println("Remove outlier:"+removedElement);
+			}
+		}
 		//update min and max.
 		updateMinMax();
-		
 	}
 	
 	private void updateMinMax(){
@@ -98,8 +116,10 @@ public class RAPLExecTime implements Writable {
 	public boolean isOutlier(long time){
 		//TODO : logic to determine if a datapoint is an outlier wrt the execTime list
 		// naive algo for now
-		
-		return false;
+		long maxDiff = this.maxTime - this.getExecTime();
+		boolean isOutlier = time > this.maxTime + maxDiff;
+		if(isOutlier) System.out.println("Outlier detected, record is being marked invalid:"+time);
+		return isOutlier;
 	}
 
 	@Override
