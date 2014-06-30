@@ -87,9 +87,15 @@ public class RAPLExecTime implements Writable {
 //		this.sampleCount = sampleCount;
 //	}
 
+	/**
+	 * Do not change this constructor signature.
+	 * @param execTime
+	 * @param sampleCount
+	 */
 	public RAPLExecTime(long execTime, int sampleCount){
 		this.execTime = new ArrayList<Long>();
-		this.execTime.add(execTime);
+		if(sampleCount == 1)
+			this.execTime.add(execTime);
 		this.maxTime = Long.MIN_VALUE;
 		this.minTime = Long.MAX_VALUE;
 //		this.sampleCount = sampleCount;
@@ -136,6 +142,7 @@ public class RAPLExecTime implements Writable {
 			Long l = in.readLong();
 			this.execTime.add(l);
 		}
+		updateMinMax();
 	}
 	
 	public String toString(){
