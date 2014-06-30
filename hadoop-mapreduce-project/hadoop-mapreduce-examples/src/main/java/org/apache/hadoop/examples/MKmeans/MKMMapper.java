@@ -126,6 +126,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			while (calibReader.next(key, value)) {
 				calib = value;
 				value = new RAPLCalibration();
+				if(DEBUG) System.out.println("Read key:"+key+",Value:"+value);
 			}
 		}
 		catch (IOException ex){
