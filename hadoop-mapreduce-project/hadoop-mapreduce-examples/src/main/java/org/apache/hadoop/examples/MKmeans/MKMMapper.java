@@ -89,7 +89,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 					}
 				}
 			}
-			else if(iterationCount == 0){
+			else if(iterationCount == 0 && !isCalibrate){
 				//Set the power cap to default.i.e. the highest. Can get this from the config file
 				int defPowerCap = 115;//watts
 				int pkg = rapl.get_thread_affinity()/8;
