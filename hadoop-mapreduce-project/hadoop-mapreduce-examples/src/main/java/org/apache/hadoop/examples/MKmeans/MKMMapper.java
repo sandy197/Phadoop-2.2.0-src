@@ -207,7 +207,9 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 					record = new RAPLRecord();
 				}
 				else{
+					//reset record
 					record.setValid(true);
+					record.setTargetTime(0L);
 				}
 				record.setJobtoken(jobToken);
 				record.setExectime(classifyTime);
