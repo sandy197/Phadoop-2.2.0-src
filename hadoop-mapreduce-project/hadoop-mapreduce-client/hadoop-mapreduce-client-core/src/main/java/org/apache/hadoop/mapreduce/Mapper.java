@@ -141,8 +141,13 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
    */
   public void run(Context context) throws IOException, InterruptedException {
 	  ThreadPinning tp = new ThreadPinning();
+	  Configuration conf = context.getConfiguration();
+	  int taskDist = conf.getInt("RAPL.taskDistribution", 2);
 	  int taskId = context.getTaskAttemptID().getTaskID().getId();
-	  int coreId = (taskId + ((taskId % 2) * 8))%16;
+	  //int coreId = (taskId + ((taskId % 2) * 8))%16;
+	  //assumption numtasks = 2 * taskDist
+	  // offset + 
+	  int coreId = ((taskId/taskDist)*8 + (8 - (taskId % taskDist)))%16;
 	    tp.set_thread_affinity(coreId);
     setup(context);
     try {
