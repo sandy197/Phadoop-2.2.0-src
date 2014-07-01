@@ -67,6 +67,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			if(calibration == null || calibration.getCapToExecTimeMap().isEmpty()){
 				calibration = readCalibrationFile(context);
 				System.out.println("Read calibration data");
+				System.out.println(calibration);
 			}
 			
 			if(record != null){
@@ -88,7 +89,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 					}
 				}
 			}
-			else if(iterationCount == 1){
+			else if(iterationCount == 0){
 				//Set the power cap to default.i.e. the highest. Can get this from the config file
 				int defPowerCap = 115;//watts
 				int pkg = rapl.get_thread_affinity()/8;
@@ -126,7 +127,7 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			while (calibReader.next(key, value)) {
 				calib = value;
 				value = new RAPLCalibration();
-				if(DEBUG) System.out.println("Read key:"+key+",Value:"+value);
+				if(DEBUG) System.out.println("Read key:"+key+",Value:"+calib);
 			}
 		}
 		catch (IOException ex){
@@ -204,6 +205,9 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 				if(record == null){
 					//NOTE : this doesn't work if the classify is done more than once per map task
 					record = new RAPLRecord();
+				}
+				else{
+					record.setValid(true);
 				}
 				record.setJobtoken(jobToken);
 				record.setExectime(classifyTime);
