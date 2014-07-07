@@ -150,8 +150,9 @@ public class MKMUtils {
 	 * @param center
 	 * @param fs
 	 * @param ratio // <start> <offset> <linear/exponential> instead of ratio
+	 * @return total number of vectors handled
 	 */
-	public static void prepareAstroPhyInput(int k, int dimension, int segPerDim, 
+	public static int prepareAstroPhyInput(int k, int dimension, int segPerDim, 
 			int maxNum, int taskCount, Configuration conf, Path[] in, Path center, FileSystem fs, 
 			int taskStart, int diffratio, boolean isLinear) throws IOException{
 		int ki = 0;
@@ -162,7 +163,7 @@ public class MKMUtils {
 		SubSpace[] space = new SubSpace[spaceCount]; 
 		Random r = new Random(RAND_SEED);
 		
-		initSpace(space, taskStart, diffratio, isLinear);
+		int totalCapacity = initSpace(space, taskStart, diffratio, isLinear);
 		
 		
 		
@@ -205,10 +206,12 @@ public class MKMUtils {
 		}
 		centerWriter.append(new Key(1, VectorType.CENTROID),centers);
 		centerWriter.close();
+		return totalCapacity;
 	}
 	
-	private static void initSpace(SubSpace[] space, int start, int diffratio, boolean isLinear) {
+	private static int initSpace(SubSpace[] space, int start, int diffratio, boolean isLinear) {
 		int idSeq = 0;
+		int totalCapacity = 0;
 		int capacity = start;
 		for(int i = 0; i < space.length; i++){
 			if(idSeq != 0){
@@ -221,7 +224,9 @@ public class MKMUtils {
 				}
 			}
 			space[i] = new SubSpace(idSeq++, capacity);
+			totalCapacity += capacity;
 		}
+		return totalCapacity;
 	}
 
 	private static int assignSubSpace(Value vector, int segLength, int segPerDim, int dimension){

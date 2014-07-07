@@ -608,7 +608,7 @@ class JobSubmitter {
     readTokensFromFiles(conf, credentials);
     // add the delegation tokens from configuration
     String [] nameNodes = conf.getStrings(MRJobConfig.JOB_NAMENODES);
-    LOG.debug("adding the following namenodes' delegation tokens:" + 
+    System.out.println("$$$$adding the following namenodes' delegation tokens:" + 
         Arrays.toString(nameNodes));
     if(nameNodes != null) {
       Path [] ps = new Path[nameNodes.length];

@@ -39,7 +39,7 @@ public class SpMMDriver {
 	public static final int SPMM_PROC_GRID_DIMM_X = 2;
 	public static final int SPMM_PROC_GRID_DIMM_Y = 4;
 	
-	public static final int NZ_INCRIMENT = 5;
+//	public static final int NZ_INCRIMENT = 5;
 	
 	private static final String SPMM_DATA_DIR = "tmp/spmm/";
 	private static final String SPMM_INPUT_PATH_A = SPMM_DATA_DIR + "/A";
@@ -488,8 +488,8 @@ public class SpMMDriver {
 				}
 				else{
 					if(!isUniform){
-						nzr_d = nzr + (coffset/bcols) * NZ_INCRIMENT;
-						nzc_d = nzc + (coffset/bcols) * NZ_INCRIMENT;
+						nzr_d = nzr + (coffset/bcols) * diff;
+						nzc_d = nzc + (coffset/bcols) * diff;
 					}
 					chset = new HashSet<Integer>();
 					while(colCount < nzc_d){

@@ -108,7 +108,7 @@ public class MKMDriver {
 			DistributedCache.createSymlink(conf);
 			DistributedCache.addCacheFile(uri, conf);
 			
-			MKMUtils.prepareAstroPhyInput(k, dimension, segPerDim, 1000, taskCount, 
+			int totalVectorCount = MKMUtils.prepareAstroPhyInput(k, dimension, segPerDim, 1000, taskCount, 
 					conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, taskStart, diffratio, isLinear);
 //			MKMUtils.prepareInput(count, k, dimension, taskCount, conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, ratio);
 			long start = System.nanoTime();
@@ -131,7 +131,8 @@ public class MKMDriver {
 			
 			
 			long end = System.nanoTime();
-			System.out.println("Job completed successfully. Time taken: " + (end -start));
+			System.out.println("totalVectorCount:\t" + totalVectorCount);
+			System.out.println("totalTime:\t" + (end -start));
 			printAvgPowerConsumption(driver.powerStatus);
 			//cleanup
 			fs.delete(new Path("tmp/rapl/", "map"), true);
