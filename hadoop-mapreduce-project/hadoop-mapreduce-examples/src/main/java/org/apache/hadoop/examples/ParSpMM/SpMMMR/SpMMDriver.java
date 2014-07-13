@@ -369,7 +369,7 @@ public class SpMMDriver {
 			long end = System.nanoTime();
 			//recursive delete of data dir
 			fs.delete(new Path(SPMM_DATA_DIR), true);
-			System.out.println("totalTime:" + (end - start));
+			System.out.println("totalTime:\t" + (end - start));
 			printAvgPowerConsumption(driver.powerStatus);
 		}
 		//cleanup
