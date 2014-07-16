@@ -154,7 +154,7 @@ public class MKMUtils {
 	 */
 	public static int prepareAstroPhyInput(int k, int dimension, int segPerDim, 
 			int maxNum, int taskCount, Configuration conf, Path[] in, Path center, FileSystem fs, 
-			int taskStart, int diffratio, boolean isLinear) throws IOException{
+			int taskStart, int diffratio, boolean isLinear, boolean isUniform) throws IOException{
 		int ki = 0;
 		int spaceCount = (int) Math.pow(segPerDim, dimension);
 		int segLength = maxNum/segPerDim;
@@ -163,7 +163,7 @@ public class MKMUtils {
 		SubSpace[] space = new SubSpace[spaceCount]; 
 		Random r = new Random(RAND_SEED);
 		
-		int totalCapacity = initSpace(space, taskStart, diffratio, isLinear);
+		int totalCapacity = initSpace(space, taskStart, diffratio, isLinear, isUniform);
 		
 		
 		
@@ -209,7 +209,7 @@ public class MKMUtils {
 		return totalCapacity;
 	}
 	
-	private static int initSpace(SubSpace[] space, int start, int diffratio, boolean isLinear) {
+	private static int initSpace(SubSpace[] space, int start, int diffratio, boolean isLinear, boolean isUniform) {
 		int idSeq = 0;
 		int totalCapacity = 0;
 		int capacity = start;
@@ -222,6 +222,8 @@ public class MKMUtils {
 				{
 					capacity *= diffratio;
 				}
+				if(isUniform)
+					capacity = start;
 			}
 			space[i] = new SubSpace(idSeq++, capacity);
 			totalCapacity += capacity;

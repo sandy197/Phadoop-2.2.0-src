@@ -67,8 +67,13 @@ public class MKMDriver {
 			boolean isLinear = Integer.parseInt(remainingArgs[9]) == 1;
 			boolean isCalibration = Integer.parseInt(remainingArgs[10]) == 1;
 			int powerCap = 115;
-			if(isCalibration)
+			boolean isUniform = false;
+			if(isCalibration){
 				powerCap = Integer.parseInt(remainingArgs[11]);
+				isUniform = Integer.parseInt(remainingArgs[12]) == 1;
+			}
+			else
+				isUniform = Integer.parseInt(remainingArgs[11]) == 1;
 			Random rand = new Random(); 
 			
 			conf.setBoolean("KM.isCalibration", isCalibration);
@@ -109,7 +114,7 @@ public class MKMDriver {
 			DistributedCache.addCacheFile(uri, conf);
 			
 			int totalVectorCount = MKMUtils.prepareAstroPhyInput(k, dimension, segPerDim, 1000, taskCount, 
-					conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, taskStart, diffratio, isLinear);
+					conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, taskStart, diffratio, isLinear, isUniform);
 //			MKMUtils.prepareInput(count, k, dimension, taskCount, conf, paths, new Path(KM_CENTER_INPUT_PATH), fs, ratio);
 			long start = System.nanoTime();
 			long defaultPowerCap0 = 115;

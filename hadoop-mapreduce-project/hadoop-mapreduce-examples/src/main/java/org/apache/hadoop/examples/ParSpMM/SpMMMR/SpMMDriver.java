@@ -336,10 +336,25 @@ public class SpMMDriver {
 		int[][] A = new int[I][K];
 		int[][] B = new int[K][J];
 		
-		buildBlockedMatrix(A, I, K, IB, KB, nzc, nzr, diff,false, isAUniform);
-		System.out.println("Built blocked A");
-		buildBlockedMatrix(B, K, J, KB, JB, nzc, nzr, diff,true, !isAUniform);
-		System.out.println("Built blocked B");
+		boolean isUniform = false;
+		if(isCalibration){
+			isUniform = Integer.parseInt(remainingArgs[13]) == 1 ? true : false;
+		}
+		else{
+			isUniform = Integer.parseInt(remainingArgs[12]) == 1 ? true : false;
+		}
+		
+		if(!isUniform){
+			buildBlockedMatrix(A, I, K, IB, KB, nzc, nzr, diff,false, isAUniform);
+			System.out.println("Built blocked A");
+			buildBlockedMatrix(B, K, J, KB, JB, nzc, nzr, diff,true, !isAUniform);
+			System.out.println("Built blocked B");
+		}
+		else{
+			buildBlockedMatrix(A, I, K, IB, KB, nzc, nzr, diff,false, true);
+			buildBlockedMatrix(B, K, J, KB, JB, nzc, nzr, diff,true, true);
+		}
+			
 		
 		
 		if(!fs.exists(new Path(SPMM_INPUT_PATH_A)))
