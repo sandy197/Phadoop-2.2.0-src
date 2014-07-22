@@ -88,7 +88,8 @@ public class SpMMDriver {
 	 */
 	@SuppressWarnings("deprecation")
 	public void SpMM(int strategy, int aRows, int aColsbRows, int bCols, 
-						int aRowBlk, int aColbRowBlk, int bColBlk, boolean isCalibration, int reduceTaskCount){
+						int aRowBlk, int aColbRowBlk, int bColBlk, boolean isCalibration, 
+							int reduceTaskCount, boolean isSparseMM){
 		try {
 		if (conf == null) throw new Exception("conf is null");
 		FileSystem fs;
@@ -107,7 +108,7 @@ public class SpMMDriver {
 		conf.setInt(RAPLRecord.REDUCE_TASK_REUSE_JOBTOKEN, rand.nextInt());
 	    //TODO:take these as command line param
 	    conf.setBoolean("SpMM.useTaskPool", true);
-	    conf.setBoolean("SpMM.isSparseMM", true);
+	    conf.setBoolean("SpMM.isSparseMM", isSparseMM);
 	    
 	    conf.set("SpMM.inputPathA", inputPathA);
 	    conf.set("SpMM.inputPathB", inputPathB);
@@ -314,6 +315,11 @@ public class SpMMDriver {
 //		int KB = 20;
 //		int JB = 30;
 		String[] remainingArgs = goParser.getRemainingArgs();
+		if(remainingArgs.length < 14){
+			System.out.println("Usage: SpMMDriver <I> <J> <K> <IB> <KB> <JB> <nzc> <nzr> "
+					+ "<diff> <isAUniform> <reduceTaskCount> <isCalibrationRun> <powerCap(if isCalibration == 1)>"
+					+ "<isUniformLoad> <isSparseMM>");
+		}
 		int I = Integer.parseInt(remainingArgs[0]);
 		int K = Integer.parseInt(remainingArgs[1]);
 		int J = Integer.parseInt(remainingArgs[2]);
@@ -337,11 +343,14 @@ public class SpMMDriver {
 		int[][] B = new int[K][J];
 		
 		boolean isUniform = false;
+		boolean isSparseMM = false;
 		if(isCalibration){
-			isUniform = Integer.parseInt(remainingArgs[13]) == 1 ? true : false;
+			isUniform = Integer.parseInt(remainingArgs[13]) == 1;
+			isSparseMM = Integer.parseInt(remainingArgs[14]) == 1;
 		}
 		else{
-			isUniform = Integer.parseInt(remainingArgs[12]) == 1 ? true : false;
+			isUniform = Integer.parseInt(remainingArgs[12]) == 1;
+			isSparseMM = Integer.parseInt(remainingArgs[13]) == 1;
 		}
 		
 		if(!isUniform){
@@ -371,7 +380,7 @@ public class SpMMDriver {
 			driver.librapl.setPowerLimit(1, powerCap);
 			Thread.sleep(2000);
 			
-			driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration, reduceTaskCount);
+			driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration, reduceTaskCount, isSparseMM);
 			//remove RAPL record file
 //				fs.delete(new Path("tmp/rapl/", "map"), true);
 			driver.librapl.setPowerLimit(0, defaultPowerCap0);
@@ -380,7 +389,7 @@ public class SpMMDriver {
 		else {
 			long start = System.nanoTime();
 			System.out.println("I="+ I+", K="+ K+", J,"+J+" IB="+ IB+", KB="+KB+", JB="+JB);
-			driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration, reduceTaskCount);
+			driver.SpMM(2, I, K, J, IB, KB, JB, isCalibration, reduceTaskCount, isSparseMM);
 			long end = System.nanoTime();
 			//recursive delete of data dir
 			fs.delete(new Path(SPMM_DATA_DIR), true);

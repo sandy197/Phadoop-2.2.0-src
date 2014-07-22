@@ -320,14 +320,14 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
 					long start_m = System.nanoTime();
 					//increasing the number of iterations to check 
 					//for a 5X increase in multiplication time
-					for (int i_jff = 0; i_jff < 1000; i_jff++){
+					//for (int i_jff = 0; i_jff < 1000; i_jff++){
 					for (int k = 0; k < KB; k++) {
 						//srkandul
 						if(a[i][k] != 0 && b[k][j] != 0){
 							sum += a[i][k] * b[k][j];
 						}
 					}
-					}
+					//}
 					long end_m = System.nanoTime();
 					multiplyTime += end_m - start_m;
 					long start = System.nanoTime();
