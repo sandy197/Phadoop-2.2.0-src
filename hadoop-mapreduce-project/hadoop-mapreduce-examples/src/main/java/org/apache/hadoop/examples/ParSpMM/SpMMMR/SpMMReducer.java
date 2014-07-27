@@ -175,6 +175,11 @@ public class SpMMReducer extends Reducer<Key, Value, Key, Value> {
       						((float)((SpMMMatrix)B).getMatrixDensity())+"\t"+((SpMMMatrix)B).getMatrix().jc.size()+"\t"+
       						(x*y*intersectCount)+"\t"+intersectCount+"\t"+multiplyTime+"\t"+(end - start)+"\t");
         	  }
+        	  else {
+        		  sb.append(((float)0)+"\t"+
+							((float)0)+"\t"+0+"\t"+
+							0+"\t"+0+"\t"+multiplyTime+"\t"+(end - start)+"\t");
+        	  }
         	  if(record == null){
 					//NOTE : this doesn't work if the classify is done more than once per map task
 					record = new RAPLRecord();
