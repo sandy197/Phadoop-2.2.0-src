@@ -51,7 +51,7 @@ public class MKMDriver {
 			
 			if (remainingArgs.length < 10) {
 			     System.out.println("USAGE: <COUNT> <K> <DIMENSION OF VECTORS> <SegmentsPerDimension> "
-			     		+ "<MAXITERATIONS> <num of tasks> <convgDelta> <FirstTaskInputCount> <Diff/Ratio> <isLinear(0/1)> <isCalibration> <opt:powerCap>");
+			     		+ "<MAXITERATIONS> <num of tasks> <convgDelta> <FirstTaskInputCount> <Diff/Ratio> <isLinear(0/1)> <isCalibration> <opt:powerCap> <isUniform>");
 			      return;
 			}
 
