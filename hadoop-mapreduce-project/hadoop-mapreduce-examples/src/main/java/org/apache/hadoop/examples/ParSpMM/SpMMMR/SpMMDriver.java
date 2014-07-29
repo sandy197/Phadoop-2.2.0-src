@@ -155,7 +155,7 @@ public class SpMMDriver {
 	    	}
 	    	conf.setInt("SpMM.iteration", k);
 	    	long start = System.nanoTime();
-	    	bCastJob(conf, strategy, k, k < 1);
+	    	bCastJob(conf, strategy, k, k < 1 || !conf.getBoolean("CACHING.ReduceReuse", false));
 	    	long end = System.nanoTime();
 	    	System.out.println("Time taken for bcast execution:"+(end - start));
 		}

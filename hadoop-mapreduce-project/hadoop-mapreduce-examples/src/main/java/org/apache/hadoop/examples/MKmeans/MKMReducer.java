@@ -30,12 +30,21 @@ public class MKMReducer extends Reducer<IntWritable, PartialCentroid, Key, Value
 			newCentroids = new Values();
 			//initialize the list of sequence file writers
 			writers = new ArrayList<SequenceFile.Writer>();
-			for(int i = 0; i < mapTaskCount; i++){
-				Path path = new Path(conf.get("KM.inputDataPath"), ""+i);
+			if(conf.getBoolean("CACHING.MapReuse", false)){
+				for(int i = 0; i < mapTaskCount; i++){
+					Path path = new Path(conf.get("KM.inputDataPath"), ""+i);
+					writers.add(SequenceFile.createWriter(fs, conf, path,
+						      Key.class, Values.class,
+						      SequenceFile.CompressionType.NONE));
+				}
+			}
+			else {
+				Path path = new Path(conf.get("KM.inputCenterPath"));
 				writers.add(SequenceFile.createWriter(fs, conf, path,
 					      Key.class, Values.class,
 					      SequenceFile.CompressionType.NONE));
 			}
+				
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

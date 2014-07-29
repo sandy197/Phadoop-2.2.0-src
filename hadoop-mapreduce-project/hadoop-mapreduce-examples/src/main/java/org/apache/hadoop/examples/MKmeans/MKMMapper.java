@@ -104,6 +104,13 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			System.out.println("Setting default power cap of pkg:"+pkg+", to:"+defPowerCap+" watts");
 			urapl.setPowerLimit(pkg, defPowerCap);
 		}
+		if(!conf.getBoolean("CACHING.MapReuse", false) && iterationCount > 0){
+			FileSystem fs = FileSystem.get(conf);
+			Path path = new Path(conf.get("KM.inputCenterPath"));
+			Path filePath = fs.makeQualified(path);
+			centroids = MKMUtils.getCentroidsFromFile(filePath, false);
+			isCbuilt = true;
+		}
 	}
 	
 	private RAPLCalibration readCalibrationFile(
