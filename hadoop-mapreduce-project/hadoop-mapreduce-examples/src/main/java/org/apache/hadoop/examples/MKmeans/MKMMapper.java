@@ -105,11 +105,16 @@ public class MKMMapper extends Mapper<Key, Values, IntWritable, PartialCentroid>
 			urapl.setPowerLimit(pkg, defPowerCap);
 		}
 		if(!conf.getBoolean("CACHING.MapReuse", false) && iterationCount > 0){
+			try {
 			FileSystem fs = FileSystem.get(conf);
 			Path path = new Path(conf.get("KM.inputCenterPath"));
 			Path filePath = fs.makeQualified(path);
 			centroids = MKMUtils.getCentroidsFromFile(filePath, false);
 			isCbuilt = true;
+			}
+			catch (Exception ex){
+				ex.printStackTrace();
+			}
 		}
 	}
 	
