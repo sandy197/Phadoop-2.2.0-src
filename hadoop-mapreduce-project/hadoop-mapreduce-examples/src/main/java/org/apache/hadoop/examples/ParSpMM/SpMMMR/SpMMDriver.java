@@ -138,11 +138,11 @@ public class SpMMDriver {
 		default:
 			break;
 		}
-		URI uri = new URI("hdfs://localhost/libraries/libpapi.so.1#libpapi.so");
-		DistributedCache.createSymlink(conf); 
-		DistributedCache.addCacheFile(uri, conf);
+//		URI uri = new URI("hdfs://localhost/libraries/libpapi.so.1#libpapi.so");
+//		DistributedCache.createSymlink(conf); 
+//		DistributedCache.addCacheFile(uri, conf);
 		
-		uri = new URI("hdfs://localhost/libraries/librapl.so.1#librapl.so");
+		URI uri = new URI("hdfs://localhost/libraries/librapl.so.1#librapl.so");
 		DistributedCache.createSymlink(conf);
 		DistributedCache.addCacheFile(uri, conf);
 		
